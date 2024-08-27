@@ -1,0 +1,10 @@
+numpy==1.26.4
+scipy==1.13.1
+matplotlib==3.9.2
+mgefit==6.0.3
+vorbin==3.1.5
+notebook
+ipympl
+black[jupyter]
+mdformat==0.5.1
+tqdm
