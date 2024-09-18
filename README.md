@@ -1,39 +1,72 @@
 # About
 
-This repository containts astrophysical N-body simulation experiments.
+This repository contains astrophysical N-body simulation experiments.
 
 # Installation
 
+## Create Conda environment
+
 First prepare an environment. I used conda environment with Python 3.9:
 
-```bash
+```shell
 conda create -n agama python=3.9
 ```
 
-Activate conda environment and install all required packages:
+Clone this repository and install all required packages in the environment:
 
-```bash
+```shell
+git clone https://github.com/savchenkoyana/Nbody.git
+cd Nbody
 conda activate agama
 pip install -r requirements.txt
+pre-commit install  # optional, only if you want to commit to repository
 ```
 
-Install Agama:
+## Install NEMO
 
-```bash
-git clone https://github.com/GalacticDynamics-Oxford/Agama.git  # I used commit hash 294d5a700941c9ee2640a33e99ab877e6213fa6f
+To install NEMO, follow these steps:
+
+```shell
+git clone https://github.com/teuben/nemo
+cd nemo
+./configure --with-yapp=pgplot
+make build check bench5
+cd ../  # back to repository root
+```
+
+If installation completed successfully, you should get "TESTSUITE: OK" for each test (see file `install.log`).
+
+> **Note:** Everytime you want to use NEMO, you first need to execute this from `nemo` repository root:
+>
+> ```shell
+> source nemo_start.sh
+> ```
+>
+> Alternatively, you might want to add the command above (with the full path to `nemo_start.sh`) at the end of your `.bashrc` file.
+
+## Install Agama
+
+Activate conda environment, if it is not activated:
+
+```shell
+conda activate agama
+```
+
+To install Agama, follow these steps:
+
+```shell
+git clone https://github.com/GalacticDynamics-Oxford/Agama.git
 cd Agama
-pip install --user ./
-cd ../
+pip install .
+cd ../  # back to repository root
 ```
 
-# How to reproduce
+For more info about Agama see https://arxiv.org/pdf/1802.08239 and official [AGAMA documentation](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/doc/reference.pdf).
 
-Before running jupyter notebooks, you may need to create a Milky Way potential:
+# Experiments
 
-```bash
-python Agama/py/example_mw_potential_hunter24.py
-```
+### 1. Custom Density Model Evolution
 
-# Other
-
-For more info about AGAMA see https://arxiv.org/pdf/1802.08239
+This experiment demonstrates how to create a self-consistent model for a custom density function.
+This is just a toy example based on [https://arxiv.org/pdf/1807.06590](https://arxiv.org/pdf/1807.06590)
+For more info see [README](1.%20Custom%20Density%20Model%20Evolution/README.md)

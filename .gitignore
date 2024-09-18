@@ -1,5 +1,4 @@
 Agama/
+nemo/
 .ipynb_checkpoints/
-*.ini
-*.dat
-*.gif
+*/*.nemo
