@@ -23,8 +23,8 @@ _R0 = 5e-3
 _RCUT = 10
 
 
-def dist(xyz: np.array, r0: float = _R0):
-    return np.sqrt(np.sum(xyz**2, axis=1) + r0**2)
+def dist(xyz: np.array, r0: float = _R0, axis=1):
+    return np.sqrt(np.sum(xyz**2, axis=axis) + r0**2)
 
 
 def rho_bh(xyz: np.array, r0: float = _R0, r_cut: float = _RCUT):
@@ -102,7 +102,7 @@ def plot_density(dens: agama.Density, save_dir: typing.Union[str, os.PathLike]):
     plt.xscale("log")
     plt.yscale("log")
     plt.xlim(1e-4, 1e1)
-    plt.ylim(1e2, 1e16)
+    plt.ylim(1e2, 1e9)
 
     if isinstance(save_dir, (str, Path)):
         plt.savefig(Path(save_dir) / "density.png")
@@ -161,6 +161,9 @@ if __name__ == "__main__":
         save_dir=save_dir,
     )
 
+    # save the final density/potential profile
+    scm.potential.export(str(save_dir / "scm.ini"))
+
     # create and write out an N−body realization of the model
     snap = agama.GalaxyModel(scm.potential, scm.potential.density).sample(args.N)
 
@@ -168,7 +171,7 @@ if __name__ == "__main__":
     out_snap_file = str(save_dir / "out.nemo")
     agama.writeSnapshot(in_snap_file, snap, "nemo")
 
-    # Compute optimal parameters for gyrfalcON
+    # Compute optimal parameters for gyrFalcON the same way as in https://td.lpi.ru/~eugvas/nbody/tutor.pdf
     eps = (args.N / _R0**3) ** (-1 / 3)  # n ** (-1 / 3)
     v_esc = math.sqrt(-2.0 * potential.potential(0, 0, 0))
     eta = 0.5
