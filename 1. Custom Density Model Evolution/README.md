@@ -33,6 +33,10 @@ To reproduce the experiment, follow these steps:
   ```shell
   conda activate agama
   ```
+- Start Nemo (from `nemo` repository root):
+  ```shell
+  source start_nemo.sh
+  ```
 - Create initial coordinates for evolution:
   ```shell
   cd 1.\ Custom\ Density\ Model\ Evolution/
@@ -48,7 +52,13 @@ To reproduce the experiment, follow these steps:
   `logstep=300` controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly
   chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the
   output.
-- Visualize results:
+- Visualize cluster evolution:
   ```shell
   snapplot3 <DENSITY_TYPE>/out.nemo
   ```
+- Plot mass density $$\\rho(r)$$ for the resulting snapshot and compare with initial density:
+  ```shell
+  python plot_snap_density.py --nemo-file <DENSITY_TYPE>/out.nemo --times <t1> <t2> ... <tn> --density-type <DENSITY_TYPE>
+  ```
+  `<t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
+  E.g., `0.0 0.100 0.200`.
