@@ -1,11 +1,8 @@
 """Plot density for a given NEMO snapshot."""
 
 import argparse
-import math
 import os
-import shutil
 import subprocess
-import sys
 import typing
 from pathlib import Path
 
