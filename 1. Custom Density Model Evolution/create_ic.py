@@ -1,3 +1,5 @@
+"""Create initial conditions for gyrFalcON."""
+
 import argparse
 import math
 import os
@@ -130,7 +132,7 @@ if __name__ == "__main__":
     if not (0 < args.N <= 10**7):
         sys.exit(f"Got invalid N={args.N}, should be 0 < N <= 10**7")
 
-    save_dir = Path(args.density_type.lower())
+    save_dir = Path(args.density_type)
     if save_dir.exists():
         shutil.rmtree(save_dir)
     save_dir.mkdir()
@@ -165,7 +167,11 @@ if __name__ == "__main__":
     scm.potential.export(str(save_dir / "scm.ini"))
 
     # create and write out an N−body realization of the model
-    snap = agama.GalaxyModel(scm.potential, scm.potential.density).sample(args.N)
+    snap = agama.GalaxyModel(
+        potential=scm.potential,
+        df=scm.components[0].df,
+        af=scm.af,
+    ).sample(args.N)
 
     in_snap_file = str(save_dir / "IC.nemo")
     out_snap_file = str(save_dir / "out.nemo")
