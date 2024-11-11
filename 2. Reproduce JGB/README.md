@@ -39,10 +39,10 @@ To reproduce the experiment, follow these steps:
 
   | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$, $M\_{☉}$ | Plummer radius, pc | Number of particles |
   | ---------------- | ----------- | ------------------- | ------------------ | ------------------- |
-  | 0                | 1           | 0.5                 | 10                 | $2 \\mul 10^4$      |
-  | 0                | 1           | 1                   | 10                 | $2 \\mul 10^4$      |
-  | 0                | 1           | 1.5                 | 10                 | $2 \\mul 10^4$      |
-  | 10               | 1.5         | 0.954               | 10                 | $2 \\mul 10^4$      |
+  | 0                | 1           | 0.5                 | 10                 | $2 \\times 10^4$    |
+  | 0                | 1           | 1                   | 10                 | $2 \\times 10^4$    |
+  | 0                | 1           | 1.5                 | 10                 | $2 \\times 10^4$    |
+  | 10               | 1.5         | 0.954               | 10                 | $2 \\times 10^4$    |
 
 - Evolve for a couple of crossing times:
 
@@ -78,3 +78,5 @@ To reproduce the experiment, follow these steps:
   ```shell
   python plot_mass_spectrum.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
   ```
+
+  The resulting histogram (mass distribution from snapshot) and the line plot (original pdf) should look like a log-normal distribution with your parameters. You can compare your results with the picture at the beginning of this README document.
