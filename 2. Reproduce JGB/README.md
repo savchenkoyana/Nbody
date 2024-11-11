@@ -4,6 +4,10 @@ This experiment is based on article [Primordial Black Hole clusters, phenomenolo
 
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
 
+![](../images/pic2.png)
+
+Mass spectra used in the article.
+
 # How to reproduce
 
 To reproduce the experiment, follow these steps:
@@ -56,6 +60,8 @@ To reproduce the experiment, follow these steps:
   snapplot3 <DIRNAME>/out.nemo
   ```
 
+  There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
+
 - Plot mass density $$\\rho(r)$$ for the resulting snapshot and compare with initial density:
 
   ```shell
@@ -66,3 +72,9 @@ To reproduce the experiment, follow these steps:
   E.g., `0.0 1.0 2.0`.
 
   When you evolve a cluster in its own gravitational field, the final density should look like the initial density. This indicates that your model is truly self-consistent.
+
+- Compute and plot mass spectrum for a given snapshot along with the original distribution function:
+
+  ```shell
+  python plot_mass_spectrum.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+  ```

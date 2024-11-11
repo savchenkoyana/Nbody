@@ -149,7 +149,7 @@ def plot_density(dens: agama.Density, save_dir: typing.Union[str, os.PathLike]):
 def mass_pdf(x, mu, scale, sigma):
     # y = (x - mu) / scale
     # return np.exp(-(np.log(y) ** 2) / (2 * sigma**2)) / (np.sqrt(2 * np.pi) * sigma * x)
-    return scipy.stats.lognorm.pdf(r, loc=mu, scale=scale, s=sigma)
+    return scipy.stats.lognorm.pdf(x, loc=mu, scale=scale, s=sigma)
 
 
 def compute_mean_mass(mu: float, scale: float, sigma: float) -> float:
