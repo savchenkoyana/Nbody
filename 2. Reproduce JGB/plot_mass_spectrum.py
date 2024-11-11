@@ -73,7 +73,7 @@ if __name__ == "__main__":
         masses = prof[0]
 
         (counts, bins) = np.histogram(masses, bins=r, density=True)
-        plt.hist(bins[:-1], bins, weights=counts, label=f"prof_{t}")
+        plt.hist(bins[:-1], bins, weights=counts, label=f"prof_{t}", histtype="step")
 
     plt.xscale("log")
     plt.legend()
