@@ -14,15 +14,70 @@ import numpy as np
 import scipy
 import scipy.integrate as integrate
 
-# choose the best units for this task
-agama.setUnits(
-    length=0.001,
-    mass=1,
-    velocity=1,
-)  # length in pc, mass in solar mass, velocity in km/s
+
+def set_units():
+    # choose the best units for this task
+    agama.setUnits(
+        length=0.001,
+        mass=1,
+        velocity=1,
+    )  # length in pc, mass in solar mass, velocity in km/s
+
+
+def create_argparse(description=""):
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument(
+        "--N",
+        type=int,
+        default=10_000,
+        help="How many particles to generate. Should be 0 < N <= 10**7. Default: 10_000",
+    )
+    parser.add_argument(
+        "--mu",
+        type=float,
+        default=0,
+        help="Parameter `mu` used for scaling in mass spectrum: y = (x - mu) / s. Units: Solar masses. Default: 0",
+    )
+    parser.add_argument(
+        "--scale",
+        "--s",
+        type=float,
+        default=1,
+        help="Parameter `s` used for scaling in mass spectrum: y = (x - mu) / s. Units: Solar masses. Default: 1",
+    )
+    parser.add_argument(
+        "--sigma",
+        type=float,
+        default=1,
+        help="Std of the log-normal distribution in mass spectrum (in Solar masses). Default: 1",
+    )
+    parser.add_argument(
+        "--plummer-r",
+        "--r",
+        type=float,
+        default=10,
+        help="Plummer sphere radius (in pc). Default: 10",
+    )
+    return parser
+
+
+def check_parameters(args):
+    if not (0 < args.N <= 10**7):
+        sys.exit(f"Got invalid N={args.N}, should be 0 < N <= 10**7")
+    if args.mu < 0:
+        sys.exit(
+            f"Got invalid mu={args.mu} of the mass spectrum, should not be negative"
+        )
+    if args.sigma <= 0:
+        sys.exit(
+            f"Got invalid sigma={args.sigma} of the mass spectrum, should be positive"
+        )
+    if args.scale <= 0:
+        sys.exit(f"Got invalid s={args.scale} of the mass spectrum, should be positive")
 
 
 def create_self_consistent_model(
+    n_iterations: int,
     potential: agama.Potential,
     df: agama.DistributionFunction,
     verbose: bool = False,
@@ -48,7 +103,7 @@ def create_self_consistent_model(
         )
 
     # perform several iterations of self-consistent modelling procedure
-    for i in range(10):
+    for i in range(n_iterations):
         scm.iterate()
         if verbose:
             print(
@@ -65,8 +120,6 @@ def create_self_consistent_model(
         plt.ylabel(r"$\rho$")
         plt.xscale("log")
         plt.yscale("log")
-        plt.ylim(1e2, 1e16)
-        plt.xlim(1e-4, 1e1)
 
         if isinstance(save_dir, (str, Path)):
             plt.savefig(Path(save_dir) / "scm.png")
@@ -86,8 +139,6 @@ def plot_density(dens: agama.Density, save_dir: typing.Union[str, os.PathLike]):
     plt.ylabel(r"$\rho$")
     plt.xscale("log")
     plt.yscale("log")
-    plt.xlim(1e-4, 1e1)
-    plt.ylim(1e2, 1e9)
 
     if isinstance(save_dir, (str, Path)):
         plt.savefig(Path(save_dir) / "density.png")
@@ -121,6 +172,9 @@ def generate_snap(
     N: int,
     generate_mass: typing.Callable[int, list[float]],
 ) -> typing.Tuple[np.array, np.array]:
+    """Generate snapshot with `N` particles. Coordinates and velocities are generated
+    according to `galaxy_model`, and masses are generated according to `generate_mass` function.
+    """
     # Generate positions and velocities
     snap_xv, snap_m = galaxy_model.sample(args.N)
 
@@ -140,56 +194,18 @@ def generate_snap(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    parser = create_argparse(
         description="This program creates initial conditions for N-body evolution. "
-        "For parameter definition see https://arxiv.org/pdf/2405.06391v1",
+        "For parameter definition see https://arxiv.org/pdf/2405.06391v1"
     )
     parser.add_argument(
-        "--N",
+        "--n-iterations",
         type=int,
-        default=10_000,
-        help="How many particles to generate. Should be 0 < N <= 10**7. Default: 10_000",
-    )
-    parser.add_argument(
-        "--mu",
-        type=float,
-        default=0,
-        help="Parameter `mu` used for scaling: y = (x - mu) / s. Units: Solar masses. Default: 0",
-    )
-    parser.add_argument(
-        "--scale",
-        "--s",
-        type=float,
-        default=1,
-        help="Parameter `s` used for scaling: y = (x - mu) / s. Units: Solar masses. Default: 1",
-    )
-    parser.add_argument(
-        "--sigma",
-        type=float,
-        default=1,
-        help="Std of the log-normal distribution (in Solar masses). Default: 1",
-    )
-    parser.add_argument(
-        "--plummer-r",
-        "--r",
-        type=float,
-        default=10,
-        help="Plummer sphere radius (in pc). Default: 10",
+        default=15,
+        help="Number of iterations to create a self-consistent model. Default: 15",
     )
     args = parser.parse_args()
-
-    if not (0 < args.N <= 10**7):
-        sys.exit(f"Got invalid N={args.N}, should be 0 < N <= 10**7")
-    if args.mu < 0:
-        sys.exit(
-            f"Got invalid mu={args.mu} of the mass spectrum, should not be negative"
-        )
-    if args.sigma <= 0:
-        sys.exit(
-            f"Got invalid sigma={args.sigma} of the mass spectrum, should be positive"
-        )
-    if args.scale <= 0:
-        sys.exit(f"Got invalid s={args.scale} of the mass spectrum, should be positive")
+    check_parameters(args)  # sanity checks
 
     save_dir = Path(
         f"snap_mu{args.mu}_s{args.scale}_sigma{args.sigma}_r{args.plummer_r}_N{args.N}"
@@ -198,9 +214,8 @@ if __name__ == "__main__":
         shutil.rmtree(save_dir)
     save_dir.mkdir()
 
-    generate_lognorm = lambda x: scipy.stats.lognorm.rvs(
-        size=x, loc=args.mu, scale=args.scale, s=args.sigma
-    )
+    # Set Agama units
+    set_units()
 
     # Compute total mass for the distribution by multiplying the number of samples by E[x] of distribution
     mass_math_expectation = compute_mean_mass(
@@ -208,10 +223,15 @@ if __name__ == "__main__":
     )
     m_tot = args.N * mass_math_expectation
 
-    potential = agama.Potential(type="Plummer", mass=m_tot)
+    potential = agama.Potential(
+        type="Plummer",
+        mass=m_tot,
+        scaleRadius=args.plummer_r,
+    )
     df = agama.DistributionFunction(type="QuasiSpherical", potential=potential)
 
     scm = create_self_consistent_model(
+        n_iterations=args.n_iterations,
         potential=potential,
         df=df,
         verbose=True,
@@ -228,13 +248,17 @@ if __name__ == "__main__":
     # save the final density/potential profile
     scm.potential.export(str(save_dir / "scm.ini"))
 
+    # create and write out an N−body realization of the model
     gm = agama.GalaxyModel(
         potential=scm.potential,
         df=scm.components[0].df,
         af=scm.af,
     )
 
-    # create and write out an N−body realization of the model
+    generate_lognorm = lambda x: scipy.stats.lognorm.rvs(
+        size=x, loc=args.mu, scale=args.scale, s=args.sigma
+    )
+
     snap = generate_snap(galaxy_model=gm, N=args.N, generate_mass=generate_lognorm)
 
     in_snap_file = str(save_dir / "IC.nemo")

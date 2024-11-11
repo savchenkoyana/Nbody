@@ -2,14 +2,18 @@
 
 import argparse
 import os
+import shutil
 import subprocess
 import typing
 from pathlib import Path
 
+import agama
 import matplotlib.pyplot as plt
 import numpy as np
-from create_ic import rho_bh
-from create_ic import rho_dm
+from create_ic import check_parameters
+from create_ic import compute_mean_mass
+from create_ic import create_argparse
+from create_ic import set_units
 
 
 def profile_by_snap(
@@ -30,19 +34,12 @@ def profile_by_snap(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--density-type",
-        type=str,
-        required=True,
-        choices=["BH", "DM"],
-        help="Whether to use black hole (BH) density or dark matter (DM) density",
-    )
+    parser = create_argparse()
     parser.add_argument(
         "--nemo-file",
         type=str,
         required=True,
-        help="Nemo file used to plot density profile",
+        help="Nemo file used for density profile computation",
     )
     parser.add_argument(
         "--times",
@@ -53,22 +50,32 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if args.density_type == "BH":
-        density_function = rho_bh
-    elif args.density_type == "DM":
-        density_function = rho_dm
-    else:
-        raise RuntimeError(f"Unknown density type {args.density_type}")
+    check_parameters(args)  # sanity checks
+
+    set_units()  # set Agama units
 
     filename = Path(args.nemo_file)
     if not filename.exists():
         raise RuntimeError(f"filename {filename} does not exist")
+    save_dir = filename.absolute().parent
+
+    # Compute total mass for the distribution by multiplying the number of samples by E[x] of distribution
+    mass_math_expectation = compute_mean_mass(
+        mu=args.mu, scale=args.scale, sigma=args.sigma
+    )
+    m_tot = args.N * mass_math_expectation
 
     # Plot original density
-    r = np.logspace(-4, 2)
+    r = np.logspace(0, 2)
     xyz = np.vstack((r, r * 0, r * 0)).T
 
-    plt.plot(r, density_function(xyz), linestyle="dotted", label="original density")
+    potential = agama.Potential(
+        type="Plummer",
+        mass=m_tot,
+        scaleRadius=args.plummer_r,
+    )
+
+    plt.plot(r, potential.density(xyz), linestyle="dotted", label="original density")
 
     plt.xlabel("r")
     plt.ylabel(r"$\rho$")
