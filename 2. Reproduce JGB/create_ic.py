@@ -147,6 +147,7 @@ def plot_density(dens: agama.Density, save_dir: typing.Union[str, os.PathLike]):
 
 
 def mass_pdf(x, mu, scale, sigma):
+    """Lognormal distribution PDF."""
     # y = (x - mu) / scale
     # return np.exp(-(np.log(y) ** 2) / (2 * sigma**2)) / (np.sqrt(2 * np.pi) * sigma * x)
     return scipy.stats.lognorm.pdf(x, loc=mu, scale=scale, s=sigma)
