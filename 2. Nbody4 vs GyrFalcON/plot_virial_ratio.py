@@ -38,6 +38,9 @@ if __name__ == "__main__":
 
     vir_files = [f for f in os.listdir(save_dir) if f.startswith("vir_")]
 
+    print(vir_files)
+
+    # Plot virial ratio
     plt.xlabel("time")
     plt.ylabel("-2T/W")
 
