@@ -76,3 +76,7 @@ For more info see [README](1.%20Custom%20Density%20Model%20Evolution/README.md)
 This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/pdf/2405.06391v1) by Juan Garcia-Bellido.
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
 For more info see [README](2.%20Reproduce%20JGB/README.md)
+
+### 3. Nbody4 vs GyrFalcON
+
+In this experiment we compare evolution results between Aarset `nbody4` and Dehnen `gyrFalcON`

@@ -12,7 +12,7 @@ To reproduce the experiment, follow these steps:
   ```
 - Go to current directory:
   ```shell
-  cd 2.\ Nbody4\ vs\ GyrFalcON/
+  cd 3.\ Nbody4\ vs\ GyrFalcON/
   ```
 - Run evolution for a system with 10000 points distributed with Plummer density for 20 crossing times:
   ```shell
