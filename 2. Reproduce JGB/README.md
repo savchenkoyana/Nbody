@@ -52,6 +52,38 @@ To reproduce the experiment, follow these steps:
 
   Here `DIRNAME` is the name of the directory with `IC.nemo`, and `logstep=300` is a parameter which controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the output.
 
+## (Optional) External potential
+
+This section desctibes how to perform the evolution of PBH cluster in an external potential. Here I use Milky Way potential created with `Agama` scripts and based on the analytic approximation for the bar model from Portail et al.(2017).
+
+- To create a Milky Way potential for evolution, run:
+
+  ```shell
+  cd ../agama/py  # cd to `py` folder in your Agama repository
+  python example_mw_potential_hunter24.py  # create Milky Way potential
+  cd -
+  ```
+
+  This command creates files `MWPotentialHunter24_*.ini` into `Nbody/agama/py` directory. TODO:Transform Milky Way potential to our units (kpc -> pc)
+
+- Shift the coordinates of cluster center:
+
+  ```shell
+  snapshift in=<DIRNAME>/IC.nemo out=<DIRNAME>/IC_shifted.nemo rshift=r,0,0 vshift=0,-vcm,0
+  ```
+
+  To reproduce JGB, we want our PBH cluster to become a satellite rotating at X pc around the galaxy center:
+
+  ```shell
+  snapshift in=<DIRNAME>/IC.nemo out=<DIRNAME>/IC_shifted.nemo rshift=r,0,0 vshift=0,-vcm,0
+  ```
+
+- Run evolution:
+
+  ```shell
+  gyrfalcON in=<DIRNAME>/IC_MW.nemo out=<DIRNAME>/out_MW.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../agama/py/MWPotentialHunter24_rotating.ini
+  ```
+
 # Explore results
 
 - Visualize cluster evolution:

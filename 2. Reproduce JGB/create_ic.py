@@ -17,6 +17,8 @@ import scipy.integrate as integrate
 
 def set_units():
     # choose the best units for this task
+    # for units explanation see
+    # https://physics.stackexchange.com/questions/162966/units-in-gravitational-n-body-simulations
     agama.setUnits(
         length=0.001,
         mass=1,
