@@ -54,7 +54,11 @@ To reproduce the experiment, follow these steps:
 
 ## (Optional) External potential
 
-This section desctibes how to perform the evolution of PBH cluster in an external potential. Here I use Milky Way potential created with `Agama` scripts and based on the analytic approximation for the bar model from Portail et al.(2017).
+This section desctibes how to perform the evolution of PBH cluster in an external potential.
+
+### Milky Way potential
+
+Here I use Milky Way potential created with `Agama` scripts and based on the analytic approximation for the bar model from Portail et al. (2017).
 
 - To create a Milky Way potential for evolution, run:
 
@@ -64,25 +68,28 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
   cd -
   ```
 
-  This command creates files `MWPotentialHunter24_*.ini` into `Nbody/agama/py` directory. TODO:Transform Milky Way potential to our units (kpc -> pc)
+  This command creates files `MWPotentialHunter24_*.ini` into `Nbody/agama/py` directory. Note that these potentials use N-body units, so before using them with our previous snapshot we need to scale snapshot data so that snapshot and potential units do match.
 
-- Shift the coordinates of cluster center:
+- Transform snapshot data before evolution in external potential. This transformation includes:
 
-  ```shell
-  snapshift in=<DIRNAME>/IC.nemo out=<DIRNAME>/IC_shifted.nemo rshift=r,0,0 vshift=0,-vcm,0
-  ```
+  - convertion to different physical units by scaling
+  - shifting coordinates (we want our PBH clusters to become a satellite rotating around the Milky Way galaxy center)
 
-  To reproduce JGB, we want our PBH cluster to become a satellite rotating at X pc around the galaxy center:
+  Run transformation script:
 
-  ```shell
-  snapshift in=<DIRNAME>/IC.nemo out=<DIRNAME>/IC_shifted.nemo rshift=r,0,0 vshift=0,-vcm,0
-  ```
+- We need to provide new parameters for `gyrFalcON`, such as `eps`, `kmax`, `tstop`, `tstep` (they have changed because we switched to using new units):
 
 - Run evolution:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/IC_MW.nemo out=<DIRNAME>/out_MW.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../agama/py/MWPotentialHunter24_rotating.ini
+  gyrfalcON in=<DIRNAME>/IC_shifted.nemo out=<DIRNAME>/out_MW.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../agama/py/MWPotentialHunter24_rotating.ini
   ```
+
+### Point mass potential
+
+JGB writes: *"Clusters are themselves immersed in a central gravitational potential with orbital radius $R_c$ = 34 kpc and central mass $M = 4.37 × 10^10 M\_\\odot$ throughout the entire evolution. This is just a point mass approximation which leads to a circular movement of period T = 2.81Gyr"*
+
+<span style="color:red">**TODO: implement**</span>
 
 # Explore results
 

@@ -51,7 +51,7 @@ def create_argparse(description=""):
         "--sigma",
         type=float,
         default=1,
-        help="Std of the log-normal distribution in mass spectrum (in Solar masses). Default: 1",
+        help="Std of the log-normal distribution in mass spectrum (dimensionless). Default: 1",
     )
     parser.add_argument(
         "--plummer-r",
@@ -118,8 +118,8 @@ def create_self_consistent_model(
     if plot:
         # show the results
         plt.legend(loc="lower left")
-        plt.xlabel("r")
-        plt.ylabel(r"$\rho$")
+        plt.xlabel("r, pc")
+        plt.ylabel(r"$\rho, M_\odot / pc^3$")
         plt.xscale("log")
         plt.yscale("log")
 
@@ -131,19 +131,43 @@ def create_self_consistent_model(
     return scm
 
 
-def plot_density(dens: agama.Density, save_dir: typing.Union[str, os.PathLike]):
+def plot_density(
+    dens: agama.Density,
+    save_path: typing.Optional[typing.Union[str, os.PathLike]] = None,
+):
     r = np.logspace(-4, 1)
     xyz = np.vstack((r, r * 0, r * 0)).T
 
     plt.plot(r, dens(xyz), linestyle="dotted")
 
-    plt.xlabel("r")
-    plt.ylabel(r"$\rho$")
+    plt.xlabel("r, pc")
+    plt.ylabel(r"$\rho, M_\odot / pc^3$")
     plt.xscale("log")
     plt.yscale("log")
 
-    if isinstance(save_dir, (str, Path)):
-        plt.savefig(Path(save_dir) / "density.png")
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    plt.show()
+
+
+def plot_density_diff(
+    orig_dens: agama.Density,
+    dens: agama.Density,
+    save_path: typing.Optional[typing.Union[str, os.PathLike]] = None,
+):
+    r = np.logspace(-4, 1)
+    xyz = np.vstack((r, r * 0, r * 0)).T
+
+    plt.plot(r, np.abs(dens(xyz) - orig_dens(xyz)))
+
+    plt.xlabel("r, pc")
+    plt.ylabel(r"$\delta\rho, M_\odot / pc^3$")
+    plt.xscale("log")
+    plt.yscale("log")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
 
     plt.show()
 
@@ -245,7 +269,14 @@ if __name__ == "__main__":
     # plot density of the resulting model
     plot_density(
         dens=scm.potential.density,
-        save_dir=save_dir,
+        save_path=save_dir / "scm_density.png",
+    )
+
+    # plot the difference between the resulting density and the original density
+    plot_density_diff(
+        orig_dens=potential.density,
+        dens=scm.potential.density,
+        save_path=save_dir / "density_diff.png",
     )
 
     # save the final density/potential profile
@@ -270,7 +301,7 @@ if __name__ == "__main__":
 
     # Compute optimal parameters for gyrFalcON the same way as in https://td.lpi.ru/~eugvas/nbody/tutor.pdf
     eps = (args.N / args.plummer_r**3) ** (-1 / 3)  # n ** (-1 / 3)
-    v_esc = math.sqrt(-2.0 * potential.potential(0, 0, 0))
+    v_esc = math.sqrt(-2.0 * scm.potential.potential(0, 0, 0))
     eta = 0.5
     tau = eta * eps / v_esc
     kmax = int(
