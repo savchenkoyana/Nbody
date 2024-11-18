@@ -37,12 +37,12 @@ To reproduce the experiment, follow these steps:
 
   To reproduce the results from the article, use these parameters combinations:
 
-  | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$, $M\_{☉}$ | Plummer radius, pc | Number of particles |
-  | ---------------- | ----------- | ------------------- | ------------------ | ------------------- |
-  | 0                | 1           | 0.5                 | 10                 | $2 \\times 10^4$    |
-  | 0                | 1           | 1                   | 10                 | $2 \\times 10^4$    |
-  | 0                | 1           | 1.5                 | 10                 | $2 \\times 10^4$    |
-  | 10               | 1.5         | 0.954               | 10                 | $2 \\times 10^4$    |
+  | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles |
+  | ---------------- | ----------- | --------- | ------------------ | ------------------- |
+  | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    |
+  | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    |
+  | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    |
+  | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    |
 
 - Evolve for a couple of crossing times:
 
@@ -50,7 +50,7 @@ To reproduce the experiment, follow these steps:
   gyrfalcON in=<DIRNAME>/IC.nemo out=<DIRNAME>/out.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
   ```
 
-  Here `DIRNAME` is the name of the directory with `IC.nemo`, and `logstep=300` is a parameter which controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the output.
+  Here `DIRNAME` is the name of the directory with `IC.nemo`, and `logstep=300` is a parameter which controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the output (don't forget to change `tstop` parameter according to how many crossing times you want to use).
 
 ## (Optional) External potential
 
@@ -87,9 +87,11 @@ Here I use Milky Way potential created with `Agama` scripts and based on the ana
 
 ### Point mass potential
 
-JGB writes: *"Clusters are themselves immersed in a central gravitational potential with orbital radius $R_c$ = 34 kpc and central mass $M = 4.37 × 10^10 M\_\\odot$ throughout the entire evolution. This is just a point mass approximation which leads to a circular movement of period T = 2.81Gyr"*
+JGB writes:
 
-<span style="color:red">**TODO: implement**</span>
+> Clusters are themselves immersed in a central gravitational potential with orbital radius $R_c$ = 34 kpc and central mass $M = 4.37 × 10^10 M\_{☉}$ throughout the entire evolution. This is just a point mass approximation which leads to a circular movement of period T = 2.81 Gyr
+
+TODO: implement
 
 # Explore results
 

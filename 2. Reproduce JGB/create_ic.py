@@ -220,6 +220,28 @@ def generate_snap(
     return (snap_xv, (*masses,))
 
 
+def compute_gyrfalcon_parameters(
+    N: int,
+    r0: float,
+    phi0: float,
+    eta: float = 0.5,
+):
+    """Compute optimal parameters for gyrFalcON the same way as in https://td.lpi.ru/~eugvas/nbody/tutor.pdf."""
+    eps = r0 / N ** (1 / 3)
+
+    v_esc = math.sqrt(-2.0 * phi0)
+    t_dyn = r0 / v_esc
+
+    tau = eta * eps / v_esc
+    kmax = int(
+        0.5 - math.log2(tau)
+    )  # tau = 2**(-kmax), 0.5 is for rounding to upper bound
+
+    print(f"Dynamical time for the system: {t_dyn:.3f}")
+
+    return eps, kmax, t_dyn
+
+
 if __name__ == "__main__":
     parser = create_argparse(
         description="This program creates initial conditions for N-body evolution. "
@@ -299,20 +321,16 @@ if __name__ == "__main__":
     out_snap_file = str(save_dir / "out.nemo")
     agama.writeSnapshot(in_snap_file, snap, "nemo")
 
-    # Compute optimal parameters for gyrFalcON the same way as in https://td.lpi.ru/~eugvas/nbody/tutor.pdf
-    eps = (args.N / args.plummer_r**3) ** (-1 / 3)  # n ** (-1 / 3)
-    v_esc = math.sqrt(-2.0 * scm.potential.potential(0, 0, 0))
-    eta = 0.5
-    tau = eta * eps / v_esc
-    kmax = int(
-        0.5 - math.log2(tau)
-    )  # tau = 2**(-kmax), 0.5 is for rounding to upper bound
-    t_dyn = args.plummer_r / v_esc
-    print(f"Dynamical time for the system: {t_dyn:.3f}")
-
     print("*" * 10, "Generation finished!", "*" * 10)
-    print("Run this to start cluster evolution:")
+
+    eps, kmax, t_dyn = compute_gyrfalcon_parameters(
+        N=args.N,
+        r0=args.plummer_r,
+        phi0=scm.potential.potential(0, 0, 0),
+    )
+
+    print(f"Run this to start cluster evolution for 1 dynamical time:")
     print(
         f"\tgyrfalcON {in_snap_file} {out_snap_file} logstep=300 "
-        f"eps={eps} kmax={kmax} tstop={3 * t_dyn:.3f} step={t_dyn / 100:.3f} Grav={agama.G}"
+        f"eps={eps} kmax={kmax} tstop={t_dyn} step={t_dyn / 100} Grav={agama.G}"
     )
