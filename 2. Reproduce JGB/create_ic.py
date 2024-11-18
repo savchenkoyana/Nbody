@@ -26,7 +26,7 @@ def set_units():
     )  # length in pc, mass in solar mass, velocity in km/s
 
 
-def create_argparse(description=""):
+def create_argparse(description="") -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "--N",
@@ -85,7 +85,7 @@ def create_self_consistent_model(
     verbose: bool = False,
     plot: bool = False,
     save_dir: typing.Union[str, os.PathLike] = None,
-):
+) -> agama.SelfConsistentModel:
     print("Creating a self-consistent model")
     dens = agama.Density(type="Plummer", mass=1.0, scaleRadius=1.0)
 
@@ -172,7 +172,7 @@ def plot_density_diff(
     plt.show()
 
 
-def mass_pdf(x, mu, scale, sigma):
+def mass_pdf(x, mu, scale, sigma) -> typing.Callable[float, float]:
     """Lognormal distribution PDF."""
     # y = (x - mu) / scale
     # return np.exp(-(np.log(y) ** 2) / (2 * sigma**2)) / (np.sqrt(2 * np.pi) * sigma * x)
@@ -225,7 +225,7 @@ def compute_gyrfalcon_parameters(
     r0: float,
     phi0: float,
     eta: float = 0.5,
-):
+) -> typing.Tuple[float, int, float]:
     """Compute optimal parameters for gyrFalcON the same way as in https://td.lpi.ru/~eugvas/nbody/tutor.pdf."""
     eps = r0 / N ** (1 / 3)
 

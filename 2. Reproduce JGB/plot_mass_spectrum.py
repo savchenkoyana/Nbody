@@ -15,7 +15,7 @@ from create_ic import mass_pdf
 def mass_spectrum_by_snap(
     filename: typing.Union[str, os.PathLike],
     t: typing.Union[float, str],
-):
+) -> np.array:
     """Get a np.array with particles for a given snapshot and time."""
     filename = str(filename)
 
@@ -31,7 +31,9 @@ def mass_spectrum_by_snap(
 
 
 if __name__ == "__main__":
-    parser = create_argparse()
+    parser = create_argparse(
+        description="This program plots mass spectrum for a given snapshot"
+    )
     parser.add_argument(
         "--nemo-file",
         type=str,
