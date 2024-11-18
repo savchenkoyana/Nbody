@@ -13,7 +13,7 @@ from create_ic import mass_pdf
 
 
 def mass_spectrum_by_snap(
-    filename: typing.Union[str, os.PathLike],
+    filename: typing.Union[str, os.PathLike, Path],
     t: typing.Union[float, str],
 ) -> np.array:
     """Get a np.array with particles for a given snapshot and time."""

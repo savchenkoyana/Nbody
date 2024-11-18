@@ -77,6 +77,11 @@ Here I use Milky Way potential created with `Agama` scripts and based on the ana
 
   Run transformation script:
 
+  ```shell
+  ```
+
+  To check that the snapshot transformations maintain the self-consistency of a model, pass zero shifts to the script and then evolve your snapshot for a couple of crossing times.
+
 - We need to provide new parameters for `gyrFalcON`, such as `eps`, `kmax`, `tstop`, `tstep` (they have changed because we switched to using new units):
 
 - Run evolution:

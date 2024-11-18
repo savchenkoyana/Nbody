@@ -181,7 +181,12 @@ def mass_pdf(x, mu, scale, sigma) -> typing.Callable[float, float]:
 
 def compute_mean_mass(mu: float, scale: float, sigma: float) -> float:
     """Compute E[x] of mass pdf analytically or numerically depending on
-    parameter values."""
+    parameter values.
+
+    See
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.lognorm.html
+    for parameters definition.
+    """
     if mu == 0 and scale == 1:  # Simple case of log-normal distribution with zero mean
         # Calculate E[x] according to analytic formula (see https://en.wikipedia.org/wiki/Log-normal_distribution)
         mass_math_expectation = np.exp(sigma**2 / 2)
@@ -226,7 +231,27 @@ def compute_gyrfalcon_parameters(
     phi0: float,
     eta: float = 0.5,
 ) -> typing.Tuple[float, int, float]:
-    """Compute optimal parameters for gyrFalcON the same way as in https://td.lpi.ru/~eugvas/nbody/tutor.pdf."""
+    """
+    Compute optimal parameters for gyrFalcON the same way
+    as in https://td.lpi.ru/~eugvas/nbody/tutor.pdf.
+
+    Parameters
+    ----------
+    N : int
+        the number of particles in a snapshot we want to evolve
+    r0 :
+        characteristic size of a density profile
+    phi0 : float
+        the value of a particles' potential at (0, 0, 0)
+    eta : float, optional
+        parameter that regulates precision of evaluation (see tutorial)
+    Returns
+    -------
+    tuple[float, int, float]
+        first value -- `eps` parameter for `gyrFalcON`
+        second value -- `kmax` parameter for `gyrFalcON`
+        third value -- dynamical time of simulation
+    """
     eps = r0 / N ** (1 / 3)
 
     v_esc = math.sqrt(-2.0 * phi0)

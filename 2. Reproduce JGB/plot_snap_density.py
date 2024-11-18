@@ -15,7 +15,7 @@ from create_ic import set_units
 
 
 def profile_by_snap(
-    filename: typing.Union[str, os.PathLike],
+    filename: typing.Union[str, os.PathLike, Path],
     t: typing.Union[float, str],
 ) -> np.array:
     """Get a np.array with density profile for a given snapshot and time."""
