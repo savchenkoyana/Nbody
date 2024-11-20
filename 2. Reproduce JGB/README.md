@@ -68,27 +68,30 @@ Here I use Milky Way potential created with `Agama` scripts and based on the ana
   cd -
   ```
 
-  This command creates files `MWPotentialHunter24_*.ini` into `Nbody/agama/py` directory. Note that these potentials use N-body units, so before using them with our previous snapshot we need to scale snapshot data so that snapshot and potential units do match.
+  This command creates files `MWPotentialHunter24_*.ini` into `Nbody/agama/py` directory. Note that snapshot units and units used to create these potentials differ, so before using them we need to scale snapshot data so that units match.
 
-- Transform snapshot data before evolution in external potential. This transformation includes:
+- Transform snapshot data before evolution in an external potential. This transformation includes:
 
   - convertion to different physical units by scaling
   - shifting coordinates (we want our PBH clusters to become a satellite rotating around the Milky Way galaxy center)
 
-  Run transformation script:
+  Run the transformation script:
 
   ```shell
+  python transform_snapshot.py --nemo-file `DIRNAME`/IC.nemo --r <PLUMMER_RADIUS> --r-shift <x> <y> <z> --v-shift <vx> <vy> <vz>
   ```
 
-  To check that the snapshot transformations maintain the self-consistency of a model, pass zero shifts to the script and then evolve your snapshot for a couple of crossing times.
+  This script will perform the transformations of data as well as printing new parameters for `gyrFalcON` (note that they change because we change units). The resulting snapshot will be stored in `<DIRNAME>/IC_scaled_shifted.nemo`.
 
-- We need to provide new parameters for `gyrFalcON`, such as `eps`, `kmax`, `tstop`, `tstep` (they have changed because we switched to using new units):
+  To reproduce [the official example](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_nbody_simulation.py) from `Agama` repository, use these shifts: `--r-shift 2 0 0 --v-shift 0 -100 50`.
 
 - Run evolution:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/IC_shifted.nemo out=<DIRNAME>/out_MW.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../agama/py/MWPotentialHunter24_rotating.ini
+  gyrfalcON in=<DIRNAME>/IC_scaled_shifted.nemo out=<DIRNAME>/out_MW.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../Agama/py/MWPotentialHunter24_rotating.ini
   ```
+
+  We recommend to use parameters provided by `transform_snapshot.py` script for `gyrFalcON`.
 
 ### Point mass potential
 
