@@ -17,6 +17,8 @@ import scipy.integrate as integrate
 
 def set_units():
     # choose the best units for this task
+    # for units explanation see
+    # https://physics.stackexchange.com/questions/162966/units-in-gravitational-n-body-simulations
     agama.setUnits(
         length=0.001,
         mass=1,
@@ -24,7 +26,7 @@ def set_units():
     )  # length in pc, mass in solar mass, velocity in km/s
 
 
-def create_argparse(description=""):
+def create_argparse(description="") -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "--N",
@@ -49,7 +51,7 @@ def create_argparse(description=""):
         "--sigma",
         type=float,
         default=1,
-        help="Std of the log-normal distribution in mass spectrum (in Solar masses). Default: 1",
+        help="Std of the log-normal distribution in mass spectrum (dimensionless). Default: 1",
     )
     parser.add_argument(
         "--plummer-r",
@@ -83,7 +85,7 @@ def create_self_consistent_model(
     verbose: bool = False,
     plot: bool = False,
     save_dir: typing.Union[str, os.PathLike] = None,
-):
+) -> agama.SelfConsistentModel:
     print("Creating a self-consistent model")
     dens = agama.Density(type="Plummer", mass=1.0, scaleRadius=1.0)
 
@@ -116,8 +118,8 @@ def create_self_consistent_model(
     if plot:
         # show the results
         plt.legend(loc="lower left")
-        plt.xlabel("r")
-        plt.ylabel(r"$\rho$")
+        plt.xlabel("r, pc")
+        plt.ylabel(r"$\rho, M_\odot / pc^3$")
         plt.xscale("log")
         plt.yscale("log")
 
@@ -129,24 +131,48 @@ def create_self_consistent_model(
     return scm
 
 
-def plot_density(dens: agama.Density, save_dir: typing.Union[str, os.PathLike]):
+def plot_density(
+    dens: agama.Density,
+    save_path: typing.Optional[typing.Union[str, os.PathLike]] = None,
+):
     r = np.logspace(-4, 1)
     xyz = np.vstack((r, r * 0, r * 0)).T
 
     plt.plot(r, dens(xyz), linestyle="dotted")
 
-    plt.xlabel("r")
-    plt.ylabel(r"$\rho$")
+    plt.xlabel("r, pc")
+    plt.ylabel(r"$\rho, M_\odot / pc^3$")
     plt.xscale("log")
     plt.yscale("log")
 
-    if isinstance(save_dir, (str, Path)):
-        plt.savefig(Path(save_dir) / "density.png")
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
 
     plt.show()
 
 
-def mass_pdf(x, mu, scale, sigma):
+def plot_density_diff(
+    orig_dens: agama.Density,
+    dens: agama.Density,
+    save_path: typing.Optional[typing.Union[str, os.PathLike]] = None,
+):
+    r = np.logspace(-4, 1)
+    xyz = np.vstack((r, r * 0, r * 0)).T
+
+    plt.plot(r, np.abs(dens(xyz) - orig_dens(xyz)))
+
+    plt.xlabel("r, pc")
+    plt.ylabel(r"$\delta\rho, M_\odot / pc^3$")
+    plt.xscale("log")
+    plt.yscale("log")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    plt.show()
+
+
+def mass_pdf(x, mu, scale, sigma) -> typing.Callable[float, float]:
     """Lognormal distribution PDF."""
     # y = (x - mu) / scale
     # return np.exp(-(np.log(y) ** 2) / (2 * sigma**2)) / (np.sqrt(2 * np.pi) * sigma * x)
@@ -155,7 +181,12 @@ def mass_pdf(x, mu, scale, sigma):
 
 def compute_mean_mass(mu: float, scale: float, sigma: float) -> float:
     """Compute E[x] of mass pdf analytically or numerically depending on
-    parameter values."""
+    parameter values.
+
+    See
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.lognorm.html
+    for parameters definition.
+    """
     if mu == 0 and scale == 1:  # Simple case of log-normal distribution with zero mean
         # Calculate E[x] according to analytic formula (see https://en.wikipedia.org/wiki/Log-normal_distribution)
         mass_math_expectation = np.exp(sigma**2 / 2)
@@ -192,6 +223,48 @@ def generate_snap(
     )
 
     return (snap_xv, (*masses,))
+
+
+def compute_gyrfalcon_parameters(
+    N: int,
+    r0: float,
+    phi0: float,
+    eta: float = 0.5,
+) -> typing.Tuple[float, int, float]:
+    """
+    Compute optimal parameters for gyrFalcON the same way
+    as in https://td.lpi.ru/~eugvas/nbody/tutor.pdf.
+
+    Parameters
+    ----------
+    N : int
+        the number of particles in a snapshot we want to evolve
+    r0 :
+        characteristic size of a density profile
+    phi0 : float
+        the value of a particles' potential at (0, 0, 0)
+    eta : float, optional
+        parameter that regulates precision of evaluation (see tutorial)
+    Returns
+    -------
+    tuple[float, int, float]
+        first value -- `eps` parameter for `gyrFalcON`
+        second value -- `kmax` parameter for `gyrFalcON`
+        third value -- dynamical time of simulation
+    """
+    eps = r0 / N ** (1 / 3)
+
+    v_esc = math.sqrt(-2.0 * phi0)
+    t_dyn = r0 / v_esc
+
+    tau = eta * eps / v_esc
+    kmax = int(
+        0.5 - math.log2(tau)
+    )  # tau = 2**(-kmax), 0.5 is for rounding to upper bound
+
+    print(f"Dynamical time for the system: {t_dyn:.3f}")
+
+    return eps, kmax, t_dyn
 
 
 if __name__ == "__main__":
@@ -243,7 +316,14 @@ if __name__ == "__main__":
     # plot density of the resulting model
     plot_density(
         dens=scm.potential.density,
-        save_dir=save_dir,
+        save_path=save_dir / "scm_density.png",
+    )
+
+    # plot the difference between the resulting density and the original density
+    plot_density_diff(
+        orig_dens=potential.density,
+        dens=scm.potential.density,
+        save_path=save_dir / "density_diff.png",
     )
 
     # save the final density/potential profile
@@ -266,20 +346,16 @@ if __name__ == "__main__":
     out_snap_file = str(save_dir / "out.nemo")
     agama.writeSnapshot(in_snap_file, snap, "nemo")
 
-    # Compute optimal parameters for gyrFalcON the same way as in https://td.lpi.ru/~eugvas/nbody/tutor.pdf
-    eps = (args.N / args.plummer_r**3) ** (-1 / 3)  # n ** (-1 / 3)
-    v_esc = math.sqrt(-2.0 * potential.potential(0, 0, 0))
-    eta = 0.5
-    tau = eta * eps / v_esc
-    kmax = int(
-        0.5 - math.log2(tau)
-    )  # tau = 2**(-kmax), 0.5 is for rounding to upper bound
-    t_dyn = args.plummer_r / v_esc
-    print(f"Dynamical time for the system: {t_dyn:.3f}")
-
     print("*" * 10, "Generation finished!", "*" * 10)
-    print("Run this to start cluster evolution:")
+
+    eps, kmax, t_dyn = compute_gyrfalcon_parameters(
+        N=args.N,
+        r0=args.plummer_r,
+        phi0=scm.potential.potential(0, 0, 0),
+    )
+
+    print(f"Run this to start cluster evolution for 1 dynamical time:")
     print(
         f"\tgyrfalcON {in_snap_file} {out_snap_file} logstep=300 "
-        f"eps={eps} kmax={kmax} tstop={3 * t_dyn:.3f} step={t_dyn / 100:.3f} Grav={agama.G}"
+        f"eps={eps} kmax={kmax} tstop={t_dyn} step={t_dyn / 100} Grav={agama.G}"
     )

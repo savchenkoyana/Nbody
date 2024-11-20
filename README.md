@@ -63,6 +63,23 @@ cd ../  # back to repository root
 
 For more info about Agama see https://arxiv.org/pdf/1802.08239 and official [AGAMA documentation](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/doc/reference.pdf).
 
+## (Optional) Install glnemo2
+
+To install `glnemo2` for snapshot visualization, follow the instructions at [the official site](https://projets.lam.fr/projects/glnemo2/wiki/download).
+
+After installation, you will have the following repository structure:
+
+```shell
+Nbody
+├── Agama  # Agama repository root
+├── nemo  # nemo repository root
+├── sandbox
+├── images
+├── README.md
+├── requirements.txt
+├── ...  # other files
+```
+
 # Experiments
 
 ### 1. Custom Density Model Evolution

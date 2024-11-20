@@ -37,12 +37,12 @@ To reproduce the experiment, follow these steps:
 
   To reproduce the results from the article, use these parameters combinations:
 
-  | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$, $M\_{☉}$ | Plummer radius, pc | Number of particles |
-  | ---------------- | ----------- | ------------------- | ------------------ | ------------------- |
-  | 0                | 1           | 0.5                 | 10                 | $2 \\times 10^4$    |
-  | 0                | 1           | 1                   | 10                 | $2 \\times 10^4$    |
-  | 0                | 1           | 1.5                 | 10                 | $2 \\times 10^4$    |
-  | 10               | 1.5         | 0.954               | 10                 | $2 \\times 10^4$    |
+  | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles |
+  | ---------------- | ----------- | --------- | ------------------ | ------------------- |
+  | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    |
+  | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    |
+  | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    |
+  | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    |
 
 - Evolve for a couple of crossing times:
 
@@ -50,7 +50,56 @@ To reproduce the experiment, follow these steps:
   gyrfalcON in=<DIRNAME>/IC.nemo out=<DIRNAME>/out.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
   ```
 
-  Here `DIRNAME` is the name of the directory with `IC.nemo`, and `logstep=300` is a parameter which controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the output.
+  Here `DIRNAME` is the name of the directory with `IC.nemo`, and `logstep=300` is a parameter which controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the output (don't forget to change `tstop` parameter according to how many crossing times you want to use).
+
+## (Optional) External potential
+
+This section desctibes how to perform the evolution of PBH cluster in an external potential.
+
+### Milky Way potential
+
+Here I use Milky Way potential created with `Agama` scripts and based on the analytic approximation for the bar model from Portail et al. (2017).
+
+- To create a Milky Way potential for evolution, run:
+
+  ```shell
+  cd ../agama/py  # cd to `py` folder in your Agama repository
+  python example_mw_potential_hunter24.py  # create Milky Way potential
+  cd -
+  ```
+
+  This command creates files `MWPotentialHunter24_*.ini` into `Nbody/agama/py` directory. Note that snapshot units and units used to create these potentials differ, so before using them we need to scale snapshot data so that units match.
+
+- Transform snapshot data before evolution in an external potential. This transformation includes:
+
+  - convertion to different physical units by scaling
+  - shifting coordinates (we want our PBH clusters to become a satellite rotating around the Milky Way galaxy center)
+
+  Run the transformation script:
+
+  ```shell
+  python transform_snapshot.py --nemo-file `DIRNAME`/IC.nemo --r <PLUMMER_RADIUS> --r-shift <x> <y> <z> --v-shift <vx> <vy> <vz>
+  ```
+
+  This script will perform the transformations of data as well as printing new parameters for `gyrFalcON` (note that they change because we change units). The resulting snapshot will be stored in `<DIRNAME>/IC_scaled_shifted.nemo`.
+
+  To reproduce [the official example](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_nbody_simulation.py) from `Agama` repository, use these shifts: `--r-shift 2 0 0 --v-shift 0 -100 50`.
+
+- Run evolution:
+
+  ```shell
+  gyrfalcON in=<DIRNAME>/IC_scaled_shifted.nemo out=<DIRNAME>/out_MW.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../Agama/py/MWPotentialHunter24_rotating.ini
+  ```
+
+  We recommend to use parameters provided by `transform_snapshot.py` script for `gyrFalcON`.
+
+### Point mass potential
+
+JGB writes:
+
+> Clusters are themselves immersed in a central gravitational potential with orbital radius $R_c$ = 34 kpc and central mass $M = 4.37 × 10^{10} M\_{☉}$ throughout the entire evolution. This is just a point mass approximation which leads to a circular movement of period T = 2.81 Gyr
+
+TODO: implement
 
 # Explore results
 

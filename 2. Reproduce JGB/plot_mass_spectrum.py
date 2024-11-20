@@ -1,25 +1,21 @@
 """Plot mass spectrum for a given NEMO snapshot."""
 
-import argparse
 import os
-import shutil
 import subprocess
 import typing
 from pathlib import Path
 
-import agama
 import matplotlib.pyplot as plt
 import numpy as np
 from create_ic import check_parameters
 from create_ic import create_argparse
 from create_ic import mass_pdf
-from create_ic import set_units
 
 
 def mass_spectrum_by_snap(
-    filename: typing.Union[str, os.PathLike],
+    filename: typing.Union[str, os.PathLike, Path],
     t: typing.Union[float, str],
-):
+) -> np.array:
     """Get a np.array with particles for a given snapshot and time."""
     filename = str(filename)
 
@@ -35,7 +31,9 @@ def mass_spectrum_by_snap(
 
 
 if __name__ == "__main__":
-    parser = create_argparse()
+    parser = create_argparse(
+        description="This program plots mass spectrum for a given snapshot"
+    )
     parser.add_argument(
         "--nemo-file",
         type=str,
@@ -52,8 +50,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
-
-    set_units()  # set Agama units
 
     filename = Path(args.nemo_file)
     if not filename.exists():
