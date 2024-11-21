@@ -88,7 +88,7 @@ Here I use Milky Way potential created with `Agama` scripts and based on the ana
 - Run evolution:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/IC_scaled_shifted.nemo out=<DIRNAME>/out_MW.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../Agama/py/MWPotentialHunter24_rotating.ini
+  gyrfalcON in=<DIRNAME>/IC_scaled_shifted.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../Agama/py/MWPotentialHunter24_rotating.ini
   ```
 
   We recommend to use parameters provided by `preprocess_snap.py` script for `gyrFalcON`.
@@ -99,7 +99,10 @@ JGB writes:
 
 > Clusters are themselves immersed in a central gravitational potential with orbital radius $R_c$ = 34 kpc and central mass $M = 4.37 × 10^{10} M\_{☉}$ throughout the entire evolution. This is just a point mass approximation which leads to a circular movement of period T = 2.81 Gyr
 
-The easiest way to implement the motion in this potential is to add a new particle representing the central mass to the existing snapshot with PBH cluster:
+The easiest way to implement the motion in this potential is to add a new particle representing the central mass to the existing snapshot with PBH cluster data:
+
+```shell
+```
 
 # Explore results
 

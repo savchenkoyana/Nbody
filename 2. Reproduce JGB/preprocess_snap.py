@@ -6,10 +6,14 @@ from pathlib import Path
 import agama
 import numpy as np
 from utils.general import compute_gyrfalcon_parameters
+from utils.transform_snap import create_center_mass_snapshot
 from utils.transform_snap import scale_snapshot
 from utils.transform_snap import shift_snapshot
+from utils.transform_snap import stack_snapshot
+from utils.transform_snap import test_center_mass_snapshot
 from utils.transform_snap import test_scale
 from utils.transform_snap import test_shift
+from utils.transform_snap import test_stack
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -44,6 +48,18 @@ if __name__ == "__main__":
         help="Plummer sphere radius (in parsecs). Default: 10",
     )
     parser.add_argument(
+        "--add-point-source",
+        action="store_true",
+        help="Whether to add steady point source of gravity "
+        "at the center of coordinates (use '--source-mass' to set its mass).",
+    )
+    parser.add_argument(
+        "--source-mass",
+        type=float,
+        default=4.37 * 10**10,
+        help="Mass of point source of gravitational field (is solar masses). Default: 4.37x10^10",
+    )
+    parser.add_argument(
         "--test",
         action="store_true",
         help="Whether to test snapshot conversion for correctness",
@@ -70,12 +86,12 @@ if __name__ == "__main__":
     m_scale = 1.0
 
     # Transform snapshot
-    filename_scaled = args.nemo_file.replace(".nemo", "_scaled.nemo")
-    filename_shifted = filename_scaled.replace(".nemo", "_shifted.nemo")
+    snapshot_scaled = args.nemo_file.replace(".nemo", "_scaled.nemo")
+    snapshot_shifted = snapshot_scaled.replace(".nemo", "_shifted.nemo")
 
     scale_snapshot(
         filename=args.nemo_file,
-        outfile=filename_scaled,
+        outfile=snapshot_scaled,
         rscale=r_scale,
         vscale=v_scale,
         mscale=m_scale,
@@ -83,22 +99,22 @@ if __name__ == "__main__":
     if args.test:
         test_scale(
             filename=args.nemo_file,
-            outfile=filename_scaled,
+            outfile=snapshot_scaled,
             rscale=r_scale,
             vscale=v_scale,
             mscale=m_scale,
         )
 
     shift_snapshot(
-        filename=filename_scaled,
-        outfile=filename_shifted,
+        filename=snapshot_scaled,
+        outfile=snapshot_shifted,
         rshift=args.r_shift,
         vshift=args.v_shift,
     )
     if args.test:
         test_shift(
-            filename=filename_scaled,
-            outfile=filename_shifted,
+            filename=snapshot_scaled,
+            outfile=snapshot_shifted,
             rshift=args.r_shift,
             vshift=args.v_shift,
         )
@@ -114,11 +130,40 @@ if __name__ == "__main__":
 
     eps, kmax, t_dyn = compute_gyrfalcon_parameters(N=N, r0=r_nbody, phi0=phi0)
 
-    out_snap_file = filename.parent / "out_MW.nemo"
+    # Add point source of field (optional)
+    if args.add_point_source:
+        snapshot_central_mass = args.nemo_file.replace(".nemo", "_potential.nemo")
+
+        create_center_mass_snapshot(
+            filename=snapshot_central_mass,
+            mass=args.source_mass,
+        )
+        if args.test:
+            test_center_mass_snapshot(
+                filename=snapshot_central_mass,
+                mass=args.source_mass,
+            )
+
+        stack_snapshot(
+            filename1=snapshot_shifted,
+            filename2=snapshot_central_mass,
+            outfile=snapshot_with_potential,
+        )
+        if args.test:
+            test_stack(
+                filename1=snapshot_shifted,
+                filename2=snapshot_central_mass,
+                outfile=snapshot_with_potential,
+            )
+
+    input_snap_file = (
+        snapshot_with_potential if args.add_point_source else snapshot_shifted
+    )
+    out_snap_file = filename.parent / "out_pot.nemo"
 
     print("*" * 10, "Transformation finished!", "*" * 10)
     print("Run this to start cluster evolution in N-body units for 1 dynamical time:")
     print(
-        f"\tgyrfalcON {filename_shifted} {out_snap_file} logstep=300 "
+        f"\tgyrfalcON {input_snap_file} {out_snap_file} logstep=300 "
         f"eps={eps} kmax={kmax} tstop={t_dyn} step={t_dyn / 100} Grav={Grav}"
     )
