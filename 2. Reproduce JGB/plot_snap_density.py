@@ -8,10 +8,10 @@ from pathlib import Path
 import agama
 import matplotlib.pyplot as plt
 import numpy as np
-from create_ic import check_parameters
-from create_ic import compute_mean_mass
-from create_ic import create_argparse
-from create_ic import set_units
+from utils.general import check_parameters
+from utils.general import compute_mean_mass
+from utils.general import create_argparse
+from utils.general import set_units
 
 
 def profile_by_snap(

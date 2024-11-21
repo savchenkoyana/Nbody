@@ -1,92 +1,20 @@
-"""Transform snapshot: change units (pc -> kpc) and shift snapshot data."""
+"""Preprocess snapshot: change units (pc -> kpc) and shift snapshot data, optional: add point source of field."""
 
 import argparse
-import os
-import subprocess
 from pathlib import Path
-from typing import Annotated
-from typing import Union
 
 import agama
 import numpy as np
-from create_ic import compute_gyrfalcon_parameters
-
-
-def scale_snapshot(
-    filename: Union[str, Path],
-    outfile: Union[str, Path],
-    rscale: float,
-    vscale: float,
-    mscale: float,
-):
-    if os.path.exists(outfile):
-        print(f"{outfile} already exists! removing...")
-        os.remove(outfile)
-
-    command = f"snapscale in={filename} out={outfile} rscale={rscale} vscale={vscale} mscale={mscale} | tee snapscale_log 2>&1"
-
-    print(f"Running:\n\t{command}\n")
-    subprocess.check_call(command, shell=True)
-
-
-def test_scale(
-    filename: Union[str, Path],
-    outfile: Union[str, Path],
-    rscale: float,
-    vscale: float,
-    mscale: float,
-):
-    coords_before = agama.readSnapshot(filename)  # tuple of (xv[N, 6], m[N,])
-    coords_after = agama.readSnapshot(outfile)
-
-    assert np.allclose(coords_before[1], coords_after[1] / mscale, atol=5e-6)  # masses
-    assert np.allclose(
-        coords_before[0][:, :3], coords_after[0][:, :3] / rscale, atol=5e-6
-    )  # positions
-    assert np.allclose(
-        coords_before[0][:, 3:], coords_after[0][:, 3:] / vscale, atol=5e-6
-    )  # velocities
-
-
-def shift_snapshot(
-    filename: Union[str, Path],
-    outfile: Union[str, Path],
-    rshift: Union[tuple[float, float, float], Annotated[list[float], 3]],
-    vshift: Union[tuple[float, float, float], Annotated[list[float], 3]],
-):
-    if os.path.exists(outfile):
-        print(f"{outfile} already exists! removing...")
-        os.remove(outfile)
-
-    rshift_str = ",".join(str(item) for item in rshift)
-    vshift_str = ",".join(str(item) for item in vshift)
-
-    command = f"snapshift in={filename} out={outfile} rshift={rshift_str} vshift={vshift_str} | tee snapshift_log 2>&1"
-
-    print(f"Running:\n\t{command}\n")
-    subprocess.check_call(command, shell=True)
-
-
-def test_shift(
-    filename: Union[str, Path],
-    outfile: Union[str, Path],
-    rshift: Union[tuple[float, float, float], Annotated[list[float], 3]],
-    vshift: Union[tuple[float, float, float], Annotated[list[float], 3]],
-):
-    coords_before = agama.readSnapshot(filename)  # tuple of (xv[N, 6], m[N,])
-    coords_after = agama.readSnapshot(outfile)
-
-    assert np.allclose(
-        coords_before[0][:, :3], coords_after[0][:, :3] - np.array(rshift), atol=5e-6
-    )  # positions
-    assert np.allclose(
-        coords_before[0][:, 3:], coords_after[0][:, 3:] - np.array(vshift), atol=5e-6
-    )  # velocities
-
+from utils.general import compute_gyrfalcon_parameters
+from utils.transform_snap import scale_snapshot
+from utils.transform_snap import shift_snapshot
+from utils.transform_snap import test_scale
+from utils.transform_snap import test_shift
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Transform snapshot: change units (pc -> kpc) and shift snapshot data."
+        description="Preprocess snapshot: change units (pc -> kpc) and shift snapshot data. "
+        "Optional: add point source of field."
     )
     parser.add_argument(
         "--nemo-file",
@@ -180,7 +108,7 @@ if __name__ == "__main__":
     (N,) = masses.shape
 
     # Compute `eps`, `kmax` and dynamical time for gyrFalcON evolution in N-body units
-    r_nbody = args.plummer_r / 1000  # in kpcs
+    r_nbody = args.plummer_r * r_scale  # in kpcs
     m_nbody = np.sum(masses)
     phi0 = -m_nbody * Grav / r_nbody  # Plummer potential at zero
 
