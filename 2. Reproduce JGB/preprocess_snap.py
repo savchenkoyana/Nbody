@@ -132,7 +132,10 @@ if __name__ == "__main__":
 
     # Add point source of field (optional)
     if args.add_point_source:
-        snapshot_central_mass = args.nemo_file.replace(".nemo", "_potential.nemo")
+        snapshot_central_mass = args.nemo_file.replace(".nemo", "_cm.nemo")
+        snapshot_with_potential = args.nemo_file.replace(
+            ".nemo", "_with_potential.nemo"
+        )
 
         create_center_mass_snapshot(
             filename=snapshot_central_mass,
@@ -159,6 +162,7 @@ if __name__ == "__main__":
     input_snap_file = (
         snapshot_with_potential if args.add_point_source else snapshot_shifted
     )
+
     out_snap_file = filename.parent / "out_pot.nemo"
 
     print("*" * 10, "Transformation finished!", "*" * 10)
