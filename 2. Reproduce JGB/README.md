@@ -83,7 +83,7 @@ Here I use Milky Way potential created with `Agama` scripts and based on the ana
 
   This script will perform the transformations of data as well as printing new parameters for `gyrFalcON` (note that they change because we change units). The resulting snapshot will be stored in `<DIRNAME>/IC_scaled_shifted.nemo`.
 
-  To reproduce [the official example](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_nbody_simulation.py) from `Agama` repository, use these shifts: `--r-shift 2 0 0 --v-shift 0 -100 50`.
+  To reproduce [the official example](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_nbody_simulation.py) from `Agama` repository, use these shifts: `--r-shift 2 0 0 --v-shift 0 -100 50` and `--r 10`.
 
 - Run evolution in external potential created using Agama:
 
@@ -104,6 +104,13 @@ JGB writes:
 The easiest way to implement the motion in this potential is to add a new particle representing the central mass to the existing snapshot with PBH cluster data:
 
 ```shell
+python preprocess_snap.py \
+  --nemo-file `DIRNAME`/IC.nemo \
+  --r 10 \
+  --r-shift 34 0 0 \
+  --v-shift 0 -74.35014 0 \
+  --add-point-source \
+  --source-mass 4.37e10
 ```
 
 # Explore results

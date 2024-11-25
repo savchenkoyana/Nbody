@@ -7,9 +7,9 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from create_ic import check_parameters
-from create_ic import create_argparse
-from create_ic import mass_pdf
+from utils.general import check_parameters
+from utils.general import create_argparse
+from utils.general import mass_pdf
 
 
 def mass_spectrum_by_snap(
