@@ -68,7 +68,7 @@ Here I use Milky Way potential created with `Agama` scripts and based on the ana
   cd -
   ```
 
-  This command creates files `MWPotentialHunter24_*.ini` into `Nbody/agama/py` directory. Note that snapshot units and units used to create these potentials differ, so before using them we need to scale snapshot data so that units match.
+  This command creates files `MWPotentialHunter24_*.ini` into `Nbody/agama/py` directory. Note that snapshot units (`length = 1 pc`) and units used to create these potentials (`length = 1 kpc`) differ, so before using them we need to scale snapshot data so that units match.
 
 - Transform snapshot data before evolution in an external potential. This transformation includes:
 
@@ -85,13 +85,15 @@ Here I use Milky Way potential created with `Agama` scripts and based on the ana
 
   To reproduce [the official example](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_nbody_simulation.py) from `Agama` repository, use these shifts: `--r-shift 2 0 0 --v-shift 0 -100 50`.
 
-- Run evolution:
+- Run evolution in external potential created using Agama:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/IC_scaled_shifted.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../Agama/py/MWPotentialHunter24_rotating.ini
+  gyrfalcON in=<DIRNAME>/IC_scaled_shifted.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../Agama/py/MWPotentialHunter24_rotating.ini accpars=<omega>,<Grav>
   ```
 
-  We recommend to use parameters provided by `preprocess_snap.py` script for `gyrFalcON`.
+  > By default it is assumed that `Agama` potential (`INI` file) uses N-body units (G = 1). To use `Agama` potential created using another units, you need to provide gravity constant into `accpars`.
+
+  We recommend to use parameters provided by `preprocess_snap.py` script for `gyrFalcON` (you can change `tstop` according to your needs). `<omega>` parameter denotes the frequency of rotation of the potential around z axis and is usually equal to 0.
 
 ### Point mass potential
 
