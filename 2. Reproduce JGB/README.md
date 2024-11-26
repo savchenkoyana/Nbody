@@ -91,9 +91,9 @@ Here I use Milky Way potential created with `Agama` scripts and based on the ana
   gyrfalcON in=<DIRNAME>/IC_scaled_shifted.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../Agama/py/MWPotentialHunter24_rotating.ini accpars=<omega>,<Grav>
   ```
 
-  > By default it is assumed that `Agama` potential (`INI` file) uses N-body units (G = 1). To use `Agama` potential created using another units, you need to provide gravity constant into `accpars`.
+  A set of recommended parameters for `gyrFalcON` is provided by `preprocess_snap.py` script at the end of its output (you can change `tstop` according to your needs). `<omega>` parameter in the command above denotes the frequency of rotation of the potential around z axis and is usually equal to 0.
 
-  We recommend to use parameters provided by `preprocess_snap.py` script for `gyrFalcON` (you can change `tstop` according to your needs). `<omega>` parameter denotes the frequency of rotation of the potential around z axis and is usually equal to 0.
+  > By default it is assumed that `Agama` potential (`INI` file) uses N-body units (G = 1). To use `Agama` potential created using another units, you need to provide gravity constant into `accpars`.
 
 ### Point mass potential
 
@@ -101,43 +101,65 @@ JGB writes:
 
 > Clusters are themselves immersed in a central gravitational potential with orbital radius $R_c$ = 34 kpc and central mass $M = 4.37 × 10^{10} M\_{☉}$ throughout the entire evolution. This is just a point mass approximation which leads to a circular movement of period T = 2.81 Gyr
 
-The easiest way to implement the motion in this potential is to add a new particle representing the central mass to the existing snapshot with PBH cluster data:
+- The easiest way to create this potential is to add a new particle representing the central mass to the existing snapshot with PBH cluster data:
 
-```shell
-python preprocess_snap.py \
-  --nemo-file `DIRNAME`/IC.nemo \
-  --r 10 \
-  --r-shift 34 0 0 \
-  --v-shift 0 -74.35014 0 \
-  --add-point-source \
-  --source-mass 4.37e10
-```
+  ```shell
+  python preprocess_snap.py \
+    --nemo-file `DIRNAME`/IC.nemo \
+    --r 10 \
+    --r-shift 34 0 0 \
+    --v-shift 0 -74.35014 0 \
+    --add-point-source \
+    --source-mass 4.37e10
+  ```
+
+  After this step, you will get a new file `<DIRNAME>/IC_with_potential.nemo` with the old data concatenated with the new data (a steady point of mass $4.37\\times10^{10} M\_\\odot$ at $(0, 0, 0)$).
+
+- Run evolution in this external potential:
+
+  ```shell
+  gyrfalcON in=<DIRNAME>/IC_with_potential.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
+  ```
+
+  A set of recommended parameters for `gyrFalcON` is provided by `preprocess_snap.py` script at the end of its output.
 
 # Explore results
 
-- Visualize cluster evolution:
+## Visualize cluster evolution
 
-  ```shell
-  snapplot3 <DIRNAME>/out.nemo
-  ```
+To visualize cluster evolution, run:
 
-  There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
+```shell
+snapplot3 <DIRNAME>/out.nemo
+```
 
-- Plot mass density $$\\rho(r)$$ for the resulting snapshot and compare with initial density:
+Use these options for customization:
 
-  ```shell
-  python plot_snap_density.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
-  ```
+```shell
+snapplot <DIRNAME>/out.nemo xrange=<xmin>:<xmax> yrange=<ymin>:<ymax> times=<tmin>:<tmax>
+```
 
-  `<t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
-  E.g., `0.0 1.0 2.0`.
+There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
 
-  When you evolve a cluster in its own gravitational field, the final density should look like the initial density. This indicates that your model is truly self-consistent.
+## Plot mass density $$\\rho(r)$$
 
-- Compute and plot mass spectrum for a given snapshot along with the original distribution function:
+Plot mass density $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
 
-  ```shell
-  python plot_mass_spectrum.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
-  ```
+```shell
+python plot_snap_density.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+```
 
-  The resulting histogram (mass distribution from snapshot) and the line plot (original pdf) should look like a log-normal distribution with your parameters. You can compare your results with the picture at the beginning of this README document.
+`<t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
+E.g., `0.0 1.0 2.0`.
+
+When you evolve a cluster in its own gravitational field, the final density should look like the initial density. This indicates that your model is truly self-consistent.
+
+## Plot mass spectrum
+
+Compute and plot mass spectrum for a given snapshot along with the original distribution function:
+
+```shell
+python plot_mass_spectrum.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+```
+
+The resulting histogram (mass distribution from snapshot) and the line plot (original pdf) should look like a log-normal distribution with your parameters. You can compare your results with the picture at the beginning of this README document.

@@ -138,7 +138,7 @@ if __name__ == "__main__":
         )
 
         create_center_mass_snapshot(
-            filename=snapshot_central_mass,
+            outfile=snapshot_central_mass,
             mass=args.source_mass,
         )
         if args.test:

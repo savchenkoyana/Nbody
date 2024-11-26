@@ -120,8 +120,8 @@ def test_center_mass_snapshot(
 ):
     xv, m = agama.readSnapshot(filename)  # tuple of (xv[1, 6], m[1,])
 
-    assert xv == np.zeros((1, 6))
-    assert m == np.array([mass])
+    assert np.allclose(xv, np.zeros_like(xv))
+    assert np.allclose(m, mass)
 
 
 def test_stack(
@@ -133,5 +133,5 @@ def test_stack(
     xv2, m2 = agama.readSnapshot(filename2)
     xv, m = agama.readSnapshot(outfile)
 
-    assert np.concatenate(xv1, xv2) == xv
-    assert np.concatenate(m1, m2) == m
+    assert np.allclose(np.concatenate((xv1, xv2)), xv)
+    assert np.allclose(np.concatenate((m1, m2)), m)
