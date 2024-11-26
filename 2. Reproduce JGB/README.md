@@ -113,7 +113,7 @@ JGB writes:
     --source-mass 4.37e10
   ```
 
-  After this step, you will get a new file `<DIRNAME>/IC_with_potential.nemo` with the old data concatenated with the new data (a steady point of mass $4.37\\times10^{10} M\_\\odot$ at $(0, 0, 0)$).
+  After this step, you will get a new file `<DIRNAME>/IC_with_potential.nemo` with the old data concatenated with the new data (a steady point of mass $4.37\\times10^{10} M\_\\odot$ at (0, 0, 0)).
 
 - Run evolution in this external potential:
 
@@ -127,21 +127,23 @@ JGB writes:
 
 ## Visualize cluster evolution
 
-To visualize cluster evolution, run:
+- To visualize cluster evolution, run:
 
-```shell
-snapplot3 <DIRNAME>/out.nemo
-```
+  ```shell
+  snapplot3 <DIRNAME>/out.nemo
+  ```
 
-Use these options for customization:
+  Use these options for customization:
 
-```shell
-snapplot <DIRNAME>/out.nemo xrange=<xmin>:<xmax> yrange=<ymin>:<ymax> times=<tmin>:<tmax>
-```
+  ```shell
+  snapplot <DIRNAME>/out.nemo xrange=<xmin>:<xmax> yrange=<ymin>:<ymax> times=<tmin>:<tmax>
+  ```
 
-There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
+- There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
 
 ## Plot mass density $$\\rho(r)$$
+
+### For evolution without external potential
 
 Plot mass density $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
 
@@ -154,7 +156,13 @@ E.g., `0.0 1.0 2.0`.
 
 When you evolve a cluster in its own gravitational field, the final density should look like the initial density. This indicates that your model is truly self-consistent.
 
+### For evolution with external potential
+
+TODO: implement
+
 ## Plot mass spectrum
+
+### For evolution without external potential
 
 Compute and plot mass spectrum for a given snapshot along with the original distribution function:
 
@@ -163,3 +171,7 @@ python plot_mass_spectrum.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ..
 ```
 
 The resulting histogram (mass distribution from snapshot) and the line plot (original pdf) should look like a log-normal distribution with your parameters. You can compare your results with the picture at the beginning of this README document.
+
+### For evolution with external potential
+
+TODO: implement
