@@ -6,14 +6,14 @@ from pathlib import Path
 import agama
 import numpy as np
 from utils.general import compute_gyrfalcon_parameters
-from utils.transform_snap import create_center_mass_snapshot
-from utils.transform_snap import scale_snapshot
-from utils.transform_snap import shift_snapshot
-from utils.transform_snap import stack_snapshot
-from utils.transform_snap import test_center_mass_snapshot
-from utils.transform_snap import test_scale
-from utils.transform_snap import test_shift
-from utils.transform_snap import test_stack
+from utils.snap import create_center_mass_snapshot
+from utils.snap import scale_snapshot
+from utils.snap import shift_snapshot
+from utils.snap import stack_snapshot
+from utils.snap import test_center_mass_snapshot
+from utils.snap import test_scale
+from utils.snap import test_shift
+from utils.snap import test_stack
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

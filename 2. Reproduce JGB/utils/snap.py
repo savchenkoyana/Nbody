@@ -1,4 +1,5 @@
-"""Scripts for snapshot transformations."""
+"""Scripts for snapshot transformations and other manipulations with
+snapshots."""
 
 import os
 import subprocess
@@ -10,9 +11,10 @@ import agama
 import numpy as np
 
 
-def remove(file):
+def remove(file, do_print=True):
     if os.path.exists(file):
-        print(f"{file} already exists! removing...")
+        if do_print:
+            print(f"{file} already exists! removing...")
         os.remove(file)
 
 
@@ -135,3 +137,37 @@ def test_stack(
 
     assert np.allclose(np.concatenate((xv1, xv2)), xv)
     assert np.allclose(np.concatenate((m1, m2)), m)
+
+
+def parse_nemo(
+    filename: Union[str, os.PathLike, Path],
+    t: Union[float, str],
+) -> np.array:
+    """Get a np.array with particles for a given NEMO snapshot and time."""
+    filename = str(filename)
+
+    snapfile = filename.replace(".nemo", f"{t}.txt")
+
+    if os.path.exists(snapfile):
+        os.remove(snapfile)
+
+    command = f"s2a in={filename} out={snapfile} times={t}"
+    subprocess.check_call(command, shell=True)
+
+    return np.loadtxt(snapfile).T
+
+
+def profile_by_snap(
+    filename: Union[str, os.PathLike, Path],
+    t: Union[float, str],
+) -> np.array:
+    """Get a np.array with density profile for a given snapshot and time."""
+    filename = str(filename)
+    manipfile = filename.replace(".nemo", "_sphereprof") + str(t)
+
+    remove(manipfile, do_print=False)
+
+    command = f'manipulate in={filename} out=. manipname=sphereprof manippars="" manipfile={manipfile} times={t} | tee sphereprof_log 2>&1'
+    subprocess.check_call(command, shell=True)
+
+    return np.loadtxt(manipfile).T

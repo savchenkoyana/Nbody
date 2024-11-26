@@ -141,14 +141,14 @@ JGB writes:
 
 - There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
 
-## Plot mass density $$\\rho(r)$$
+## Plot density profile $$\\rho(r)$$
 
 ### For evolution without external potential
 
-Plot mass density $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
+Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
 
 ```shell
-python plot_snap_density.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+python plot_density_profile.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
 `<t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.

@@ -1,8 +1,5 @@
 """Plot density for a given NEMO snapshot."""
 
-import os
-import subprocess
-import typing
 from pathlib import Path
 
 import agama
@@ -12,28 +9,11 @@ from utils.general import check_parameters
 from utils.general import compute_mean_mass
 from utils.general import create_argparse
 from utils.general import set_units
-
-
-def profile_by_snap(
-    filename: typing.Union[str, os.PathLike, Path],
-    t: typing.Union[float, str],
-) -> np.array:
-    """Get a np.array with density profile for a given snapshot and time."""
-    filename = str(filename)
-    manipfile = filename.replace(".nemo", "_sphereprof") + str(t)
-
-    if os.path.exists(manipfile):
-        os.remove(manipfile)
-
-    command = f'manipulate in={filename} out=. manipname=sphereprof manippars="" manipfile={manipfile} times={t} | tee sphereprof_log 2>&1'
-    subprocess.check_call(command, shell=True)
-
-    return np.loadtxt(manipfile).T
-
+from utils.snap import profile_by_snap
 
 if __name__ == "__main__":
     parser = create_argparse(
-        description="This program plots mass density for a given snapshot"
+        description="This program plots density profile for a given snapshot"
     )
     parser.add_argument(
         "--nemo-file",
@@ -83,12 +63,9 @@ if __name__ == "__main__":
     plt.yscale("log")
 
     for t in args.times:
-        prof = profile_by_snap(
-            filename=filename,
-            t=t,
-        )
-        x, y = prof[0], prof[1]
-        plt.plot(x, y, label=f"prof_{t}")
+        prof = profile_by_snap(filename=filename, t=t)
+        r_prof, rho_prof = prof[0], prof[1]
+        plt.plot(r_prof, rho_prof, label=f"prof_{t}")
 
     plt.legend()
     plt.show()
