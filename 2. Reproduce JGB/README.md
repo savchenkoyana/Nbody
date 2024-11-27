@@ -88,7 +88,7 @@ Here I use Milky Way potential created with `Agama` scripts and based on the ana
 - Run evolution in external potential created using Agama:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/IC_scaled_shifted.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../Agama/py/MWPotentialHunter24_rotating.ini accpars=<omega>,<Grav>
+  gyrfalcON in=<DIRNAME>/IC_preprocessed.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300 accname=agama accfile=../Agama/py/MWPotentialHunter24_rotating.ini accpars=<omega>,<Grav>
   ```
 
   A set of recommended parameters for `gyrFalcON` is provided by `preprocess_snap.py` script at the end of its output (you can change `tstop` according to your needs). `<omega>` parameter in the command above denotes the frequency of rotation of the potential around z axis and is usually equal to 0.
@@ -113,12 +113,12 @@ JGB writes:
     --source-mass 4.37e10
   ```
 
-  After this step, you will get a new file `<DIRNAME>/IC_with_potential.nemo` with the old data concatenated with the new data (a steady point of mass $4.37\\times10^{10} M\_\\odot$ at (0, 0, 0)).
+  After this step, you will get a new file `<DIRNAME>/IC_preprocessed.nemo` with the old data concatenated with the new data (a steady point of mass $4.37\\times10^{10} M\_\\odot$ at (0, 0, 0)).
 
 - Run evolution in this external potential:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/IC_with_potential.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
+  gyrfalcON in=<DIRNAME>/IC_preprocessed.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
   ```
 
   A set of recommended parameters for `gyrFalcON` is provided by `preprocess_snap.py` script at the end of its output.

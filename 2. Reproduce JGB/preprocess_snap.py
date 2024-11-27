@@ -6,14 +6,6 @@ from pathlib import Path
 import agama
 import numpy as np
 from utils.general import compute_gyrfalcon_parameters
-from utils.snap import create_center_mass_snapshot
-from utils.snap import scale_snapshot
-from utils.snap import shift_snapshot
-from utils.snap import stack_snapshot
-from utils.snap import test_center_mass_snapshot
-from utils.snap import test_scale
-from utils.snap import test_shift
-from utils.snap import test_stack
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -59,17 +51,16 @@ if __name__ == "__main__":
         default=4.37 * 10**10,
         help="Mass of point source of gravitational field (is solar masses). Default: 4.37x10^10",
     )
-    parser.add_argument(
-        "--test",
-        action="store_true",
-        help="Whether to test snapshot conversion for correctness",
-    )
     args = parser.parse_args()
 
     # Sanity checks
     if args.plummer_r <= 0:
         raise RuntimeError(
             f"Plummer radius should be positive, got r={args.plummer_r} pc"
+        )
+    if args.source_mass <= 0:
+        raise RuntimeError(
+            f"Source mass should be positive, got {args.source_mass} Msun"
         )
 
     filename = Path(args.nemo_file)
@@ -82,45 +73,16 @@ if __name__ == "__main__":
 
     # Define scaling coefficients
     r_scale = 1e-3  # pc -> kpc
-    v_scale = 1.0
-    m_scale = 1.0
 
-    # Transform snapshot
-    snapshot_scaled = args.nemo_file.replace(".nemo", "_scaled.nemo")
-    snapshot_shifted = snapshot_scaled.replace(".nemo", "_shifted.nemo")
+    xv, masses = agama.readSnapshot(args.nemo_file)  # Shapes: [N, 6] and [N,]
 
-    scale_snapshot(
-        filename=args.nemo_file,
-        outfile=snapshot_scaled,
-        rscale=r_scale,
-        vscale=v_scale,
-        mscale=m_scale,
-    )
-    if args.test:
-        test_scale(
-            filename=args.nemo_file,
-            outfile=snapshot_scaled,
-            rscale=r_scale,
-            vscale=v_scale,
-            mscale=m_scale,
-        )
+    # Scale snapshot
+    xv[:, :3] *= r_scale
 
-    shift_snapshot(
-        filename=snapshot_scaled,
-        outfile=snapshot_shifted,
-        rshift=args.r_shift,
-        vshift=args.v_shift,
-    )
-    if args.test:
-        test_shift(
-            filename=snapshot_scaled,
-            outfile=snapshot_shifted,
-            rshift=args.r_shift,
-            vshift=args.v_shift,
-        )
+    # Shift snapshot
+    xv += np.array([*args.r_shift, *args.v_shift], dtype=np.float32)
 
-    # Read nemo file to get the number of particles
-    xv, masses = agama.readSnapshot(args.nemo_file)
+    # Get the number of particles
     (N,) = masses.shape
 
     # Compute `eps`, `kmax` and dynamical time for gyrFalcON evolution in N-body units
@@ -132,42 +94,18 @@ if __name__ == "__main__":
 
     # Add point source of field (optional)
     if args.add_point_source:
-        snapshot_central_mass = args.nemo_file.replace(".nemo", "_cm.nemo")
-        snapshot_with_potential = args.nemo_file.replace(
-            ".nemo", "_with_potential.nemo"
-        )
+        xv = np.concatenate((xv, np.zeros((1, 6))))
+        masses = np.concatenate((masses, np.array([args.source_mass])))
 
-        create_center_mass_snapshot(
-            outfile=snapshot_central_mass,
-            mass=args.source_mass,
-        )
-        if args.test:
-            test_center_mass_snapshot(
-                filename=snapshot_central_mass,
-                mass=args.source_mass,
-            )
+    snap = (xv, masses)
+    in_snap_file = args.nemo_file.replace(".nemo", "_preprocessed.nemo")
+    out_snap_file = filename.parent / "out.nemo"
 
-        stack_snapshot(
-            filename1=snapshot_shifted,
-            filename2=snapshot_central_mass,
-            outfile=snapshot_with_potential,
-        )
-        if args.test:
-            test_stack(
-                filename1=snapshot_shifted,
-                filename2=snapshot_central_mass,
-                outfile=snapshot_with_potential,
-            )
-
-    input_snap_file = (
-        snapshot_with_potential if args.add_point_source else snapshot_shifted
-    )
-
-    out_snap_file = filename.parent / "out_pot.nemo"
+    agama.writeSnapshot(in_snap_file, snap, "nemo")
 
     print("*" * 10, "Transformation finished!", "*" * 10)
     print("Run this to start cluster evolution in N-body units for 1 dynamical time:")
     print(
-        f"\tgyrfalcON {input_snap_file} {out_snap_file} logstep=300 "
+        f"\tgyrfalcON {in_snap_file} {out_snap_file} logstep=300 "
         f"eps={eps} kmax={kmax} tstop={t_dyn} step={t_dyn / 100} Grav={Grav}"
     )
