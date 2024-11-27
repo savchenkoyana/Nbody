@@ -22,6 +22,16 @@ if __name__ == "__main__":
         help="Nemo file used for density profile computation",
     )
     parser.add_argument(
+        "--proj-vector",
+        type=float,
+        nargs=3,
+        default=[0, 0, 0],
+        help="This vector is used for density profile calculations. "
+        "If proj_vector contains only zeros, the script ignores it and calculates spherically symmetric density using NEMO's 'sphereprof'. "
+        "Otherwise the script calculates projected density using the vector as a line of sight (see NEMO's 'projprof'). "
+        "Default: [0, 0, 0]",
+    )
+    parser.add_argument(
         "--times",
         nargs="+",
         type=float,
@@ -45,6 +55,9 @@ if __name__ == "__main__":
     )
     m_tot = args.N * mass_math_expectation
 
+    # Compute proj_vector for plotting the density
+    proj_vector = None if not np.any(args.proj_vector) else args.proj_vector
+
     # Plot original density
     r = np.logspace(0, 2)
     xyz = np.vstack((r, r * 0, r * 0)).T
@@ -55,7 +68,12 @@ if __name__ == "__main__":
         scaleRadius=args.plummer_r,
     )
 
-    plt.plot(r, potential.density(xyz), linestyle="dotted", label="original density")
+    if proj_vector is None:
+        plt.plot(
+            r, potential.density(xyz), linestyle="dotted", label="original density"
+        )
+    else:
+        pass  # TODO: implement
 
     plt.xlabel("r")
     plt.ylabel(r"$\rho$")
@@ -63,8 +81,9 @@ if __name__ == "__main__":
     plt.yscale("log")
 
     for t in args.times:
-        prof = profile_by_snap(filename=filename, t=t)
+        prof = profile_by_snap(filename=filename, t=t, projvector=proj_vector)
         r_prof, rho_prof = prof[0], prof[1]
+
         plt.plot(r_prof, rho_prof, label=f"prof_{t}")
 
     plt.legend()
