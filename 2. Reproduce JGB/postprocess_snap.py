@@ -1,4 +1,4 @@
-"""Postprocess snapshot: remove source of filed (optional), shift snapshot data to center of mass and then change units (kpc -> pc)."""
+"""Postprocess snapshot: remove source of filed (optional), change length units (optional) and shift snapshot data to the center of mass."""
 
 import os
 from pathlib import Path
@@ -15,11 +15,12 @@ def postprocess(
     t: Union[float, str],
     remove_point_source: bool = False,
     source_mass: float = 4.37 * 10**10,
+    r_scale: float = 1.0,
     output_file: Optional[str] = None,
 ):
     """
-    Postprocess snapshot: remove source of filed (optional), shift snapshot data
-    to center of mass and then change units (kpc -> pc).
+    Postprocess snapshot: remove source of filed (optional), change lenght units (optional)
+    and shift snapshot data to the center of mass.
     """
     # Sanity checks
     if not Path(filename).exists():
@@ -39,6 +40,9 @@ def postprocess(
 
         xv, masses = xv[:-1], masses[:-1]
 
+    # Scale snapshot
+    xv[:, :3] *= r_scale
+
     # Calculate center of mass
     m_tot = np.sum(masses)
     xv_cm = np.sum(xv * masses.reshape((-1, 1)), axis=0) / m_tot
@@ -46,11 +50,6 @@ def postprocess(
     # Move to center of mass
     xv = xv - xv_cm
 
-    # Define scaling coefficients
-    r_scale = 1e3  # kpc -> pc
-
-    # Scale snapshot
-    xv[:, :3] *= r_scale
     snap = (xv, masses)
 
     if output_file is not None:

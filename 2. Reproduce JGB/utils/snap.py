@@ -5,10 +5,18 @@ import os
 import subprocess
 from pathlib import Path
 from typing import Annotated
+from typing import Literal
 from typing import Optional
 from typing import Union
 
 import numpy as np
+
+_PROJ_VECTOR_TYPE = Union[
+    tuple[float, float, float],
+    Annotated[list[float], 3],
+    np.ndarray[tuple[Literal[3]], np.dtype[np.float32]],
+    np.ndarray[tuple[Literal[3]], np.dtype[np.float64]],
+]
 
 
 def remove(file, do_print=True):
@@ -39,9 +47,7 @@ def parse_nemo(
 def profile_by_snap(
     filename: Union[str, os.PathLike, Path],
     t: Union[float, str],
-    projvector: Optional[
-        Union[tuple[float, float, float], Annotated[list[float], 3]]
-    ] = None,
+    projvector: Optional[_PROJ_VECTOR_TYPE] = None,
 ) -> np.array:
     """Get a np.array with density profile for a given snapshot and time.
 
@@ -51,14 +57,18 @@ def profile_by_snap(
         the name of NEMO snapshot file
     t : Union[float, str]
         which time point in snapshot to use for profile calculations
-    projvector : Optional[Union[tuple[float, float, float], Annotated[list[float], 3]]]
-        If the vector contains only zeros, spherically symmetric density is computed using 'sphereprof'.
-        Otherwise calculates the projected density using the vector as a line of sight (see NEMO's 'projprof').
+    projvector :
+        List, tuple or np.ndarray of size 3 with float numbers.
+        If `projvector` is None, spherically symmetric density is computed using 'sphereprof'.
+        Otherwise computes the projected density using `projvector` as a line-of-sight vector (see NEMO's 'projprof').
     Returns
     -------
-    np.array, the first row of which is distance and the second row is density
+    np.ndarray, the first row of which is distance and the second row is density
     """
-    print("DEbug", projvector)
+    print("projvector = ", projvector)
+    if projvector and len(projvector) != 3:  # TODO: check dtype too
+        raise RuntimeError(f"`projvector` should have len == 3, got {projvector}")
+
     manipname = "sphereprof" if not projvector else "projprof"
     print(f"Using manipulator {manipname}")
 
