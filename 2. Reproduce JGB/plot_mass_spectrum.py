@@ -36,13 +36,13 @@ if __name__ == "__main__":
     save_dir = filename.absolute().parent
 
     # Plot original spectrum
-    r = np.logspace(-2, 2)
-    plt.plot(r, mass_pdf(r, mu=args.mu, scale=args.scale, sigma=args.sigma))
+    m = np.logspace(-2, 2)
+    plt.plot(m, mass_pdf(m, mu=args.mu, scale=args.scale, sigma=args.sigma))
 
     for t in args.times:
         masses = parse_nemo(filename=filename, t=t)[0]
 
-        (counts, bins) = np.histogram(masses, bins=r, density=True)
+        (counts, bins) = np.histogram(masses, bins=m, density=True)
         plt.hist(bins[:-1], bins, weights=counts, label=f"prof_{t}", histtype="step")
 
     plt.xscale("log")

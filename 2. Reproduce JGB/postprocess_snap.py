@@ -1,53 +1,41 @@
 """Postprocess snapshot: remove source of filed (optional), shift snapshot data to center of mass and then change units (kpc -> pc)."""
 
-import argparse
+import os
 from pathlib import Path
+from typing import Optional
+from typing import Union
 
 import agama
 import numpy as np
-from utils.general import set_units
+from utils.snap import parse_nemo
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Postprocess snapshot: remove source of filed (optional), shift snapshot data "
-        "to center of mass and then change units (kpc -> pc)."
-    )
-    parser.add_argument(
-        "--nemo-file",
-        type=str,
-        required=True,
-        help="Snapshot file in nemo format",
-    )
-    parser.add_argument(
-        "--remove-point-source",
-        action="store_true",
-        help="Whether to remove a steady point source of gravity at the center of coordinates.",
-    )
-    parser.add_argument(
-        "--source-mass",
-        type=float,
-        default=4.37 * 10**10,
-        help="Mass of point source of gravitational field (is solar masses). Default: 4.37x10^10",
-    )
-    args = parser.parse_args()
 
+def postprocess(
+    filename: Union[str, os.PathLike, Path],
+    t: Union[float, str],
+    remove_point_source: bool = False,
+    source_mass: float = 4.37 * 10**10,
+    output_file: Optional[str] = None,
+):
+    """
+    Postprocess snapshot: remove source of filed (optional), shift snapshot data
+    to center of mass and then change units (kpc -> pc).
+    """
     # Sanity checks
-    filename = Path(args.nemo_file)
-    if not filename.exists():
+    if not Path(filename).exists():
         raise RuntimeError(f"filename {filename} does not exist")
-    if args.source_mass <= 0:
-        raise RuntimeError(
-            f"Source mass should be positive, got {args.source_mass} Msun"
-        )
+    if source_mass <= 0:
+        raise RuntimeError(f"Source mass should be positive, got {source_mass} Msun")
 
-    set_units()
-
-    xv, masses = agama.readSnapshot(args.nemo_file)  # Shapes: [N, 6] and [N,]
+    mpv = parse_nemo(
+        filename, t=t, transpose=False
+    )  # np.array with rows: mass, pos, vel; shape [N, 7]
+    xv, masses = mpv[:, 1:], mpv[:, 0]
 
     # Remove source mass (optional)
-    if args.remove_point_source:
-        assert np.allclose(xv[-1], np.zeros((1, 6)))
-        assert np.isclose(masses[-1], args.source_mass)
+    if remove_point_source:
+        assert np.allclose(xv[-1], np.zeros((1, 6)), atol=1e-7), xv[-1]
+        assert np.isclose(masses[-1], source_mass), masses[-1]
 
         xv, masses = xv[:-1], masses[:-1]
 
@@ -63,8 +51,9 @@ if __name__ == "__main__":
 
     # Scale snapshot
     xv[:, :3] *= r_scale
-
-    # Save
     snap = (xv, masses)
-    snap_file = args.nemo_file.replace(".nemo", "_postprocessed.nemo")
-    agama.writeSnapshot(snap_file, snap, "nemo")
+
+    if output_file is not None:
+        agama.writeSnapshot(output_file, particles=snap, format="nemo")
+
+    return snap, xv_cm
