@@ -1,45 +1,37 @@
 """Plot density for a given NEMO snapshot."""
 
-import os
-import subprocess
-import typing
 from pathlib import Path
 
 import agama
 import matplotlib.pyplot as plt
 import numpy as np
-from create_ic import check_parameters
-from create_ic import compute_mean_mass
-from create_ic import create_argparse
-from create_ic import set_units
-
-
-def profile_by_snap(
-    filename: typing.Union[str, os.PathLike, Path],
-    t: typing.Union[float, str],
-) -> np.array:
-    """Get a np.array with density profile for a given snapshot and time."""
-    filename = str(filename)
-    manipfile = filename.replace(".nemo", "_sphereprof") + str(t)
-
-    if os.path.exists(manipfile):
-        os.remove(manipfile)
-
-    command = f'manipulate in={filename} out=. manipname=sphereprof manippars="" manipfile={manipfile} times={t} | tee sphereprof_log 2>&1'
-    subprocess.check_call(command, shell=True)
-
-    return np.loadtxt(manipfile).T
-
+from utils.general import check_parameters
+from utils.general import compute_mean_mass
+from utils.general import create_argparse
+from utils.general import set_units
+from utils.snap import profile_by_snap
 
 if __name__ == "__main__":
     parser = create_argparse(
-        description="This program plots mass density for a given snapshot"
+        description="This program plots density profile for a given snapshot"
     )
     parser.add_argument(
         "--nemo-file",
         type=str,
         required=True,
         help="Nemo file used for density profile computation",
+    )
+    parser.add_argument(
+        "--projprof",
+        action="store_true",
+        help="Whether to plot projected density profile ('projprof')."
+        "By default plots spherical density profile 'sphereprof'.",
+    )
+    parser.add_argument(
+        "--proj-vector",
+        type=float,
+        nargs=3,
+        help="Vector for density profile calculations when using '--projprof'.",
     )
     parser.add_argument(
         "--times",
@@ -65,6 +57,11 @@ if __name__ == "__main__":
     )
     m_tot = args.N * mass_math_expectation
 
+    # Compute proj_vector for plotting the density
+    if args.projprof and args.proj_vector is None:
+        raise RuntimeError("--proj-vector should be set when using --projprof!")
+    proj_vector = args.proj_vector if args.projprof else None
+
     # Plot original density
     r = np.logspace(0, 2)
     xyz = np.vstack((r, r * 0, r * 0)).T
@@ -75,7 +72,12 @@ if __name__ == "__main__":
         scaleRadius=args.plummer_r,
     )
 
-    plt.plot(r, potential.density(xyz), linestyle="dotted", label="original density")
+    if proj_vector is None:
+        plt.plot(
+            r, potential.density(xyz), linestyle="dotted", label=r"original $\rho(r)$"
+        )
+    else:
+        pass  # TODO: implement
 
     plt.xlabel("r")
     plt.ylabel(r"$\rho$")
@@ -83,12 +85,10 @@ if __name__ == "__main__":
     plt.yscale("log")
 
     for t in args.times:
-        prof = profile_by_snap(
-            filename=filename,
-            t=t,
-        )
-        x, y = prof[0], prof[1]
-        plt.plot(x, y, label=f"prof_{t}")
+        prof = profile_by_snap(filename=filename, t=t, projvector=proj_vector)
+        r_prof, rho_prof = prof[0], prof[1]
+
+        plt.plot(r_prof, rho_prof, label=f"prof_{t}")
 
     plt.legend()
     plt.show()

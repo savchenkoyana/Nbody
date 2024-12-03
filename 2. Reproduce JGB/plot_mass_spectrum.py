@@ -1,34 +1,13 @@
 """Plot mass spectrum for a given NEMO snapshot."""
 
-import os
-import subprocess
-import typing
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from create_ic import check_parameters
-from create_ic import create_argparse
-from create_ic import mass_pdf
-
-
-def mass_spectrum_by_snap(
-    filename: typing.Union[str, os.PathLike, Path],
-    t: typing.Union[float, str],
-) -> np.array:
-    """Get a np.array with particles for a given snapshot and time."""
-    filename = str(filename)
-
-    snapfile = filename.replace(".nemo", f"{t}.txt")
-
-    if os.path.exists(snapfile):
-        os.remove(snapfile)
-
-    command = f"s2a in={filename} out={snapfile} times={t}"
-    subprocess.check_call(command, shell=True)
-
-    return np.loadtxt(snapfile).T
-
+from utils.general import check_parameters
+from utils.general import create_argparse
+from utils.general import mass_pdf
+from utils.snap import parse_nemo
 
 if __name__ == "__main__":
     parser = create_argparse(
@@ -57,17 +36,15 @@ if __name__ == "__main__":
     save_dir = filename.absolute().parent
 
     # Plot original spectrum
-    r = np.logspace(-2, 2)
-    plt.plot(r, mass_pdf(r, mu=args.mu, scale=args.scale, sigma=args.sigma))
+    m = np.logspace(-2, 2)
+    plt.plot(
+        m, mass_pdf(m, mu=args.mu, scale=args.scale, sigma=args.sigma), label="orig pdf"
+    )
 
     for t in args.times:
-        prof = mass_spectrum_by_snap(
-            filename=filename,
-            t=t,
-        )
-        masses = prof[0]
+        masses = parse_nemo(filename=filename, t=t)[0]
 
-        (counts, bins) = np.histogram(masses, bins=r, density=True)
+        (counts, bins) = np.histogram(masses, bins=m, density=True)
         plt.hist(bins[:-1], bins, weights=counts, label=f"prof_{t}", histtype="step")
 
     plt.xscale("log")
