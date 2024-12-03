@@ -141,37 +141,49 @@ JGB writes:
 
 - There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
 
-## Plot density profile $$\\rho(r)$$
+## Postprocess
 
-### For evolution without external potential
+It would be useful to postprocess your data to plot profiles, spectras, etc.
+
+To postprocess snapshot evolved in Milky Way potential, run:
+
+```shell
+python postprocess.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo
+```
+
+To postprocess snapshot evolved in JGB potential, run:
+
+```shell
+python postprocess.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source
+```
+
+The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored in `<DIRNAME>` folder.
+
+## Plot density profile $$\\rho(r)$$
 
 Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
 
 ```shell
-python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
 `<t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
-E.g., `0.0 1.0 2.0`.
+E.g., `0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
 
-When you evolve a cluster in its own gravitational field, the final density should look like the initial density. This indicates that your model is truly self-consistent.
-
-### For evolution with external potential
-
-TODO: implement
+```shell
+python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
+```
 
 ## Plot mass spectrum
-
-### For evolution without external potential
 
 Compute and plot mass spectrum for a given snapshot along with the original distribution function:
 
 ```shell
-python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
-The resulting histogram (mass distribution from snapshot) and the line plot (original pdf) should look like a log-normal distribution with your parameters. You can compare your results with the picture at the beginning of this README document.
+The mass distribution for your snapshot (the resulting histograms) and original pdf (the line plot) should look like a log-normal distribution with your parameters. You can compare your results with the picture of log-normal distributions at the beginning of this README document.
 
-### For evolution with external potential
+# Test pipeline
 
-TODO: implement
+To test your pipeline, you may evolve a cluster in its own gravitational field (without any potentials). The final density after the evolution should look like the initial density. This indicates that your model is truly self-consistent.
