@@ -4,6 +4,8 @@ mgefit>=6.0.3
 notebook
 numpy==1.26
 pre-commit
+python-unsio
+python-unsiotools
 scipy
 tqdm
 vorbin==3.1.5

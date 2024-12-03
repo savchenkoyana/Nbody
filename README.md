@@ -44,6 +44,8 @@ If installation completed successfully, you should get "TESTSUITE: OK" for each 
 >
 > Alternatively, you might want to add the command above (with the full path to `nemo_start.sh`) at the end of your `.bashrc` file.
 
+For more info about NEMO see [NEMO's user guide](https://bima.astro.umd.edu/nemo/nemo.pdf) and [NEMO's official documentations](https://teuben.github.io/nemo/man_html/whatis.html)
+
 ## Install Agama
 
 Activate conda environment, if it is not activated:

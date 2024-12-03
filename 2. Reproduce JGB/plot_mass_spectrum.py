@@ -37,7 +37,9 @@ if __name__ == "__main__":
 
     # Plot original spectrum
     m = np.logspace(-2, 2)
-    plt.plot(m, mass_pdf(m, mu=args.mu, scale=args.scale, sigma=args.sigma))
+    plt.plot(
+        m, mass_pdf(m, mu=args.mu, scale=args.scale, sigma=args.sigma), label="orig pdf"
+    )
 
     for t in args.times:
         masses = parse_nemo(filename=filename, t=t)[0]

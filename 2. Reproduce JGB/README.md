@@ -148,7 +148,7 @@ JGB writes:
 Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
 
 ```shell
-python plot_density_profile.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
 `<t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
@@ -167,7 +167,7 @@ TODO: implement
 Compute and plot mass spectrum for a given snapshot along with the original distribution function:
 
 ```shell
-python plot_mass_spectrum.py --nemo-file <DIRNAME>/out.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
 The resulting histogram (mass distribution from snapshot) and the line plot (original pdf) should look like a log-normal distribution with your parameters. You can compare your results with the picture at the beginning of this README document.

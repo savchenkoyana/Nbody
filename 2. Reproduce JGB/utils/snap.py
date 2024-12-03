@@ -65,22 +65,33 @@ def profile_by_snap(
     -------
     np.ndarray, the first row of which is distance and the second row is density
     """
-    print("projvector = ", projvector)
     if projvector and len(projvector) != 3:  # TODO: check dtype too
         raise RuntimeError(f"`projvector` should have len == 3, got {projvector}")
 
     manipname = "sphereprof" if not projvector else "projprof"
-    print(f"Using manipulator {manipname}")
 
     filename = str(filename)
     manipfile = filename.replace(".nemo", f"_{manipname}{t}")
     remove(manipfile, do_print=False)
 
-    manippars = '""' if not projvector else ",".join([str(_) for _ in projvector])
-    print(manippars, "manippars")
-    command = f"manipulate in={filename} out=. manipname={manipname} manippars={manippars} manipfile={manipfile} times={t} | tee {manipname}_log 2>&1"
+    manippars = "" if not projvector else ",".join([str(_) for _ in projvector])
+    command = f'manipulate in={filename} out=. manipname=dens_centre+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
     print(command)
 
     subprocess.check_call(command, shell=True)
+
+    # TODO: dummy fix, needs to take care of!
+    with open(manipfile) as f:
+        lines = f.readlines()
+
+    first_timestamp = True
+    with open(manipfile, "w") as f:
+        for line in lines:
+            if line.startswith("#"):
+                if not first_timestamp:
+                    break
+            else:
+                first_timestamp = False
+            f.write(line)
 
     return np.loadtxt(manipfile).T
