@@ -5,6 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from utils.general import check_parameters
 from utils.general import create_argparse
+from utils.plot import create_label
 from utils.snap import lagrange_radius_by_snap
 
 if __name__ == "__main__":
@@ -32,6 +33,8 @@ if __name__ == "__main__":
     if not filename.exists():
         raise RuntimeError(f"filename {filename} does not exist")
     save_dir = filename.absolute().parent
+
+    label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
     for t in args.times:
         snap_t, lagrange_r = lagrange_radius_by_snap(filename, t)
