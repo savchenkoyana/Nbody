@@ -103,7 +103,10 @@ def lagrange_radius_by_snap(
     t: Union[float, str],
     fraction: Union[float, str] = 0.5,
 ) -> np.array:
-    """Compute a lagrange radius for a given snapshot and time.
+    """
+    Compute a lagrange radius for a given snapshot and time.
+    See https://teuben.github.io/nemo/man_html/lagrange_radii.1.html
+    for more info.
 
     Parameters
     ----------

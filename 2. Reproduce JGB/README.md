@@ -4,7 +4,7 @@ This experiment is based on article [Primordial Black Hole clusters, phenomenolo
 
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
 
-![](../images/pic2.png)
+![](../images/log_normal_mass.png)
 
 Mass spectra used in the article.
 
@@ -171,8 +171,10 @@ python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.ne
 E.g., `0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
 
 ```shell
-python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
+python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
 ```
+
+where `<N>` is the desired number of timestamps.
 
 ## Plot mass spectrum
 
@@ -183,6 +185,18 @@ python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
 ```
 
 The mass distribution for your snapshot (the resulting histograms) and original pdf (the line plot) should look like a log-normal distribution with your parameters. You can compare your results with the picture of log-normal distributions at the beginning of this README document.
+
+## Plot Lagrange radius
+
+To plot Lagrange radius at different timestamps, run:
+
+```shell
+python plot_lagrange_radius.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn>
+```
+
+You can compare your results with plots from the article:
+
+![](../images/lagrange_radii.png)
 
 # Test pipeline
 
