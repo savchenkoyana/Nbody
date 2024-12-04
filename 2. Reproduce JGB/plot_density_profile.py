@@ -72,17 +72,18 @@ if __name__ == "__main__":
         scaleRadius=args.plummer_r,
     )
 
-    if proj_vector is None:
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.xlabel("$r, pc$")
+
+    if args.projprof is None:
         plt.plot(
             r, potential.density(xyz), linestyle="dotted", label=r"original $\rho(r)$"
         )
+        plt.ylabel(r"$\rho, M_\odot / pc^3$")
     else:
         pass  # TODO: implement
-
-    plt.xlabel("r")
-    plt.ylabel(r"$\rho$")
-    plt.xscale("log")
-    plt.yscale("log")
+        plt.ylabel(r"$\rho, M_\odot / pc^2$")
 
     for t in args.times:
         prof = profile_by_snap(filename=filename, t=t, projvector=proj_vector)
