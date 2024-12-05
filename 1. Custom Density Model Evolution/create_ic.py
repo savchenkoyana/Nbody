@@ -8,10 +8,9 @@ import sys
 import typing
 from pathlib import Path
 
+import agama
 import matplotlib.pyplot as plt
 import numpy as np
-
-import agama
 
 # choose the best units for this task
 agama.setUnits(
