@@ -42,4 +42,6 @@ if __name__ == "__main__":
 
     plt.xlabel("$t$, 0.978 Gyr")
     plt.ylabel("Lagrange radius, $pc$")
+    plt.legend(title=label)
+    plt.title("Lagrange radii for 50% of mass")
     plt.show()

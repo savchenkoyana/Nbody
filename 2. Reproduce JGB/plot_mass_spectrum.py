@@ -55,5 +55,6 @@ if __name__ == "__main__":
 
     plt.xscale("log")
     plt.xlabel(r"$M, M_\odot$")
-    plt.legend()
+    plt.legend(title=label)
+    plt.title("Mass distribution in cluster")
     plt.show()

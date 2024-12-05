@@ -94,5 +94,9 @@ if __name__ == "__main__":
 
         plt.plot(r_prof, rho_prof, label=f"$t$={t}")
 
-    plt.legend()
+    plt.legend(title=label)
+    if args.projprof:
+        plt.title("Projected density of the cluster")
+    else:
+        plt.title("Spherical density of the cluster")
     plt.show()
