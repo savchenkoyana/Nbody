@@ -75,7 +75,8 @@ def profile_by_snap(
     remove(manipfile, do_print=False)
 
     manippars = "" if not projvector else ",".join([str(_) for _ in projvector])
-    command = f'manipulate in={filename} out=. manipname=dens_centre+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
+    # command = f'manipulate in={filename} out=. manipname=dens_centre+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
+    command = f'manipulate in={filename} out=. manipname=centre_of_mass+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
     print(command)
 
     subprocess.check_call(command, shell=True)
@@ -94,4 +95,41 @@ def profile_by_snap(
                 first_timestamp = False
             f.write(line)
 
+    return np.loadtxt(manipfile).T
+
+
+def lagrange_radius_by_snap(
+    filename: Union[str, os.PathLike, Path],
+    t: Union[float, str],
+    fraction: Union[float, str] = 0.5,
+) -> np.array:
+    """
+    Compute a lagrange radius for a given snapshot and time.
+    See https://teuben.github.io/nemo/man_html/lagrange_radii.1.html
+    for more info.
+
+    Parameters
+    ----------
+    filename : Union[str, os.PathLike, Path]
+        the name of NEMO snapshot file
+    t : Union[float, str]
+        which time point in snapshot to use for profile calculations
+    fraction : Union[float, str]
+        fraction of mass (parameter for lagrange radius evaluation)
+    Returns
+    -------
+    """
+    manipname = "lagrange"
+
+    filename = str(filename)
+    manipfile = filename.replace(".nemo", f"_{manipname}{t}")
+    remove(manipfile, do_print=False)
+
+    # command = f'manipulate in={filename} out=. manipname=dens_centre+{manipname} manippars=";{fraction}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
+    command = f'manipulate in={filename} out=. manipname=centre_of_mass+{manipname} manippars=";{fraction}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
+    print(command)
+
+    subprocess.check_call(command, shell=True)
+
+    # return np.loadtxt(manipfile).T[:, -1]  # TODO: dummy fix, needs to take care of!
     return np.loadtxt(manipfile).T

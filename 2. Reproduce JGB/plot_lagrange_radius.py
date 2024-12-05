@@ -1,14 +1,12 @@
-"""Plot mass spectrum for a given NEMO snapshot."""
+"""Plot lagrange radius for a given NEMO snapshot."""
 
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
-from utils.general import mass_pdf
 from utils.plot import create_label
-from utils.snap import parse_nemo
+from utils.snap import lagrange_radius_by_snap
 
 if __name__ == "__main__":
     parser = create_argparse(
@@ -36,25 +34,14 @@ if __name__ == "__main__":
         raise RuntimeError(f"filename {filename} does not exist")
     save_dir = filename.absolute().parent
 
-    # Plot original spectrum
-    m = np.logspace(-2, 2)
-    plt.plot(
-        m,
-        mass_pdf(m, mu=args.mu, scale=args.scale, sigma=args.sigma),
-        linestyle="dotted",
-        label="orig pdf",
-    )
-
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
     for t in args.times:
-        masses = parse_nemo(filename=filename, t=t)[0]
+        snap_t, lagrange_r = lagrange_radius_by_snap(filename, t)
+        plt.plot(snap_t, lagrange_r, "b.")
 
-        (counts, bins) = np.histogram(masses, bins=m, density=True)
-        plt.hist(bins[:-1], bins, weights=counts, label=f"$t$={t}", histtype="step")
-
-    plt.xscale("log")
-    plt.xlabel(r"$M, M_\odot$")
+    plt.xlabel("$t$, 0.978 Gyr")
+    plt.ylabel("Lagrange radius, $pc$")
     plt.legend(title=label)
-    plt.title("Mass distribution in cluster")
+    plt.title("Lagrange radii for 50% of mass")
     plt.show()

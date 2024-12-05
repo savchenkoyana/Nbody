@@ -5,7 +5,7 @@ This is just a toy example based on [https://arxiv.org/pdf/1807.06590](https://a
 
 We create two separate self-consistent models for black holes and dark matter densities:
 
-![Dark matter density – dashed line, black hole density – dotted line.](../images/pic1.png)
+![Dark matter density – dashed line, black hole density – dotted line.](../images/custom_density_profile.png)
 
 Dark matter density – dashed line, black hole density – dotted line.
 
