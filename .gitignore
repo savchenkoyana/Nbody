@@ -2,3 +2,4 @@ Agama/
 nemo/
 .ipynb_checkpoints/
 */*.nemo
+*/snap_*/

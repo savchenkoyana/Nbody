@@ -9,6 +9,7 @@ from utils.general import check_parameters
 from utils.general import compute_mean_mass
 from utils.general import create_argparse
 from utils.general import set_units
+from utils.plot import create_label
 from utils.snap import profile_by_snap
 
 if __name__ == "__main__":
@@ -72,23 +73,30 @@ if __name__ == "__main__":
         scaleRadius=args.plummer_r,
     )
 
-    if proj_vector is None:
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.xlabel("$r, pc$")
+
+    if args.projprof is None:
         plt.plot(
             r, potential.density(xyz), linestyle="dotted", label=r"original $\rho(r)$"
         )
+        plt.ylabel(r"$\rho, M_\odot / pc^3$")
     else:
         pass  # TODO: implement
+        plt.ylabel(r"$\rho, M_\odot / pc^2$")
 
-    plt.xlabel("r")
-    plt.ylabel(r"$\rho$")
-    plt.xscale("log")
-    plt.yscale("log")
+    label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
     for t in args.times:
         prof = profile_by_snap(filename=filename, t=t, projvector=proj_vector)
         r_prof, rho_prof = prof[0], prof[1]
 
-        plt.plot(r_prof, rho_prof, label=f"prof_{t}")
+        plt.plot(r_prof, rho_prof, label=f"$t$={t}")
 
-    plt.legend()
+    plt.legend(title=label)
+    if args.projprof:
+        plt.title("Projected density of the cluster")
+    else:
+        plt.title("Spherical density of the cluster")
     plt.show()
