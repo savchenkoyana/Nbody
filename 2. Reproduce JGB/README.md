@@ -10,7 +10,7 @@ Mass spectra used in the article.
 
 # How to reproduce
 
-To reproduce the experiment, follow these steps:
+To reproduce the experiment, follow this pipeline:
 
 - Activate the Agama environment:
 
@@ -33,24 +33,30 @@ To reproduce the experiment, follow these steps:
 
   Here `N` is the number of particles in simulation, `MEAN`, `SIGMA`, and `SCALE` are log-normal distribution parameters of PBH mass spectrum, and `PLUMMER_RADIUS` is a characteristic size of Plummer density distribution (type `python create_ic.py --help` for more details).
 
-  The above command will automatically create (or re-create) a directory with name `snap_m<MEAN>_s<SIGMA>_r<PLUMMER_RADIUS>_N<N>` containing file `IC.nemo` with initial coordinates for evolution.
+  The above command will automatically create (or re-create) a directory with name `snap_mu<MEAN>_s<SCALE>_sigma<SIGMA>_r<PLUMMER_RADIUS>_N<N>` containing file `IC.nemo` with initial coordinates for evolution.
 
-  To reproduce the results from the article, use these parameters combinations:
-
-  | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles |
-  | ---------------- | ----------- | --------- | ------------------ | ------------------- |
-  | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    |
-  | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    |
-  | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    |
-  | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    |
+- Pre-process data (optional)
 
 - Evolve for a couple of crossing times:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/IC.nemo out=<DIRNAME>/out.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
+  gyrfalcON in=<DIRNAME>/<IC_COORDINATES>.nemo out=<DIRNAME>/out.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
   ```
 
-  Here `DIRNAME` is the name of the directory with `IC.nemo`, and `logstep=300` is a parameter which controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the output (don't forget to change `tstop` parameter according to how many crossing times you want to use).
+  Here `logstep=300` is the parameter which controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the output (don't forget to change `tstop` parameter according to how many crossing times you want to use). If you preprocess your data, you should adjust these parameters according to your preprocessing procedure.
+
+- Post-process data (optional)
+
+You may use your own parameters for the experiments. To reproduce the original article, use the combinations of parameters listed below:
+
+| Experiment name | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles | Script to reproduce evolution |
+| --------------- | ---------------- | ----------- | --------- | ------------------ | ------------------- | ----------------------------- |
+| $\\sigma$ = 0.5 | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    | run_exp_sigma05.sh            |
+| $\\sigma$ = 1   | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    | run_exp_sigma10.sh            |
+| $\\sigma$ = 1.5 | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    | run_exp_sigma15.sh            |
+| M & A           | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    | run_exp_MA.sh                 |
+
+You may use scripts `run_exp*.sh` for evolution, or run commands one-by-one using the instruction given in the next section.
 
 ## External potential
 
@@ -151,7 +157,7 @@ To postprocess snapshot evolved in Milky Way potential, run:
 python postprocess.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo
 ```
 
-To postprocess snapshot evolved in JGB potential, run:
+To postprocess snapshot evolved in JGB potential (the original article), run:
 
 ```shell
 python postprocess.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source

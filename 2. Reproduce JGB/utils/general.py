@@ -4,6 +4,7 @@ import argparse
 import math
 import sys
 import typing
+from functools import partial
 
 import agama
 import numpy as np
@@ -27,8 +28,8 @@ def create_argparse(description="") -> argparse.ArgumentParser:
     parser.add_argument(
         "--N",
         type=int,
-        default=10_000,
-        help="How many particles to generate. Should be 0 < N <= 10**7. Default: 10_000",
+        default=20_000,
+        help="How many particles to generate. Should be 0 < N <= 10**7. Default: 20_000",
     )
     parser.add_argument(
         "--mu",

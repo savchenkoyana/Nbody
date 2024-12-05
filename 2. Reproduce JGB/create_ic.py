@@ -14,6 +14,7 @@ from utils.general import compute_gyrfalcon_parameters
 from utils.general import compute_mean_mass
 from utils.general import create_argparse
 from utils.general import set_units
+from utils.plot import show_with_timeout
 
 
 def create_self_consistent_model(
@@ -64,7 +65,7 @@ def create_self_consistent_model(
         if isinstance(save_dir, (str, Path)):
             plt.savefig(Path(save_dir) / "scm.png")
 
-        plt.show()
+        show_with_timeout()
 
     return scm
 
@@ -86,7 +87,7 @@ def plot_density(
     if isinstance(save_path, (str, Path)):
         plt.savefig(Path(save_path))
 
-    plt.show()
+    show_with_timeout()
 
 
 def plot_density_diff(
@@ -97,17 +98,17 @@ def plot_density_diff(
     r = np.logspace(-4, 1)
     xyz = np.vstack((r, r * 0, r * 0)).T
 
-    plt.plot(r, np.abs(dens(xyz) - orig_dens(xyz)))
+    plt.plot(r, np.abs(dens(xyz) - orig_dens(xyz)) / orig_dens(xyz))
 
     plt.xlabel("r, pc")
-    plt.ylabel(r"$\delta\rho, M_\odot / pc^3$")
+    plt.ylabel(r"$\delta\rho / \rho, M_\odot / pc^3$")
     plt.xscale("log")
     plt.yscale("log")
 
     if isinstance(save_path, (str, Path)):
         plt.savefig(Path(save_path))
 
-    plt.show()
+    show_with_timeout()
 
 
 def generate_snap(
