@@ -25,6 +25,11 @@ if __name__ == "__main__":
         required=True,
         help="Which times to use. Example: '--times 0.0 0.5 1.0'",
     )
+    parser.add_argument(
+        "--store-artifacts",
+        action="store_true",
+        help="Whether to store NEMO artifacts for debug",
+    )
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
@@ -37,11 +42,14 @@ if __name__ == "__main__":
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
     for t in args.times:
-        snap_t, lagrange_r = lagrange_radius_by_snap(filename, t)
+        snap_t, lagrange_r = lagrange_radius_by_snap(
+            filename, t, remove_artifacts=not args.store_artifacts
+        )
         plt.plot(snap_t, lagrange_r, "b.")
 
     plt.xlabel("$t$, 0.978 Gyr")
     plt.ylabel("Lagrange radius, $pc$")
     plt.legend(title=label)
     plt.title("Lagrange radii for 50% of mass")
+    plt.savefig(save_dir / "lagrange_radii.png")
     plt.show()

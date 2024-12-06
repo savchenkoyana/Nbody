@@ -49,14 +49,23 @@ To reproduce the experiment, follow this pipeline:
 
 You may use your own parameters for the experiments. To reproduce the original article, use the combinations of parameters listed below:
 
-| Experiment name | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles | Script to reproduce evolution |
-| --------------- | ---------------- | ----------- | --------- | ------------------ | ------------------- | ----------------------------- |
-| $\\sigma$ = 0.5 | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    | run_exp_sigma05.sh            |
-| $\\sigma$ = 1   | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    | run_exp_sigma10.sh            |
-| $\\sigma$ = 1.5 | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    | run_exp_sigma15.sh            |
-| M & A           | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    | run_exp_MA.sh                 |
+| Experiment name | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles | Script to reproduce evolution  |
+| --------------- | ---------------- | ----------- | --------- | ------------------ | ------------------- | ------------------------------ |
+| $\\sigma$ = 0.5 | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma0.5.sh |
+| $\\sigma$ = 1   | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma1.0.sh |
+| $\\sigma$ = 1.5 | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma1.5.sh |
+| M & A           | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_MA.sh       |
 
-You may use scripts `run_exp*.sh` for evolution, or run commands one-by-one using the instruction given in the next section.
+You may use bash scripts `run_exp*.sh` to run evolution, for example:
+
+```shell
+bash sh_scripts/run_exp_MA.sh
+```
+
+or run commands one-by-one using the instruction given in the next section.
+
+> Note that all python scripts in this experiment overwrite the existing files.
+> Don't forget to backup your experiments before trying to reproduce them!
 
 ## External potential
 
@@ -173,8 +182,8 @@ Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with
 python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
-`<t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
-E.g., `0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
+`--times <t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
+E.g., `--times 0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
 
 ```shell
 python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
@@ -182,7 +191,7 @@ python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamp
 
 where `<N>` is the desired number of timestamps.
 
-## Plot mass spectrum
+## Plot mass spectrum $$f(M)$$
 
 Compute and plot mass spectrum for a given snapshot along with the original distribution function:
 
