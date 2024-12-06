@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Generate coordinates for experiment: M&A"
+echo "Generate coordinates for experiment: M & A"
 python create_ic.py \
   --N 20000 \
   --mu 10 \

@@ -27,33 +27,34 @@ def remove(file: str, print_msg: Optional[str] = None):
 
 
 class RemoveFileOnEnterExit:
-    """Context manager that."""
+    """Context manager that removes file on enter and (optional) on exit."""
 
     def __init__(self, file_path, remove_on_exit=True):
         self.file_path = file_path
         self.remove_on_exit = remove_on_exit
 
     def __enter__(self):
-        # Remove the file on entry
-        remove(self.file_path, f"Removed file: {self.file_path} on entry.")
+        # Remove the file on enter
+        remove(self.file_path, f"Removed file: {self.file_path} on enter.")
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         # Remove the file on exit
-        remove(self.file_path, f"Removed file: {self.file_path} on exit.")
+        if self.remove_on_exit:
+            remove(self.file_path, f"Removed file: {self.file_path} on exit.")
 
 
 def parse_nemo(
     filename: Union[str, os.PathLike, Path],
     t: Union[float, str],
     transpose: bool = True,
-    remove_on_exit: bool = True,
+    remove_artifacts: bool = True,
 ) -> np.array:
     """Get a np.array with particles for a given NEMO snapshot and time."""
     filename = str(filename)
     snapfile = filename.replace(".nemo", f"{t}.txt")
 
-    with RemoveFileOnEnterExit(snapfile, remove_on_exit):
+    with RemoveFileOnEnterExit(snapfile, remove_artifacts):
         command = f"s2a in={filename} out={snapfile} times={t}"
         subprocess.check_call(command, shell=True)
         result = np.loadtxt(snapfile).T if transpose else np.loadtxt(snapfile)
@@ -65,7 +66,7 @@ def profile_by_snap(
     filename: Union[str, os.PathLike, Path],
     t: Union[float, str],
     projvector: Optional[_PROJ_VECTOR_TYPE] = None,
-    remove_on_exit: bool = True,
+    remove_artifacts: bool = True,
 ) -> np.array:
     """Get a np.array with density profile for a given snapshot and time.
 
@@ -79,7 +80,7 @@ def profile_by_snap(
         List, tuple or np.ndarray of size 3 with float numbers.
         If `projvector` is None, spherically symmetric density is computed using 'sphereprof'.
         Otherwise computes the projected density using `projvector` as a line-of-sight vector (see NEMO's 'projprof').
-    remove_on_exit :
+    remove_artifacts :
         Whether to remove artifacts after the function execution. Default: True.
     Returns
     -------
@@ -93,7 +94,7 @@ def profile_by_snap(
     filename = str(filename)
     manipfile = filename.replace(".nemo", f"_{manipname}{t}")
 
-    with RemoveFileOnEnterExit(manipfile, remove_on_exit):
+    with RemoveFileOnEnterExit(manipfile, remove_artifacts):
         manippars = "" if not projvector else ",".join([str(_) for _ in projvector])
         command = f'manipulate in={filename} out=. manipname=centre_of_mass+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
         print(command)
@@ -123,7 +124,7 @@ def lagrange_radius_by_snap(
     filename: Union[str, os.PathLike, Path],
     t: Union[float, str],
     fraction: Union[float, str] = 0.5,
-    remove_on_exit: bool = True,
+    remove_artifacts: bool = True,
 ) -> np.array:
     """
     Compute a lagrange radius for a given snapshot and time.
@@ -138,7 +139,7 @@ def lagrange_radius_by_snap(
         which time point in snapshot to use for profile calculations
     fraction : Union[float, str]
         fraction of mass (parameter for lagrange radius evaluation)
-    remove_on_exit :
+    remove_artifacts :
         Whether to remove artifacts after the function execution. Default: True.
     Returns
     -------
@@ -148,7 +149,7 @@ def lagrange_radius_by_snap(
     filename = str(filename)
     manipfile = filename.replace(".nemo", f"_{manipname}{t}")
 
-    with RemoveFileOnEnterExit(manipfile, remove_on_exit):
+    with RemoveFileOnEnterExit(manipfile, remove_artifacts):
         command = f'manipulate in={filename} out=. manipname=centre_of_mass+{manipname} manippars=";{fraction}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
         print(command)
 

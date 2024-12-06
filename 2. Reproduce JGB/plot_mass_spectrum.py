@@ -51,10 +51,11 @@ if __name__ == "__main__":
         masses = parse_nemo(filename=filename, t=t)[0]
 
         (counts, bins) = np.histogram(masses, bins=m, density=True)
-        plt.hist(bins[:-1], bins, weights=counts, label=f"$t$={t}", histtype="step")
+        plt.hist(bins[:-1], bins, weights=counts, label=f"$t$={t:.2e}", histtype="step")
 
     plt.xscale("log")
     plt.xlabel(r"$M, M_\odot$")
     plt.legend(title=label)
     plt.title("Mass distribution in cluster")
+    plt.savefig(save_dir / "mass_spectrum.png")
     plt.show()
