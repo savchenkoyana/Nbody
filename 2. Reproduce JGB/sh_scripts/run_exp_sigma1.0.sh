@@ -20,12 +20,12 @@ python preprocess_snap.py \
   --source-mass 4.37e10
 
 echo
-echo "Start evolution for 100 dynamical times for: sigma=1.0"
-gyrfalcON snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/IC_preprocessed.nemo \
+echo "Start evolution for 13.7 Gyr for: sigma=1.0"
+nice -n 20 gyrfalcON snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/IC_preprocessed.nemo \
   snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out.nemo \
-  logstep=300 \
+  logstep=3000 \
   eps=0.0003684031498640387 \
   kmax=15 \
-  tstop=0.18693875619711035 \
-  step=1.8693875619711035e-05 \
+  tstop=14 \
+  step=1.8693875619711035e-04 \
   Grav=4.30091727067736e-06
