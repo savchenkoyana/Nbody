@@ -29,3 +29,16 @@ nice -n 20 gyrfalcON snap_mu10.0_s1.5_sigma0.954_r10.0_N20000/IC_preprocessed.ne
   tstop=14 \
   step=6.855891525557327e-05 \
   Grav=4.30091727067736e-06
+
+echo
+echo "Postprocess data:"
+python postprocess_snap.py \
+  --nemo-file snap_mu10.0_s1.5_sigma0.954_r10.0_N20000/out.nemo \
+  --remove-point-source \
+  --source-mass 4.37e10
+
+echo
+echo "Calculating timestamps..."
+python stat.py \
+  --nemo-file snap_mu10.0_s1.5_sigma0.954_r10.0_N20000/out.nemo \
+  --n-timestamps 100 > snap_mu10.0_s1.5_sigma0.954_r10.0_N20000/timestamps.txt

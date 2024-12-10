@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
 from utils.plot import create_label
@@ -13,10 +14,11 @@ if __name__ == "__main__":
         description="This program plots mass spectrum for a given snapshot"
     )
     parser.add_argument(
-        "--nemo-file",
+        "--nemo-files",
+        nargs="+",
         type=str,
         required=True,
-        help="Nemo file used for density profile computation",
+        help="Nemo files used for lagrange radii computation",
     )
     parser.add_argument(
         "--times",
@@ -33,23 +35,29 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
-
-    filename = Path(args.nemo_file)
-    if not filename.exists():
-        raise RuntimeError(f"filename {filename} does not exist")
-    save_dir = filename.absolute().parent
-
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
-    for t in args.times:
-        snap_t, lagrange_r = lagrange_radius_by_snap(
-            filename, t, remove_artifacts=not args.store_artifacts
-        )
-        plt.plot(snap_t, lagrange_r, "b.")
+    for filename in args.nemo_files:
+        filename = Path(filename)
+        if not filename.exists():
+            raise RuntimeError(f"filename {filename} does not exist")
+
+        x = np.array([], dtype=np.float32)
+        y = np.array([], dtype=np.float32)
+
+        for t in args.times:
+            snap_t, lagrange_r = lagrange_radius_by_snap(
+                filename, t, remove_artifacts=not args.store_artifacts
+            )
+            x = np.append(x, snap_t)
+            y = np.append(y, lagrange_r)
+
+        print(x, y)
+        plot_label = filename.stem if len(args.nemo_files) > 1 else None
+        plt.plot(x, y, ".", label=plot_label)
 
     plt.xlabel("$t$, 0.978 Gyr")
     plt.ylabel("Lagrange radius, $pc$")
     plt.legend(title=label)
     plt.title("Lagrange radii for 50% of mass")
-    plt.savefig(save_dir / "lagrange_radii.png")
     plt.show()

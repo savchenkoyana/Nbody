@@ -138,24 +138,6 @@ JGB writes:
 
   A set of recommended parameters for `gyrFalcON` is provided by `preprocess_snap.py` script at the end of its output.
 
-# Explore results
-
-## Visualize cluster evolution
-
-- To visualize cluster evolution, run:
-
-  ```shell
-  snapplot3 <DIRNAME>/out.nemo
-  ```
-
-  Use these options for customization:
-
-  ```shell
-  snapplot <DIRNAME>/out.nemo xrange=<xmin>:<xmax> yrange=<ymin>:<ymax> times=<tmin>:<tmax>
-  ```
-
-- There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
-
 ## Postprocess
 
 It would be useful to postprocess your data to plot profiles, spectras, etc.
@@ -174,6 +156,26 @@ python postprocess.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-sourc
 
 The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored in `<DIRNAME>` folder.
 
+> If you used sh-scripts to reproduce the experiments, the postprocessing procedure has already been done for you.
+
+# Explore results
+
+## Visualize cluster evolution
+
+- To visualize cluster evolution, run:
+
+  ```shell
+  snapplot3 <DIRNAME>/out.nemo
+  ```
+
+  Use these options for customization:
+
+  ```shell
+  snapplot <DIRNAME>/out.nemo xrange=<xmin>:<xmax> yrange=<ymin>:<ymax> times=<tmin>:<tmax>
+  ```
+
+- There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
+
 ## Plot density profile $$\\rho(r)$$
 
 Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
@@ -190,6 +192,8 @@ python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamp
 ```
 
 where `<N>` is the desired number of timestamps.
+
+> If you used sh-scripts, check `timestamps.txt` file in directory with your snapshot
 
 ## Plot mass spectrum $$f(M)$$
 

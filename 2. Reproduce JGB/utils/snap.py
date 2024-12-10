@@ -154,6 +154,6 @@ def lagrange_radius_by_snap(
         print(command)
 
         subprocess.check_call(command, shell=True)
-        result = np.loadtxt(manipfile).T
+        result = np.loadtxt(manipfile)[0].T  # dummy fix
 
     return result

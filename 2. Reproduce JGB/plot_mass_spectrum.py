@@ -18,7 +18,7 @@ if __name__ == "__main__":
         "--nemo-file",
         type=str,
         required=True,
-        help="Nemo file used for density profile computation",
+        help="Nemo file used for mass spectrum computation",
     )
     parser.add_argument(
         "--times",
