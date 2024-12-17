@@ -106,6 +106,6 @@ if __name__ == "__main__":
     print("*" * 10, "Transformation finished!", "*" * 10)
     print("Run this to start cluster evolution in N-body units for 1 dynamical time:")
     print(
-        f"\tgyrfalcON {in_snap_file} {out_snap_file} logstep=300 "
-        f"eps={eps} kmax={kmax} tstop={t_dyn} step={t_dyn / 100} Grav={Grav}"
+        f"\tgyrfalcON {in_snap_file} {out_snap_file} logstep=3000 "
+        f"eps={eps} kmax={kmax} tstop={t_dyn} step={t_dyn / 10} Grav={Grav}"
     )

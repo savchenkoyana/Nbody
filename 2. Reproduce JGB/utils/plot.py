@@ -1,5 +1,10 @@
 """Utils used for plotting."""
 
+from functools import partial
+from typing import Callable
+from typing import Optional
+
+import matplotlib.animation
 import matplotlib.pyplot as plt
 
 
@@ -20,3 +25,66 @@ def show_with_timeout():
     plt.show(block=False)
     plt.pause(10)
     plt.close()
+
+
+def update(
+    i: int,
+    data: list,
+    ax: plt.axes,
+    xlim: tuple[float, float],
+    ylim: tuple[float, float],
+):
+    (
+        x,
+        y,
+        label,
+    ) = data[i]
+
+    ax.cla()
+    ax.set(xlim=xlim, ylim=ylim)
+
+    ax.scatter(x, y, c="b", s=2, linewidths=0)
+
+    if label:
+        ax.text(
+            x=0.01,
+            y=0.99,
+            s=label,
+            ha="left",
+            va="top",
+            transform=ax.transAxes,
+        )
+
+
+def create_animation(
+    data: list,
+    n_frames: int,
+    fig: plt.figure,
+    ax: plt.axes,
+    update_animation: Optional[Callable[int, None]] = None,
+    xlim: tuple[float, float] = (-40, 40),
+    ylim: tuple[float, float] = (-40, 40),
+    interval: int = 2000,
+) -> matplotlib.animation.FuncAnimation:
+    plt.rcParams["animation.html"] = "jshtml"
+    plt.rcParams["animation.embed_limit"] = 200
+
+    ax.set(xlim=xlim, ylim=ylim)
+
+    if update_animation is None:
+        update_animation = partial(
+            update,
+            data=data,
+            ax=ax,
+            xlim=xlim,
+            ylim=ylim,
+        )
+
+    ani = matplotlib.animation.FuncAnimation(
+        fig=fig,
+        func=update_animation,
+        frames=n_frames,
+        interval=interval,
+        cache_frame_data=True,
+    )
+    return ani
