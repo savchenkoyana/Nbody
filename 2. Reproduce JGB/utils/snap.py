@@ -148,12 +148,51 @@ def lagrange_radius_by_snap(
 
     filename = str(filename)
     manipfile = filename.replace(".nemo", f"_{manipname}{t}")
+    dens_par = 500
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        command = f'manipulate in={filename} out=. manipname=centre_of_mass+{manipname} manippars=";{fraction}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
+        # command = f'manipulate in={filename} out=. manipname=centre_of_mass+{manipname} manippars=";{fraction}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
+        command = f'manipulate in={filename} out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
-        result = np.loadtxt(manipfile)[0].T  # dummy fix
+        result = np.loadtxt(manipfile).T
+
+    return result
+
+
+def center_of_snap(
+    filename: Union[str, os.PathLike, Path],
+    t: Union[float, str],
+    density_center: bool = False,
+    remove_artifacts: bool = True,
+) -> np.array:
+    """Compute a center-of-mass / density center for a given snapshot.
+
+    Parameters
+    ----------
+    filename : Union[str, os.PathLike, Path]
+        the name of NEMO snapshot file
+    t : Union[float, str]
+        which time point in snapshot to use for profile calculations
+    density_center : bool
+        whether to compute density center instead of center-of-mass. Default: True
+    remove_artifacts :
+        Whether to remove artifacts after the function execution. Default: True.
+    Returns
+    -------
+    """
+    manipname = "dens_centre" if density_center else "centre_of_mass"
+
+    filename = str(filename)
+    manipfile = filename.replace(".nemo", f"_{manipname}{t}")
+    dens_par = 500
+
+    with RemoveFileOnEnterExit(manipfile, remove_artifacts):
+        command = f'manipulate in={filename} out=. manipname={manipname} manippars="" manipfile="{manipfile}" times={t} | tee {manipname}_log 2>&1'
+        print(command)
+
+        subprocess.check_call(command, shell=True)
+        result = np.loadtxt(manipfile).T
 
     return result

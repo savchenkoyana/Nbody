@@ -205,13 +205,15 @@ python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
 
 The mass distribution for your snapshot (the resulting histograms) and original pdf (the line plot) should look like a log-normal distribution with your parameters. You can compare your results with the picture of log-normal distributions at the beginning of this README document.
 
-## Plot Lagrange radius
+## Plot Lagrange radii
 
-To plot Lagrange radius at different timestamps, run:
+To plot Lagrange radius at different timestamps for different experiments, run:
 
 ```shell
-python plot_lagrange_radius.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn>
+python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn>
 ```
+
+Note that all timestamps should be present in both nemo files. It is better to use two experiments with different random seed for this task.
 
 You can compare your results with plots from the article:
 
