@@ -1,6 +1,6 @@
 # About
 
-This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/pdf/2405.06391v1) by Juan Garcia-Bellido.
+This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/pdf/2405.06391v1) by Juan Garcia-Bellido (shortly: JGB).
 
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
 
@@ -176,6 +176,29 @@ The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored 
 
 - There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
 
+- Another option is to use custom visualization script from this repository:
+
+  ```shell
+  python animation.py --nemo-file <DIRNAME>/out_postprocessed.nemo --times <t1> <t2> ... <tn> <POTENTIAL-OPTION>
+  ```
+
+  `--times <t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
+  E.g., `--times 0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
+
+  ```shell
+  python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
+  ```
+
+  where `<N>` is the desired number of timestamps.
+
+  > If you used sh-scripts, check `timestamps.txt` file in directory with your snapshot
+
+  `<POTENTIAL-OPTION>` is an optional parameter to visualize external potential for the evolved cluster.
+  It sholud be one of:
+
+  - `--add-mw-potential` --- should be used for evolution with Milky Way potential
+  - `--add-point-source` --- evolution with point mass potential at the center (JGB)
+
 ## Plot density profile $$\\rho(r)$$
 
 Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
@@ -183,17 +206,6 @@ Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with
 ```shell
 python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
-
-`--times <t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
-E.g., `--times 0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
-
-```shell
-python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
-```
-
-where `<N>` is the desired number of timestamps.
-
-> If you used sh-scripts, check `timestamps.txt` file in directory with your snapshot
 
 ## Plot mass spectrum $$f(M)$$
 

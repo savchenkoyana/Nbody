@@ -39,7 +39,7 @@ if __name__ == "__main__":
         help="Whether to add steady point source of gravity at the center of coordinates",
     )
     parser.add_argument(
-        "--add-potential",
+        "--add-mw-potential",
         action="store_true",
         help="Whether to add Milky Way potential (file with potential should be stored at "
         " 'Nbody/Agama/py/MWPotentialHunter24_rotating.ini')",
@@ -49,13 +49,13 @@ if __name__ == "__main__":
     # Sanity checks
     if not os.path.exists(args.nemo_file):
         raise RuntimeError(f"{args.nemo_file} does not exist")
-    if args.add_potential:
+    if args.add_mw_potential:
         pot_path = "../Agama/py/MWPotentialHunter24_rotating.ini"
         if not os.path.exists(pot_path):
             raise RuntimeError(f"{pot_path} does not exist")
-    if args.add_point_source and args.add_potential:
+    if args.add_point_source and args.add_mw_potential:
         raise RuntimeError(
-            "Cannot use '--add-point-source' and '--add-potential' together. Choose one depending on how you performed evolution."
+            "Cannot use '--add-point-source' and '--add-mw-potential' together. Choose one depending on how you performed evolution."
         )
 
     # Initialize plot and simulation parameters
@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
         if args.add_point_source:
             ax.scatter(0, 0, c="r", s=10, linewidths=0)
-        if args.add_potential:
+        if args.add_mw_potential:
             pass  # TODO: implement
 
         if label:
