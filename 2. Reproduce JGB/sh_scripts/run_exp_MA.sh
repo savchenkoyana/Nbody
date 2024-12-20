@@ -27,7 +27,7 @@ nice -n 20 gyrfalcON snap_mu10.0_s1.5_sigma0.954_r10.0_N20000/IC_preprocessed.ne
   eps=0.0003684031498640387 \
   kmax=16 \
   tstop=14 \
-  step=6.855891525557327e-05 \
+  step=0.01 \
   Grav=4.30091727067736e-06
 
 echo
