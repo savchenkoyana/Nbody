@@ -151,7 +151,6 @@ def lagrange_radius_by_snap(
     dens_par = 500
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        # command = f'manipulate in={filename} out=. manipname=centre_of_mass+{manipname} manippars=";{fraction}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
         command = f'manipulate in={filename} out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
         print(command)
 
@@ -186,7 +185,6 @@ def center_of_snap(
 
     filename = str(filename)
     manipfile = filename.replace(".nemo", f"_{manipname}{t}")
-    dens_par = 500
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
         command = f'manipulate in={filename} out=. manipname={manipname} manippars="" manipfile="{manipfile}" times={t} | tee {manipname}_log 2>&1'

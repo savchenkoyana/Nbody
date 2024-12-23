@@ -2,14 +2,13 @@
 
 import argparse
 import os
-import subprocess
 from functools import partial
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm.notebook import tqdm
 from utils.plot import create_animation
-from utils.snap import RemoveFileOnEnterExit
+from utils.snap import parse_nemo
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -64,20 +63,24 @@ if __name__ == "__main__":
 
     data = []
 
-    for time in tqdm(args.times):
-        snapfile = args.nemo_file.replace(".nemo", f"_{time}")
+    center_x = np.array([], dtype=np.float32)
+    center_y = np.array([], dtype=np.float32)
 
-        with RemoveFileOnEnterExit(snapfile):
-            subprocess.check_call(
-                f"s2a {args.nemo_file} {snapfile} times={time}", shell=True
-            )
-            snap = np.loadtxt(snapfile).T  # mass, pos, vel
+    for t in args.times:
+        snap = parse_nemo(
+            filename=args.nemo_file, t=t, remove_artifacts=not args.store_artifacts
+        )  # mass, pos, vel
 
-        x = snap[1, :]
-        y = snap[2, :]
-        label = f"Time={time}"
+        x = snap[1]
+        y = snap[2]
+        label = f"Time={t}"
 
         data.append((x, y, label))
+
+        m = snap[0]
+        m_tot = np.sum(m)
+        center_x = np.append(center_x, np.sum(m * x) / m_tot)
+        center_y = np.append(center_y, np.sum(m * y) / m_tot)
 
     # Create custom function for updating animation
     def custom_update(
@@ -86,6 +89,8 @@ if __name__ == "__main__":
         ax: plt.axes,
         xlim: tuple[float, float],
         ylim: tuple[float, float],
+        center_x: Optional[np.ndarray[np.float32]] = None,
+        center_y: Optional[np.ndarray[np.float32]] = None,
     ):
         (
             x,
@@ -96,29 +101,32 @@ if __name__ == "__main__":
         ax.cla()
         ax.set(xlim=xlim, ylim=ylim)
 
-        ax.scatter(x, y, c="b", s=2, linewidths=0)
+        ax.scatter(x, y, c="b", s=2, linewidths=0, label="Cluster bodies")
 
         if args.add_point_source:
-            ax.scatter(0, 0, c="r", s=10, linewidths=0)
+            ax.scatter(0, 0, c="r", s=10, linewidths=0, label="SMBH")
         if args.add_mw_potential:
             pass  # TODO: implement
 
-        if label:
-            ax.text(
-                x=0.01,
-                y=0.99,
-                s=label,
-                ha="left",
-                va="top",
-                transform=ax.transAxes,
-            )
+        ax.scatter(
+            center_x[i],
+            center_y[i],
+            c="k",
+            marker="v",
+            s=10,
+            linewidths=0,
+            label="Cluster center-of-mass",
+        )
+        ax.legend(title=label if label else None, loc=1)  # upper right location
 
     update_animation = partial(
         custom_update,
         data=data,
         ax=ax,
-        xlim=(-40, 40),
-        ylim=(-40, 40),
+        xlim=(-40000, 40000),
+        ylim=(-40000, 40000),
+        center_x=center_x,
+        center_y=center_y,
     )
 
     ani = create_animation(
@@ -128,4 +136,5 @@ if __name__ == "__main__":
         n_frames=len(args.times),
         update_animation=update_animation,
     )
+    ani.save("sim.gif", writer="pillow")
     plt.show()

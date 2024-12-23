@@ -196,8 +196,8 @@ The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored 
   `<POTENTIAL-OPTION>` is an optional parameter to visualize external potential for the evolved cluster.
   It sholud be one of:
 
-  - `--add-mw-potential` --- should be used for evolution with Milky Way potential
-  - `--add-point-source` --- evolution with point mass potential at the center (JGB)
+  - `--add-mw-potential` — should be used for evolution with Milky Way potential
+  - `--add-point-source` — for evolution with point mass potential at the center (JGB)
 
 ## Plot density profile $$\\rho(r)$$
 
