@@ -231,6 +231,8 @@ You can compare your results with plots from the article:
 
 ![](../images/lagrange_radii.png)
 
+Note that half-mass radius for Plummer with size 10 pc [should be](https://en.wikipedia.org/wiki/Plummer_model) approximately 13 pc.
+
 # Test pipeline
 
 To test your pipeline, you may evolve a cluster in its own gravitational field (without any potentials). The final density after the evolution should look like the initial density. This indicates that your model is truly self-consistent.

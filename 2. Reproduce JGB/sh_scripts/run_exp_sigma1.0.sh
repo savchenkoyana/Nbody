@@ -42,3 +42,7 @@ echo "Calculating timestamps..."
 python stat.py \
   --nemo-file snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out.nemo \
   --n-timestamps 100 > snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/timestamps.txt
+
+python stat.py \
+  --nemo-file snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out.nemo \
+  --n-timestamps 10 >> snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/timestamps.txt
