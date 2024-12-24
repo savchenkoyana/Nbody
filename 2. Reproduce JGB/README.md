@@ -179,7 +179,7 @@ The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored 
 - Another option is to use custom visualization script from this repository:
 
   ```shell
-  python animation.py --nemo-file <DIRNAME>/out_postprocessed.nemo --times <t1> <t2> ... <tn> <POTENTIAL-OPTION>
+  python animate.py --nemo-file <DIRNAME>/out_postprocessed.nemo --times <t1> <t2> ... <tn> <POTENTIAL-OPTION>
   ```
 
   `--times <t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
