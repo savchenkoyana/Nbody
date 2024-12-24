@@ -44,7 +44,7 @@ If installation completed successfully, you should get "TESTSUITE: OK" for each 
 >
 > Alternatively, you might want to add the command above (with the full path to `nemo_start.sh`) at the end of your `.bashrc` file.
 
-For more info about NEMO see [NEMO's user guide](https://astronemo.readthedocs.io/en/latest/) and [NEMO's official documentations](https://teuben.github.io/nemo/man_html/whatis.html)
+For more info about NEMO see [NEMO's official documentation](https://astronemo.readthedocs.io/en/latest/) and [NEMO's github pages](https://teuben.github.io/nemo/)
 
 ## Install Agama
 
