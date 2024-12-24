@@ -8,7 +8,7 @@ import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
 from utils.plot import create_label
-from utils.snap import lagrange_radius_by_snap
+from utils.snap import masses_in_lagrange_radius
 
 if __name__ == "__main__":
     parser = create_argparse(
@@ -43,44 +43,69 @@ if __name__ == "__main__":
     check_parameters(args)  # sanity checks
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
-    agama.setUnits(length=1, mass=1, velocity=1)
+    agama.setUnits(length=1, mass=1, velocity=1)  # time units used for evolution
     timeUnitGyr = agama.getUnits()["time"] / 1e3  # time unit is 1 kpc / (1 km/s)
 
     # assuming filenames are like /path/to/Nbody/2.\ Reproduce\ JGB/<DIRNAME>/out.nemo
     save_dir = Path(args.nemo_files[0]).parents[1]
+
+    fig_rt, ax_rt = plt.subplots()  # for Lagrange radius vs Time
+    ax_rt.set_xlabel("$t$, Gyr")
+    ax_rt.set_ylabel("Lagrange radius, $pc$")
+    ax_rt.legend(title=label)
+    ax_rt.set_title("Lagrange radii for 50% of mass")
+
+    fig_nt, ax_nt = plt.subplots()  # for N particles in Lagrange radius vs Time
+    ax_nt.set_xlabel("$t$, Gyr")
+    ax_nt.set_ylabel("$N(t) / N(t=0)$")
+    ax_nt.legend(title=label)
+    ax_nt.set_title("Number of particles in cluster")
+
+    fig_mt, ax_mt = plt.subplots()  # for Mass in Lagrange radius vs Time
+    ax_mt.set_xlabel("$t$, Gyr")
+    ax_mt.set_ylabel(r"$M(t)$, M_\odot$")
+    ax_mt.legend(title=label)
+    ax_mt.set_title("Mean mass of particles in cluster")
 
     for filename in args.nemo_files:
         filename = Path(filename)
         if not filename.exists():
             raise RuntimeError(f"filename {filename} does not exist")
 
-        x = np.array([], dtype=np.float32)
-        y = np.array([], dtype=np.float32)
+        times = np.array([], dtype=np.float32)
+        lagrange_radii = np.array([], dtype=np.float32)
+        n_particles = np.array([], dtype=np.float32)
+        mean_mass = np.array([], dtype=np.float32)
 
         for t in args.times:
-            snap_t, lagrange_r = lagrange_radius_by_snap(
-                filename, t, remove_artifacts=not args.store_artifacts
-            )
-            x = np.append(x, snap_t * timeUnitGyr)
-            y = np.append(y, lagrange_r)
-
-        if args.remove_outliers:
-            # Check if there are outliers
-            has_outliers = np.max(y) / np.min(y) > 500
-            if has_outliers:
-                print(
-                    f"There are outliers as max={np.max(y)} and min={np.min(y)}! Filtering..."
+            try:
+                masses, lagrange_r, mask = masses_in_lagrange_radius(
+                    filename=filename,
+                    t=t,
+                    remove_artifacts=not args.store_artifacts,
                 )
-                mask = y < np.mean(y)
-                x, y = x[mask], y[mask]
+            except RuntimeError:
+                if args.remove_outliers:
+                    continue
+                raise
 
-        plot_label = filename.parts[-2] if len(args.nemo_files) > 1 else None
-        print("first Lagrange radius", x[0], y[0])
-        plt.plot(x, y, ".", label=plot_label)
+            m_tot = np.sum(masses)
+            m_filtered = masses[mask]
 
-    plt.xlabel("$t$, Gyr")
-    plt.ylabel("Lagrange radius, $pc$")
-    plt.legend(title=label)
-    plt.title("Lagrange radii for 50% of mass")
-    plt.savefig(save_dir / "lagrange_radii.png")
+            times = np.append(times, t * timeUnitGyr)
+            lagrange_radii = np.append(lagrange_radii, lagrange_r)
+            n_particles = np.append(n_particles, m_filtered.size)
+            mean_mass = np.append(mean_mass, np.mean(m_filtered))
+
+        plot_label = (
+            filename.parts[-2] if len(args.nemo_files) > 1 else None
+        )  # label as filename if there are many files
+        ax_rt.plot(times, lagrange_radii, ".", label=plot_label)
+        ax_nt.plot(times, n_particles / n_particles[0], ".", label=plot_label)
+        ax_mt.plot(times, mean_mass, ".", label=plot_label)
+
+    fig_rt.savefig(save_dir / "lagrange_radii.png")
+    fig_nt.savefig(save_dir / "N_lagrange_radii.png")
+    fig_mt.savefig(save_dir / "M_lagrange_radii.png")
+
     plt.show()

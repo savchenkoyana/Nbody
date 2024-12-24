@@ -194,3 +194,34 @@ def center_of_snap(
         result = np.loadtxt(manipfile).T
 
     return result
+
+
+def masses_in_lagrange_radius(
+    filename: Union[str, os.PathLike, Path],
+    t: Union[float, str],
+    remove_artifacts: bool = True,
+):
+    snap = parse_nemo(filename=filename, t=t)  # m, x, y, z, vx, vy, vz
+    masses = snap[0]
+
+    # calculate density center
+    center = center_of_snap(
+        filename=filename,
+        t=t,
+        density_center=True,
+        remove_artifacts=remove_artifacts,
+    )  # center_coords : snap_t, x, y, z, vx, vy, vz
+    if center.size == 0:
+        raise RuntimeError(f"'dens_centre' didn't converge for t={t}")
+
+    # calculate lagrange radius
+    snap_t, lagrange_r = lagrange_radius_by_snap(
+        filename, t, remove_artifacts=remove_artifacts
+    )
+
+    # create mask
+    dist = np.linalg.norm(snap[1:4].T - center[1:4], axis=1)
+    mask = dist < lagrange_r
+    print(f"Number of particles for half-mass radius {lagrange_r}: {mask.sum()}")
+
+    return masses, lagrange_r, mask

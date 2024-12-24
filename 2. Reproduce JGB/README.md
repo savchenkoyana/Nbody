@@ -207,6 +207,26 @@ Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with
 python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
+## Plot Lagrange radii
+
+To plot Lagrange radius at different timestamps for different experiments, run:
+
+```shell
+python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn>
+```
+
+As NEMO's tool for computation of cluster's density center sometimes fail and I haven't fixed it yet, it is better to add `--remove-outliers` at the end of the command:
+
+```shell
+python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --remove-outliers
+```
+
+You can compare your results with plots from the article:
+
+![](../images/lagrange_radii.png)
+
+Note that half-mass radius for Plummer with size 10 pc [should be](https://en.wikipedia.org/wiki/Plummer_model) approximately 13 pc.
+
 ## Plot mass spectrum $$f(M)$$
 
 Compute and plot mass spectrum for a given snapshot along with the original distribution function:
@@ -217,21 +237,11 @@ python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
 
 The mass distribution for your snapshot (the resulting histograms) and original pdf (the line plot) should look like a log-normal distribution with your parameters. You can compare your results with the picture of log-normal distributions at the beginning of this README document.
 
-## Plot Lagrange radii
-
-To plot Lagrange radius at different timestamps for different experiments, run:
+To plot the distribution of masses only for particles inside the half-mass radius, run:
 
 ```shell
-python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn>
+python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS> --lagrange --remove-outliers
 ```
-
-Note that all timestamps should be present in both nemo files. It is better to use two experiments with different random seed for this task.
-
-You can compare your results with plots from the article:
-
-![](../images/lagrange_radii.png)
-
-Note that half-mass radius for Plummer with size 10 pc [should be](https://en.wikipedia.org/wiki/Plummer_model) approximately 13 pc.
 
 # Test pipeline
 
