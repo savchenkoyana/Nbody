@@ -225,7 +225,9 @@ You can compare your results with plots from the article:
 
 ![](../images/lagrange_radii.png)
 
-Note that half-mass radius for Plummer with size 10 pc [should be](https://en.wikipedia.org/wiki/Plummer_model) approximately 13 pc.
+![](../images/cluster_stat.png)
+
+> Note that half-mass radius for Plummer with size 10 pc [should be](https://en.wikipedia.org/wiki/Plummer_model) approximately 13 pc
 
 ## Plot mass spectrum $$f(M)$$
 
@@ -235,7 +237,7 @@ Compute and plot mass spectrum for a given snapshot along with the original dist
 python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
-The mass distribution for your snapshot (the resulting histograms) and original pdf (the line plot) should look like a log-normal distribution with your parameters. You can compare your results with the picture of log-normal distributions at the beginning of this README document.
+The mass distribution for your snapshot (the resulting histograms) and original pdf (the line plot) should look like a log-normal distribution with your parameters at $t=0$. You can compare your results with the picture of log-normal distributions at the beginning of this README document.
 
 To plot the distribution of masses only for particles inside the half-mass radius, run:
 
@@ -246,3 +248,12 @@ python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
 # Test pipeline
 
 To test your pipeline, you may evolve a cluster in its own gravitational field (without any potentials). The final density after the evolution should look like the initial density. This indicates that your model is truly self-consistent.
+
+# Checklist
+
+Here is a list of what we need to fully reproduce the article:
+
+- [x] N-body simulation
+- [ ] Comparison between Nbody6++GPU (or Nbody6) and GyrfalcON
+- [ ] Gravitational waves
+- [ ] Black hole mergers
