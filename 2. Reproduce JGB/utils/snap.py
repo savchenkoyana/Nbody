@@ -49,8 +49,25 @@ def parse_nemo(
     t: Union[float, str],
     transpose: bool = True,
     remove_artifacts: bool = True,
-) -> np.array:
-    """Get a np.array with particles for a given NEMO snapshot and time."""
+) -> np.ndarray:
+    """Get a np.ndarray with particles for a given NEMO snapshot and time.
+
+    Parameters
+    ----------
+    filename : Union[str, os.PathLike, Path]
+        the name of NEMO snapshot file
+    t : Union[float, str]
+        which time point in snapshot to use for profile calculations
+    transpose : bool
+        Whether to return transposed result. Default: True.
+    remove_artifacts :
+        Whether to remove artifacts after the function execution. Default: True.
+    Returns
+    -------
+    np.ndarray
+        Array with particles with shape [7, N] (if transposed) or [N, 7] (otherwise).
+        7 coordinates are: mass, x, y, z, vx, vy, vz.
+    """
     filename = str(filename)
     snapfile = filename.replace(".nemo", f"{t}.txt")
 
@@ -67,8 +84,8 @@ def profile_by_snap(
     t: Union[float, str],
     projvector: Optional[_PROJ_VECTOR_TYPE] = None,
     remove_artifacts: bool = True,
-) -> np.array:
-    """Get a np.array with density profile for a given snapshot and time.
+) -> np.ndarray:
+    """Get a np.ndarray with density profile for a given snapshot and time.
 
     Parameters
     ----------
@@ -125,7 +142,7 @@ def lagrange_radius_by_snap(
     t: Union[float, str],
     fraction: Union[float, str] = 0.5,
     remove_artifacts: bool = True,
-) -> np.array:
+) -> np.ndarray:
     """
     Compute a lagrange radius for a given snapshot and time.
     See https://teuben.github.io/nemo/man_html/lagrange_radii.1.html
@@ -143,6 +160,8 @@ def lagrange_radius_by_snap(
         Whether to remove artifacts after the function execution. Default: True.
     Returns
     -------
+    np.ndarray
+        Array with two elements: time and lagrange radius.
     """
     manipname = "lagrange"
 
@@ -165,8 +184,8 @@ def center_of_snap(
     t: Union[float, str],
     density_center: bool = False,
     remove_artifacts: bool = True,
-) -> np.array:
-    """Compute a center-of-mass / density center for a given snapshot.
+) -> np.ndarray:
+    """Compute a center-of-mass or density center for a given snapshot.
 
     Parameters
     ----------
@@ -180,6 +199,8 @@ def center_of_snap(
         Whether to remove artifacts after the function execution. Default: True.
     Returns
     -------
+    np.ndarray
+        Array with the following structure: t, x, y, z, vx, vy, vz.
     """
     manipname = "dens_centre" if density_center else "centre_of_mass"
 
@@ -200,7 +221,24 @@ def masses_in_lagrange_radius(
     filename: Union[str, os.PathLike, Path],
     t: Union[float, str],
     remove_artifacts: bool = True,
-):
+) -> tuple[np.ndarray[np.float32], float, np.ndarray[bool]]:
+    """Compute which masses of cluster reside inside the half-mass radius.
+
+    Parameters
+    ----------
+    filename : Union[str, os.PathLike, Path]
+        the name of NEMO snapshot file
+    t : Union[float, str]
+        which time point in snapshot to use for profile calculations
+    remove_artifacts :
+        Whether to remove artifacts after the function execution. Default: True.
+    Returns
+    -------
+    tuple[np.ndarray[np.float32], float, np.ndarray[bool]]
+        First element: np.ndarray with all masses from snapshot
+        Second element: lagrange radius 50% for the snapshot
+        Third element: binary mask for masses
+    """
     snap = parse_nemo(filename=filename, t=t)  # m, x, y, z, vx, vy, vz
     masses = snap[0]
 
