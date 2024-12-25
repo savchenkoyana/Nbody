@@ -227,7 +227,7 @@ You can compare your results with plots from the article:
 
 ![](../images/lagrange_radii.png)
 
-> Note that half-mass radius for Plummer with size 10 pc [should be](https://en.wikipedia.org/wiki/Plummer_model) approximately 13 pc
+> Note that Lagrange radius at t=0 should be approximately 13 pc according to [analytical expression](https://en.wikipedia.org/wiki/Plummer_model) for Plummer with size 10 pc
 
 ## Plot mass spectrum $$f(M)$$
 
