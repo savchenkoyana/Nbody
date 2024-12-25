@@ -223,9 +223,9 @@ python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.
 
 You can compare your results with plots from the article:
 
-![](../images/lagrange_radii.png)
-
 ![](../images/cluster_stat.png)
+
+![](../images/lagrange_radii.png)
 
 > Note that half-mass radius for Plummer with size 10 pc [should be](https://en.wikipedia.org/wiki/Plummer_model) approximately 13 pc
 
