@@ -74,9 +74,7 @@ def parse_nemo(
     with RemoveFileOnEnterExit(snapfile, remove_artifacts):
         command = f"s2a in={filename} out={snapfile} times={t}"
         subprocess.check_call(command, shell=True)
-        result = np.loadtxt(snapfile).T if transpose else np.loadtxt(snapfile)
-
-    return result
+        return np.loadtxt(snapfile).T if transpose else np.loadtxt(snapfile)
 
 
 def profile_by_snap(
@@ -132,9 +130,7 @@ def profile_by_snap(
                     first_timestamp = False
                 f.write(line)
 
-        result = np.loadtxt(manipfile).T
-
-    return result
+        return np.loadtxt(manipfile).T
 
 
 def lagrange_radius_by_snap(
@@ -174,9 +170,7 @@ def lagrange_radius_by_snap(
         print(command)
 
         subprocess.check_call(command, shell=True)
-        result = np.loadtxt(manipfile).T
-
-    return result
+        return np.loadtxt(manipfile).T
 
 
 def center_of_snap(
@@ -212,9 +206,7 @@ def center_of_snap(
         print(command)
 
         subprocess.check_call(command, shell=True)
-        result = np.loadtxt(manipfile).T
-
-    return result
+        return np.loadtxt(manipfile).T
 
 
 def masses_in_lagrange_radius(
