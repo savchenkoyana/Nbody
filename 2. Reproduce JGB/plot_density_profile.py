@@ -41,6 +41,11 @@ if __name__ == "__main__":
         required=True,
         help="Which times to use. Example: '--times 0.0 0.5 1.0'",
     )
+    parser.add_argument(
+        "--store-artifacts",
+        action="store_true",
+        help="Whether to store NEMO artifacts for debug",
+    )
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
@@ -77,26 +82,32 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.xlabel("$r, pc$")
 
-    if args.projprof is None:
+    if args.projprof:
+        plt.ylabel(r"$\rho, M_\odot / pc^2$")
+    else:
         plt.plot(
             r, potential.density(xyz), linestyle="dotted", label=r"original $\rho(r)$"
         )
         plt.ylabel(r"$\rho, M_\odot / pc^3$")
-    else:
-        pass  # TODO: implement
-        plt.ylabel(r"$\rho, M_\odot / pc^2$")
 
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
     for t in args.times:
-        prof = profile_by_snap(filename=filename, t=t, projvector=proj_vector)
+        prof = profile_by_snap(
+            filename=filename,
+            t=t,
+            projvector=proj_vector,
+            remove_artifacts=not args.store_artifacts,
+        )
         r_prof, rho_prof = prof[0], prof[1]
 
-        plt.plot(r_prof, rho_prof, label=f"$t$={t}")
+        plt.plot(r_prof, rho_prof, label=f"$t$={t:.2e}")
 
     plt.legend(title=label)
     if args.projprof:
         plt.title("Projected density of the cluster")
     else:
         plt.title("Spherical density of the cluster")
+
+    plt.savefig(save_dir / "density_profile.png")
     plt.show()
