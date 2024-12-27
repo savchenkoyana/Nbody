@@ -8,6 +8,7 @@ from utils.general import check_parameters
 from utils.general import create_argparse
 from utils.general import mass_pdf
 from utils.plot import create_label
+from utils.snap import masses_in_lagrange_radius
 from utils.snap import parse_nemo
 
 if __name__ == "__main__":
@@ -18,7 +19,7 @@ if __name__ == "__main__":
         "--nemo-file",
         type=str,
         required=True,
-        help="Nemo file used for density profile computation",
+        help="Nemo file used for mass spectrum computation",
     )
     parser.add_argument(
         "--times",
@@ -26,6 +27,21 @@ if __name__ == "__main__":
         type=float,
         required=True,
         help="Which times to use. Example: '--times 0.0 0.5 1.0'",
+    )
+    parser.add_argument(
+        "--store-artifacts",
+        action="store_true",
+        help="Whether to store NEMO artifacts for debug",
+    )
+    parser.add_argument(
+        "--remove-outliers",
+        action="store_true",
+        help="Whether to remove outliers from non-converged dense_cluster",
+    )
+    parser.add_argument(
+        "--lagrange",
+        action="store_true",
+        help="Whether to plot only masses into the lagrange radius from density center (will be computed)",
     )
     args = parser.parse_args()
 
@@ -48,13 +64,28 @@ if __name__ == "__main__":
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
     for t in args.times:
-        masses = parse_nemo(filename=filename, t=t)[0]
+        if args.lagrange:
+            try:
+                masses, lagrange_r_mask = masses_in_lagrange_radius(
+                    filename=filename,
+                    t=t,
+                    remove_artifacts=not args.store_artifacts,
+                )
+                masses = masses[mask]
+            except RuntimeError:
+                if args.remove_outliers:
+                    continue
+                raise
+        else:
+            snap = parse_nemo(filename=filename, t=t)  # m, x, y, z, vx, vy, vz
+            masses = snap[0]
 
         (counts, bins) = np.histogram(masses, bins=m, density=True)
-        plt.hist(bins[:-1], bins, weights=counts, label=f"$t$={t}", histtype="step")
+        plt.hist(bins[:-1], bins, weights=counts, label=f"$t$={t:.2e}", histtype="step")
 
     plt.xscale("log")
     plt.xlabel(r"$M, M_\odot$")
     plt.legend(title=label)
     plt.title("Mass distribution in cluster")
+    plt.savefig(save_dir / "mass_spectrum.png")
     plt.show()
