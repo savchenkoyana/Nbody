@@ -99,19 +99,17 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   A set of recommended parameters for `gyrFalcON` is provided by `preprocess_snap.py` script at the end of its output.
 
-## Postprocess
+- It would be useful to postprocess your data to plot profiles, spectras, etc.
 
-It would be useful to postprocess your data to plot profiles, spectras, etc.
+  To postprocess snapshot evolved in JGB potential (the original article), run:
 
-To postprocess snapshot evolved in JGB potential (the original article), run:
+  ```shell
+  python postprocess.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source
+  ```
 
-```shell
-python postprocess.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source
-```
+  The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored in `<DIRNAME>` folder.
 
-The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored in `<DIRNAME>` folder.
-
-> If you used sh-scripts to reproduce the experiments, the postprocessing procedure has already been done for you.
+  > If you used sh-scripts to reproduce the experiments, the postprocessing procedure has already been done for you.
 
 # Explore results
 
