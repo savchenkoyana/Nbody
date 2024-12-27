@@ -35,7 +35,7 @@ To reproduce the experiment, follow this pipeline:
 
   The above command will automatically create (or re-create) a directory with name `snap_mu<MEAN>_s<SCALE>_sigma<SIGMA>_r<PLUMMER_RADIUS>_N<N>` containing file `IC.nemo` with initial coordinates for evolution.
 
-- Pre-process data (optional)
+- Pre-process data
 
 - Evolve for a couple of crossing times:
 
@@ -69,15 +69,13 @@ or run commands one-by-one using the instruction given in the next section.
 
 ## External potential
 
-This section desctibes how to perform the evolution of PBH cluster in an external potential.
+This section desctibes how to perform the evolution of PBH cluster in an external potential of SMBH. It is assumed that you have already created cluster's initial coordinates for evolution `DIRNAME/IC.nemo` using `create_ic.py` (see previous section).
 
-### Point mass potential
+- JGB writes:
 
-JGB writes:
+  > Clusters are themselves immersed in a central gravitational potential with orbital radius $R_c$ = 34 kpc and central mass $M = 4.37 × 10^{10} M\_{☉}$ throughout the entire evolution. This is just a point mass approximation which leads to a circular movement of period T = 2.81 Gyr
 
-> Clusters are themselves immersed in a central gravitational potential with orbital radius $R_c$ = 34 kpc and central mass $M = 4.37 × 10^{10} M\_{☉}$ throughout the entire evolution. This is just a point mass approximation which leads to a circular movement of period T = 2.81 Gyr
-
-- The easiest way to create this potential is to add a new particle representing the central mass to the existing snapshot with PBH cluster data:
+  The easiest way to create this point-mass potential is to add a new particle representing the central mass to the existing snapshot with PBH cluster data:
 
   ```shell
   python preprocess_snap.py \
