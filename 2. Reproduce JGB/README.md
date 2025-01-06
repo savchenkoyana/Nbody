@@ -10,7 +10,7 @@ Mass spectra used in the article.
 
 # How to reproduce
 
-To reproduce the experiment, follow this pipeline:
+To reproduce the experiment, follow these steps:
 
 - Activate the Agama environment:
 
@@ -24,30 +24,24 @@ To reproduce the experiment, follow this pipeline:
   source start_nemo.sh
   ```
 
-- Create initial coordinates for evolution:
+- Go to the experiment root directory:
 
   ```shell
   cd 2.\ Reproduce\ JGB/
-  python create_ic.py --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS> --N <N>
   ```
 
-  Here `N` is the number of particles in simulation, `MEAN`, `SIGMA`, and `SCALE` are log-normal distribution parameters of PBH mass spectrum, and `PLUMMER_RADIUS` is a characteristic size of Plummer density distribution (type `python create_ic.py --help` for more details).
-
-  The above command will automatically create (or re-create) a directory with name `snap_mu<MEAN>_s<SCALE>_sigma<SIGMA>_r<PLUMMER_RADIUS>_N<N>` containing file `IC.nemo` with initial coordinates for evolution.
-
-- Pre-process data
-
-- Evolve for a couple of crossing times:
+- To reproduce any experiment from the original article, run the corresponding sh-script. For example:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/<IC_COORDINATES>.nemo out=<DIRNAME>/out.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
+  bash sh_scripts/run_exp_MA.sh
   ```
 
-  Here `logstep=300` is the parameter which controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the output (don't forget to change `tstop` parameter according to how many crossing times you want to use). If you preprocess your data, you should adjust these parameters according to your preprocessing procedure.
+  You can also choose your own parameters for distributions and run the commands from sh-script one-by-one (see next section).
 
-- Post-process data
+  > Note that all scripts in this experiment overwrite the existing files.
+  > Don't forget to backup your experiments before trying to reproduce them!
 
-You may use your own parameters for the experiments. To reproduce the original article, use the combinations of parameters listed below:
+The combinations of parameters from the original article and corresponding sh-scripts are listed below:
 
 | Experiment name | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles | Script to reproduce evolution  |
 | --------------- | ---------------- | ----------- | --------- | ------------------ | ------------------- | ------------------------------ |
@@ -56,22 +50,23 @@ You may use your own parameters for the experiments. To reproduce the original a
 | $\\sigma$ = 1.5 | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma1.5.sh |
 | M & A           | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_MA.sh       |
 
-You may use bash scripts `run_exp*.sh` to run evolution, for example:
+## More detailed overview
 
-```shell
-bash sh_scripts/run_exp_MA.sh
-```
+This section desctibes how to perform the evolution of PBH cluster in an external potential of SMBH.
 
-or run commands one-by-one using the instruction given in the next section.
+- Create initial coordinates of cluster:
 
-> Note that all python scripts in this experiment overwrite the existing files.
-> Don't forget to backup your experiments before trying to reproduce them!
+  ```shell
+  python create_ic.py --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS> --N <N>
+  ```
 
-## External potential
+  Here `N` is the number of particles in simulation, `MEAN`, `SIGMA`, and `SCALE` are log-normal distribution parameters of PBH mass spectrum, and `PLUMMER_RADIUS` is a characteristic size of Plummer density distribution (type `python create_ic.py --help` for more details).
 
-This section desctibes how to perform the evolution of PBH cluster in an external potential of SMBH. It is assumed that you have already created cluster's initial coordinates for evolution `DIRNAME/IC.nemo` using `create_ic.py` (see previous section).
+  The above command will automatically create (or re-create) a directory with name `snap_mu<MEAN>_s<SCALE>_sigma<SIGMA>_r<PLUMMER_RADIUS>_N<N>` containing file `IC.nemo` with initial coordinates for evolution.
 
-- JGB writes:
+- Preprocess data
+
+  JGB writes:
 
   > Clusters are themselves immersed in a central gravitational potential with orbital radius $R_c$ = 34 kpc and central mass $M = 4.37 × 10^{10} M\_{☉}$ throughout the entire evolution. This is just a point mass approximation which leads to a circular movement of period T = 2.81 Gyr
 
@@ -91,7 +86,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   Note that `preprocess.py` also converts parsecs to kiloparsecs for convenience using NEMO's `snapscale`. The reverse transformation is performed by `postrprocess.py`.
 
-- Run evolution of this snapshot wuth SMBH:
+- Run evolution of this snapshot with SMBH:
 
   ```shell
   gyrfalcON in=<DIRNAME>/IC_preprocessed.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
@@ -109,8 +104,6 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored in `<DIRNAME>` folder.
 
-  > If you used sh-scripts to reproduce the experiments, the postprocessing procedure has already been done for you.
-
 # Explore results
 
 ## Visualize cluster evolution
@@ -118,7 +111,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 - To visualize cluster evolution, run:
 
   ```shell
-  snapplot3 <DIRNAME>/out.nemo
+  snapplot <DIRNAME>/out.nemo
   ```
 
   Use these options for customization:
