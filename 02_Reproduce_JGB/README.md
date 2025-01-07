@@ -27,7 +27,7 @@ To reproduce the experiment, follow these steps:
 - Go to the experiment root directory:
 
   ```shell
-  cd 2.\ Reproduce\ JGB/
+  cd 02_Reproduce_JGB/
   ```
 
 - To reproduce any experiment from the original article, run the corresponding sh-script. For example:
