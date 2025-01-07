@@ -189,6 +189,16 @@ python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
 
 To test your pipeline, you may evolve a cluster in its own gravitational field (without any potentials). The final density after the evolution should look like the initial density. This indicates that your model is truly self-consistent.
 
+# Compare with precise Nbody methods
+
+Many researchers use Nbody6++GPU in order to perform evolution of clusters. We need to compare our method (fast gytFalcON with complexity $O(N)$) with precise but slow Nbody methods with complexity $O(N^2)$ to make sure that our method suits good for this task.
+
+To run both methods for the same task, use:
+
+```shell
+bash sh_scripts/nbody.sh
+```
+
 # Checklist
 
 Here is a list of what we need to fully reproduce the article:
