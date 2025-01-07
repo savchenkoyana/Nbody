@@ -199,6 +199,12 @@ To run both methods for the same task, use:
 bash sh_scripts/nbody.sh
 ```
 
+To compare results visually use:
+
+```shell
+snapplot nbody_vs_gyrfalcon/<snapfile> xrange=-130:130 yrange=-130:130
+```
+
 # Checklist
 
 Here is a list of what we need to fully reproduce the article:

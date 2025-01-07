@@ -69,10 +69,10 @@ def parse_nemo(
         7 coordinates are: mass, x, y, z, vx, vy, vz.
     """
     filename = str(filename)
-    snapfile = filename.replace(".nemo", f"{t}.txt")
+    snapfile = filename.replace(".nemo", "") + f"{t}.txt"
 
     with RemoveFileOnEnterExit(snapfile, remove_artifacts):
-        command = f"s2a in={filename} out={snapfile} times={t}"
+        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | s2a in=- out={snapfile}"
         subprocess.check_call(command, shell=True)
         return np.loadtxt(snapfile).T if transpose else np.loadtxt(snapfile)
 
@@ -107,28 +107,14 @@ def profile_by_snap(
     manipname = "sphereprof" if not projvector else "projprof"
 
     filename = str(filename)
-    manipfile = filename.replace(".nemo", f"_{manipname}{t}")
+    manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
         manippars = "" if not projvector else ",".join([str(_) for _ in projvector])
-        command = f'manipulate in={filename} out=. manipname=centre_of_mass+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
+        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
-
-        # TODO: dummy fix, needs to take care of!
-        with open(manipfile) as f:
-            lines = f.readlines()
-
-        first_timestamp = True
-        with open(manipfile, "w") as f:
-            for line in lines:
-                if line.startswith("#"):
-                    if not first_timestamp:
-                        break
-                else:
-                    first_timestamp = False
-                f.write(line)
 
         return np.loadtxt(manipfile).T
 
@@ -162,11 +148,11 @@ def lagrange_radius_by_snap(
     manipname = "lagrange"
 
     filename = str(filename)
-    manipfile = filename.replace(".nemo", f"_{manipname}{t}")
+    manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
     dens_par = 500
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        command = f'manipulate in={filename} out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" times={t} | tee {manipname}_log 2>&1'
+        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
@@ -199,10 +185,10 @@ def center_of_snap(
     manipname = "dens_centre" if density_center else "centre_of_mass"
 
     filename = str(filename)
-    manipfile = filename.replace(".nemo", f"_{manipname}{t}")
+    manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        command = f'manipulate in={filename} out=. manipname={manipname} manippars="" manipfile="{manipfile}" times={t} | tee {manipname}_log 2>&1'
+        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)

@@ -41,4 +41,5 @@ snapstack $IC_CLUSTER $IC_SMBH $IC deltar=100,0,0 deltav=0,-2,0
 # Step is 0.25 crossing times
 gyrfalcON $IC $OUT_FALC eps=$EPS kmax=$KMAX step=0.707 tstop=56.5685 logstep=100
 
-nbody0 $IC $OUT_NBODY tcrit=56.5685 deltat=0.707 eps=$EPS
+#nbody0 $IC $OUT_NBODY tcrit=56.5685 deltat=0.707 eps=$EPS
+runbody1 $IC $OUT_NBODY tcrit=56.5685 deltat=0.707 eps=$EPS body1=100 bodyn=0.001
