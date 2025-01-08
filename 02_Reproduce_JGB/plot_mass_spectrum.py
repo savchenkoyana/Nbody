@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import agama
 import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
@@ -63,10 +64,13 @@ if __name__ == "__main__":
 
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
+    agama.setUnits(length=1, mass=1, velocity=1)  # time units used for evolution
+    timeUnitGyr = agama.getUnits()["time"] / 1e3  # time unit is 1 kpc / (1 km/s)
+
     for t in args.times:
         if args.lagrange:
             try:
-                masses, lagrange_r_mask = masses_in_lagrange_radius(
+                masses, lagrange_r, mask = masses_in_lagrange_radius(
                     filename=filename,
                     t=t,
                     remove_artifacts=not args.store_artifacts,
@@ -81,7 +85,13 @@ if __name__ == "__main__":
             masses = snap[0]
 
         (counts, bins) = np.histogram(masses, bins=m, density=True)
-        plt.hist(bins[:-1], bins, weights=counts, label=f"$t$={t:.2e}", histtype="step")
+        plt.hist(
+            bins[:-1],
+            bins,
+            weights=counts,
+            label=f"$t$={t * timeUnitGyr:.2f}",
+            histtype="step",
+        )
 
     plt.xscale("log")
     plt.xlabel(r"$M, M_\odot$")

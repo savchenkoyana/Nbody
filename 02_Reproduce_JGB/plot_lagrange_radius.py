@@ -52,19 +52,16 @@ if __name__ == "__main__":
     fig_rt, ax_rt = plt.subplots()  # for Lagrange radius vs Time
     ax_rt.set_xlabel("$t$, Gyr")
     ax_rt.set_ylabel("Lagrange radius, $pc$")
-    ax_rt.legend(title=label)
     ax_rt.set_title("Lagrange radii for 50% of mass")
 
     fig_nt, ax_nt = plt.subplots()  # for N particles in Lagrange radius vs Time
     ax_nt.set_xlabel("$t$, Gyr")
     ax_nt.set_ylabel("$N(t) / N(t=0)$")
-    ax_nt.legend(title=label)
     ax_nt.set_title("Number of particles in cluster")
 
     fig_mt, ax_mt = plt.subplots()  # for Mass in Lagrange radius vs Time
     ax_mt.set_xlabel("$t$, Gyr")
-    ax_mt.set_ylabel(r"$M(t)$, M_\odot$")
-    ax_mt.legend(title=label)
+    ax_mt.set_ylabel(r"$M(t)$, $M_\odot$")
     ax_mt.set_title("Mean mass of particles in cluster")
 
     for filename in args.nemo_files:
@@ -103,6 +100,11 @@ if __name__ == "__main__":
         ax_rt.plot(times, lagrange_radii, ".", label=plot_label)
         ax_nt.plot(times, n_particles / n_particles[0], ".", label=plot_label)
         ax_mt.plot(times, mean_mass, ".", label=plot_label)
+
+    # If legends are created before calling of ax.plot, there will be no labels
+    ax_rt.legend(title=label)
+    ax_nt.legend(title=label)
+    ax_mt.legend(title=label)
 
     fig_rt.savefig(save_dir / "lagrange_radii.png")
     fig_nt.savefig(save_dir / "N_lagrange_radii.png")
