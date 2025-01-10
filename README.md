@@ -46,25 +46,6 @@ If installation completed successfully, you should get "TESTSUITE: OK" for each 
 
 For more info about NEMO see [NEMO's official documentation](https://astronemo.readthedocs.io/en/latest/) and [NEMO's github pages](https://teuben.github.io/nemo/)
 
-## Install Nbody6
-
-To install Nbody6, follow these steps:
-
-```shell
-wget ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz
-mkdir nbody6
-gunzip nbody6.tar.gz
-tar -xf nbody6.tar -C nbody6
-(cd nbody6/GPU2 ;  make clean; make sse ; cp run/nbody7b.sse $NEMOBIN)
-(cd nbody6/Ncode ; make clean; make     ; cp nbody6         $NEMOBIN)
-```
-
-Check that everything works fine:
-
-```shell
-bash test_runbody6.sh
-```
-
 ## Install Agama
 
 Activate conda environment, if it is not activated:
