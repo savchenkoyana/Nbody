@@ -57,10 +57,10 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 - Create initial coordinates of cluster:
 
   ```shell
-  python create_ic.py --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS> --N <N>
+  python create_ic.py --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS> --N <N>
   ```
 
-  Here `N` is the number of particles in simulation, `MEAN`, `SIGMA`, and `SCALE` are log-normal distribution parameters of PBH mass spectrum, and `PLUMMER_RADIUS` is a characteristic size of Plummer density distribution (type `python create_ic.py --help` for more details).
+  Here `N` is the number of particles in simulation, `MU`, `SIGMA`, and `SCALE` are log-normal distribution parameters of PBH mass spectrum, and `PLUMMER_RADIUS` is a characteristic size of Plummer density distribution (type `python create_ic.py --help` for more details).
 
   The above command will automatically create (or re-create) a directory with name `snap_mu<MEAN>_s<SCALE>_sigma<SIGMA>_r<PLUMMER_RADIUS>_N<N>` containing file `IC.nemo` with initial coordinates for evolution.
 
@@ -193,17 +193,33 @@ To test your pipeline, you may evolve a cluster in its own gravitational field (
 
 Many researchers use Nbody6++GPU in order to perform evolution of clusters. We need to compare our method (fast gytFalcON with complexity $O(N)$) with precise but slow Nbody methods with complexity $O(N^2)$ to make sure that our method suits good for this task.
 
-To run both methods for the same task, use:
+## How to perform evolution with Nbody
+
+To run both gyrFalcON and Nbody0 methods for the same task, use `1` in argument:
 
 ```shell
-bash sh_scripts/nbody.sh
+bash sh_scripts/run_exp_MA.sh 1
 ```
 
-To compare results visually use:
+## Compare results
+
+You can compare results visually (by running `animate.py`) or plot all statistics: density profile, mass spectrum or lagrange radius.
+
+To plot lagrange radii for gyrFalcON and Nbody0 together, run this command:
 
 ```shell
-snapplot nbody_vs_gyrfalcon/<snapfile> xrange=-130:130 yrange=-130:130
+python plot_lagrange_radius.py \
+  --remove-outliers \
+  --nemo-files /path/to/dir1/out_postprocessed.nemo ... /path/to/dirn/out_postprocessed.nemo \
+  --mu <MU> \
+  --sigma <SIGMA> \
+  --scale <SCALE> \
+  --times t1 ... tn \
+  --nbody-nemo-files /path/to/dirn/out_nbody_postprocessed.nemo \
+  --nbody-times t1 ... tn
 ```
+
+> Note that timestamps for gyrFalcON and Nbody0 will likely differ, so we feed them separately. There is also a way to get the nearest timestamp in snapshot using NEMO's `snaptrim` with option `timefuzz=nearest`. However, there is a [bug](https://github.com/savchenkoyana/Nbody/issues/9) related to close timestamps in a simulation snapshot. So my way is uglier but less error prone.
 
 # Checklist
 
