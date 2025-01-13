@@ -24,10 +24,30 @@ To reproduce the experiment, follow these steps:
   source start_nemo.sh
   ```
 
+- Switch to custom NEMO version (needed for NbodyX methods):
+
+  ```shell
+  cd $NEMO
+  git remote add custom https://github.com/savchenkoyana/nemo.git
+  git checkout nbodyx
+  cd src/nbody/evolve/aarseth/nbody0
+  make nmax
+  cd $NEMO
+  make rebuild
+  ```
+
+  If you want to go back to the default NEMO version, run:
+
+  ```shell
+  cd $NEMO
+  git checkout master
+  make rebuild
+  ```
+
 - Go to the experiment root directory:
 
   ```shell
-  cd 02_Reproduce_JGB/
+  cd /path/to/Nbody/02_Reproduce_JGB/
   ```
 
 - To reproduce any experiment from the original article, run the corresponding sh-script. For example:
@@ -195,7 +215,7 @@ Many researchers use Nbody6++GPU in order to perform evolution of clusters. We n
 
 ## How to perform evolution with Nbody
 
-To run both gyrFalcON and Nbody0 methods for the same task, use `1` in argument:
+To run both gyrFalcON and Nbody0 methods together, use `1` in argument:
 
 ```shell
 bash sh_scripts/run_exp_MA.sh 1
