@@ -215,11 +215,13 @@ Many researchers use Nbody6++GPU in order to perform evolution of clusters. We n
 
 ## How to perform evolution with Nbody
 
-To run both gyrFalcON and Nbody0 methods together, use `1` in argument:
+At the moment I compare gyrfalcON with Nbody0 (the simplest Nbody method). To run both gyrFalcON and Nbody0 methods together, use `1` in a bash script for evolution:
 
 ```shell
 bash sh_scripts/run_exp_MA.sh 1
 ```
+
+> The default command `bash sh_scripts/run_exp_MA.sh` is equivalent to `bash sh_scripts/run_exp_MA.sh 0`, the latter argument means whether to run Nbody0 or not.
 
 ## Compare results
 
@@ -240,6 +242,12 @@ python plot_lagrange_radius.py \
 ```
 
 > Note that timestamps for gyrFalcON and Nbody0 will likely differ, so we feed them separately. There is also a way to get the nearest timestamp in snapshot using NEMO's `snaptrim` with option `timefuzz=nearest`. However, there is a [bug](https://github.com/savchenkoyana/Nbody/issues/9) related to close timestamps in a simulation snapshot. So my way is uglier but less error prone.
+
+# Units
+
+The main diffrence between Nbody0 and gyrFalcON is that Nbody0 always uses `G=1`. We, on the other hand, use non-usual units in our experiments. The convenient units for creating a cluster model with log-normal spectrum are: parsec, km/s and $M\_{☉}$. We use another units for evolution: kiloparsec, km/s and $M\_{☉}$. Mostly these units are motivated by the fact that they are used with the Milky Way potential from Portail et al. (2017) [implemented in Agama](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_mw_potential_hunter24.py) and we would probably like to reuse our code for this task in future.
+
+The easiest choice of units for Nbody0 is: kiloparsec, km/s and $232533.73313343327 \\times M\_{☉}$. In these units `G=1` and also we do not need to change the time scale.
 
 # Checklist
 
