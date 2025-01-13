@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
+from utils.plot import create_file_label
 from utils.plot import create_label
 from utils.snap import masses_in_lagrange_radius
 
@@ -22,11 +23,25 @@ if __name__ == "__main__":
         help="Nemo files used for lagrange radii computation",
     )
     parser.add_argument(
+        "--nbody-nemo-files",
+        nargs="+",
+        type=str,
+        required=False,
+        help="Same as '--nemo-files', but for NbodyX integrator output",
+    )
+    parser.add_argument(
         "--times",
         nargs="+",
         type=float,
         required=True,
         help="Which times to use. Example: '--times 0.0 0.5 1.0'",
+    )
+    parser.add_argument(
+        "--nbody-times",
+        nargs="+",
+        type=float,
+        required=False,
+        help="Same as '--times', but for NbodyX integrator output",
     )
     parser.add_argument(
         "--store-artifacts",
@@ -64,6 +79,11 @@ if __name__ == "__main__":
     ax_mt.set_ylabel(r"$M(t)$, $M_\odot$")
     ax_mt.set_title("Mean mass of particles in cluster")
 
+    if args.nbody_nemo_files is None:
+        args.nbody_nemo_files = []
+
+    args.nemo_files += args.nbody_nemo_files
+
     for filename in args.nemo_files:
         filename = Path(filename)
         if not filename.exists():
@@ -74,7 +94,12 @@ if __name__ == "__main__":
         n_particles = np.array([], dtype=np.float32)
         mean_mass = np.array([], dtype=np.float32)
 
-        for t in args.times:
+        nbody_algo = (
+            str(filename) in args.nbody_nemo_files
+        )  # whether NEMO file is produced with NbodyX algo
+        times_list = args.nbody_times if nbody_algo else args.times
+
+        for t in times_list:
             try:
                 masses, lagrange_r, mask = masses_in_lagrange_radius(
                     filename=filename,
@@ -95,11 +120,12 @@ if __name__ == "__main__":
             mean_mass = np.append(mean_mass, np.mean(m_filtered))
 
         plot_label = (
-            filename.parts[-2] if len(args.nemo_files) > 1 else None
+            create_file_label(filename) if len(args.nemo_files) > 1 else None
         )  # label as filename if there are many files
-        ax_rt.plot(times, lagrange_radii, ".", label=plot_label)
-        ax_nt.plot(times, n_particles / n_particles[0], ".", label=plot_label)
-        ax_mt.plot(times, mean_mass, ".", label=plot_label)
+        fmt = "v" if nbody_algo else "."
+        ax_rt.plot(times, lagrange_radii, fmt, label=plot_label)
+        ax_nt.plot(times, n_particles / n_particles[0], fmt, label=plot_label)
+        ax_mt.plot(times, mean_mass, fmt, label=plot_label)
 
     # If legends are created before calling of ax.plot, there will be no labels
     ax_rt.legend(title=label)

@@ -1,6 +1,7 @@
 """Utils used for plotting."""
 
 from functools import partial
+from pathlib import Path
 from typing import Callable
 from typing import Optional
 
@@ -18,6 +19,17 @@ def create_label(mu: float, scale: float, sigma: float) -> str:
         label = f"{mu}_{scale}_{sigma}"
 
     return label
+
+
+def create_file_label(filename: Path) -> str:
+    """Creates label by filename.
+
+    Filename should be like this: f'/path/to/dirname/snap_mu{mu}_s{scale}_sigma{sigma}_r{plummer_r}_N{N}_{postfix}'.
+    """
+    dirname = filename.parts[-2]
+    postfix = "_".join(dirname.split("_")[6:])
+
+    return postfix
 
 
 def show_with_timeout():

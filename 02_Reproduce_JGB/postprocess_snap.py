@@ -17,6 +17,7 @@ def postprocess(
     remove_point_source: bool = False,
     source_mass: float = 4.37 * 10**10,
     r_scale: float = 1.0,
+    m_scale: float = 1.0,
 ):
     """
     Postprocess snapshot: remove source of field (if needed) and change length units.
@@ -37,11 +38,11 @@ def postprocess(
     # Remove source mass (optional)
     if remove_point_source:
         assert np.allclose(xv[-1], np.zeros((1, 6)), atol=1e-7), xv[-1]
-        assert np.isclose(masses[-1], source_mass), masses[-1]
+        assert np.isclose(masses[-1], source_mass / m_scale), masses[-1]
 
-        command = f"snapmask {filename} - select=0:{N - 2} | snapscale - {output_file} rscale={r_scale}"
+        command = f"snapscale in={filename} out=- rscale={r_scale} mscale={m_scale} | snapmask - {output_file} select=0:{N - 2}"
     else:
-        command = f"snapscale in={filename} out={output_file} rscale={r_scale}"
+        command = f"snapscale in={filename} out={output_file} rscale={r_scale} mscale={m_scale}"
 
     print(f"Running:\n\t{command}\n")
     subprocess.check_call(command, shell=True)
@@ -69,6 +70,11 @@ if __name__ == "__main__":
         default=4.37 * 10**10,
         help="Mass of point source of gravitational field (is solar masses). Default: 4.37x10^10",
     )
+    parser.add_argument(
+        "--nbody",
+        action="store_true",
+        help="Whether to use units for Nbody",
+    )
     args = parser.parse_args()
 
     postprocess(
@@ -76,5 +82,6 @@ if __name__ == "__main__":
         remove_point_source=args.remove_point_source,
         source_mass=args.source_mass,
         r_scale=1e3,  # kpc -> pc
+        m_scale=232533.73313343327 if args.nbody else 1.0,
         output_file=args.nemo_file.replace(".nemo", "_postprocessed.nemo"),
     )
