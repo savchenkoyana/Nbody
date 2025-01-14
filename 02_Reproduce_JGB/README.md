@@ -24,7 +24,7 @@ To reproduce the experiment, follow these steps:
   source start_nemo.sh
   ```
 
-- Switch to custom NEMO version (needed for NbodyX methods):
+- Switch to custom NEMO version (needed for Nbodyx methods, such as Nbody0 and Nbody6):
 
   ```shell
   cd $NEMO
@@ -82,7 +82,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   Here `N` is the number of particles in simulation, `MU`, `SIGMA`, and `SCALE` are log-normal distribution parameters of PBH mass spectrum, and `PLUMMER_RADIUS` is a characteristic size of Plummer density distribution (type `python create_ic.py --help` for more details).
 
-  The above command will automatically create (or re-create) a directory with name `snap_mu<MEAN>_s<SCALE>_sigma<SIGMA>_r<PLUMMER_RADIUS>_N<N>` containing file `IC.nemo` with initial coordinates for evolution.
+  The above command will automatically create (or re-create) a directory with name `snap_mu<MU>_s<SCALE>_sigma<SIGMA>_r<PLUMMER_RADIUS>_N<N>` containing file `IC.nemo` with initial coordinates for evolution.
 
 - Preprocess data
 
@@ -104,7 +104,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   After this step, you will get a new file `<DIRNAME>/IC_preprocessed.nemo` with the old data concatenated with the new data (a steady point of mass $4.37\\times10^{10} M\_\\odot$ at (0, 0, 0)).
 
-  Note that `preprocess.py` also converts parsecs to kiloparsecs for convenience using NEMO's `snapscale`. The reverse transformation is performed by `postrprocess.py`.
+  Note that `preprocess.py` also converts parsecs to kiloparsecs for convenience using NEMO's `snapscale`. The reverse transformation is performed by `postrprocess.py`. For more details see section [Units](#Units).
 
 - Run evolution of this snapshot with SMBH:
 
@@ -157,14 +157,14 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   where `<N>` is the desired number of timestamps.
 
-  > If you used sh-scripts, check `timestamps.txt` file in directory with your snapshot
+  > If you used sh-scripts, check `txt`-file in directory with your snapshot
 
 ## Plot density profile $$\\rho(r)$$
 
 Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
 
 ```shell
-python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
 ## Plot Lagrange radii
@@ -187,14 +187,14 @@ You can compare your results with plots from the article:
 
 ![](../images/lagrange_radii.png)
 
-Note that Lagrange radius at t=0 should be approximately 13 pc according to [analytical expression](https://en.wikipedia.org/wiki/Plummer_model) for Plummer with size 10 pc
+Note that Lagrange radius at $t=0$ should be approximately 13 pc according to [analytical expression](https://en.wikipedia.org/wiki/Plummer_model) for Plummer with size 10 pc.
 
 ## Plot mass spectrum $$f(M)$$
 
 Compute and plot mass spectrum for a given snapshot along with the original distribution function:
 
 ```shell
-python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
+python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
 The mass distribution for your snapshot (the resulting histograms) and original pdf (the line plot) should look like a log-normal distribution with your parameters at $t=0$. You can compare your results with the picture of log-normal distributions at the beginning of this README document.
@@ -202,7 +202,7 @@ The mass distribution for your snapshot (the resulting histograms) and original 
 To plot the distribution of masses only for particles inside the half-mass radius, run:
 
 ```shell
-python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mean <MEAN> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS> --lagrange --remove-outliers
+python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS> --lagrange --remove-outliers
 ```
 
 # Test pipeline
@@ -211,7 +211,7 @@ To test your pipeline, you may evolve a cluster in its own gravitational field (
 
 # Compare with precise Nbody methods
 
-Many researchers use Nbody6++GPU in order to perform evolution of clusters. We need to compare our method (fast gytFalcON with complexity $O(N)$) with precise but slow Nbody methods with complexity $O(N^2)$ to make sure that our method suits good for this task.
+Many researchers use Nbody6++GPU in order to perform evolution of clusters. We need to compare our method (fast gytFalcON with complexity $O(N)$) with precise but slow Nbodyx methods (Nbody0, Nbody4, Nbody6, etc.) with complexity $O(N^2)$ to make sure that our method suits good for this task.
 
 ## How to perform evolution with Nbody
 
@@ -241,13 +241,19 @@ python plot_lagrange_radius.py \
   --nbody-times t1 ... tn
 ```
 
-> Note that timestamps for gyrFalcON and Nbody0 will likely differ, so we feed them separately. There is also a way to get the nearest timestamp in snapshot using NEMO's `snaptrim` with option `timefuzz=nearest`. However, there is a [bug](https://github.com/savchenkoyana/Nbody/issues/9) related to close timestamps in a simulation snapshot. So my way is uglier but less error prone.
+> Note that timestamps for gyrFalcON and Nbody0 will likely differ, so we need to feed them separately. There is also a way to get the nearest timestamp in snapshot using NEMO's `snaptrim` with option `timefuzz=nearest`. However, there is a [bug](https://github.com/savchenkoyana/Nbody/issues/9) related to close timestamps in a simulation snapshot. So my way is uglier but less error prone.
 
 # Units
 
-The main diffrence between Nbody0 and gyrFalcON is that Nbody0 always uses `G=1`. We, on the other hand, use non-usual units in our experiments. The convenient units for creating a cluster model with log-normal spectrum are: parsec, km/s and $M\_{☉}$. We use another units for evolution: kiloparsec, km/s and $M\_{☉}$. Mostly these units are motivated by the fact that they are used with the Milky Way potential from Portail et al. (2017) [implemented in Agama](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_mw_potential_hunter24.py) and we would probably like to reuse our code for this task in future.
+The main diffrence between Nbody0 and gyrFalcON is that Nbody0 always uses `G=1`. We, on the other hand, use non-usual units in our experiments:
 
-The easiest choice of units for Nbody0 is: kiloparsec, km/s and $232533.73313343327 \\times M\_{☉}$. In these units `G=1` and also we do not need to change the time, velocity and length scale.
+- We use pc (length), km/s (velocity) and $M\_{☉}$ (mass) units for creating a cluster model because of convenience
+- We use another units for evolution: kpc for lenght, km/s for velocity and $M\_{☉}$ for mass. Mostly these units are motivated by the fact that they are used with the Milky Way potential from Portail et al. (2017) [implemented in Agama](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_mw_potential_hunter24.py) and we would probably like to reuse our code for this task in future. Also characteristic size of the system changes to kpc (the size of cluster orbit).
+
+With that in mind, I decided that the easiest choice of units for Nbody0 is: kpc, km/s and $\\sim 232533.7 \\times M\_{☉}$:
+
+- In these units `G=1` by definition
+- It is easy to compare results of evolution between Nbody0 and gyrFalcON and reuse the same scripts, as we do not need to change the time, velocity and length scale. We only change the mass scale.
 
 # Checklist
 
