@@ -61,7 +61,8 @@ if __name__ == "__main__":
     agama.setUnits(length=1, mass=1, velocity=1)  # time units used for evolution
     timeUnitGyr = agama.getUnits()["time"] / 1e3  # time unit is 1 kpc / (1 km/s)
 
-    # assuming filenames are like /path/to/Nbody/2.\ Reproduce\ JGB/<DIRNAME>/out.nemo
+    # assuming filenames are: /path/to/Nbody/02_Reproduce_JGB/<DIRNAME>/out.nemo
+    # we will save data into /path/to/Nbody/02_Reproduce_JGB
     save_dir = Path(args.nemo_files[0]).parents[1]
 
     fig_rt, ax_rt = plt.subplots()  # for Lagrange radius vs Time
@@ -119,6 +120,9 @@ if __name__ == "__main__":
             n_particles = np.append(n_particles, m_filtered.size)
             mean_mass = np.append(mean_mass, np.mean(m_filtered))
 
+        # plot_label = (
+        #     filename.parts[-2] if len(args.nemo_files) > 1 else None
+        # )  # label as filename if there are many files
         plot_label = (
             create_file_label(filename) if len(args.nemo_files) > 1 else None
         )  # label as filename if there are many files
