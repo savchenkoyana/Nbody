@@ -65,17 +65,18 @@ if __name__ == "__main__":
     # we will save data into /path/to/Nbody/02_Reproduce_JGB
     save_dir = Path(args.nemo_files[0]).parents[1]
 
-    fig_rt, ax_rt = plt.subplots()  # for Lagrange radius vs Time
+    fig_rt, ax_rt = plt.subplots()  # Lagrange radius vs Time
     ax_rt.set_xlabel("$t$, Gyr")
     ax_rt.set_ylabel("Lagrange radius, $pc$")
     ax_rt.set_title("Lagrange radii for 50% of mass")
 
-    fig_nt, ax_nt = plt.subplots()  # for N particles in Lagrange radius vs Time
+    fig_nt, ax_nt = plt.subplots()  # N particles in Lagrange radius vs Time
     ax_nt.set_xlabel("$t$, Gyr")
     ax_nt.set_ylabel("$N(t) / N(t=0)$")
+    ax_nt.set_ylim([0, 1])
     ax_nt.set_title("Number of particles in cluster")
 
-    fig_mt, ax_mt = plt.subplots()  # for Mass in Lagrange radius vs Time
+    fig_mt, ax_mt = plt.subplots()  # Mass in Lagrange radius vs Time
     ax_mt.set_xlabel("$t$, Gyr")
     ax_mt.set_ylabel(r"$M(t)$, $M_\odot$")
     ax_mt.set_title("Mean mass of particles in cluster")
