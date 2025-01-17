@@ -243,6 +243,8 @@ python plot_lagrange_radius.py \
 
 > Note that timestamps for gyrFalcON and Nbody0 will likely differ, so we need to feed them separately. There is also a way to get the nearest timestamp in snapshot using NEMO's `snaptrim` with option `timefuzz=nearest`. However, there is a [bug](https://github.com/savchenkoyana/Nbody/issues/9) related to close timestamps in a simulation snapshot. So my way is uglier but less error prone.
 
+> It takes about 4 hours to run a gyrFalcON simulation on our CPU. Running Nbody0 simulation takes about 3 days depending on task you choose. Running M & A experiment with `N = 20000` was not reasonable because it would take us more than two weeks, so we used `N = 10000` for this experiment.
+
 # Units
 
 The main diffrence between Nbody0 and gyrFalcON is that Nbody0 always uses `G=1`. We, on the other hand, use non-usual units in our experiments:
