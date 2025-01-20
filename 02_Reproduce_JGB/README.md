@@ -223,6 +223,8 @@ bash sh_scripts/run_exp_MA.sh 1
 
 > The default command `bash sh_scripts/run_exp_MA.sh` is equivalent to `bash sh_scripts/run_exp_MA.sh 0`, the latter argument means whether to run Nbody0 or not.
 
+> It takes about 4 hours to run a gyrFalcON simulation on our CPU. Running Nbody0 simulation takes about 3 days depending on task you choose. Running M & A experiment with `N = 20000` was not reasonable because it would take us more than two weeks, so we used `N = 10000` for this experiment.
+
 ## Compare results
 
 You can compare results visually (by running `animate.py`) or plot all statistics: density profile, mass spectrum or lagrange radius.
@@ -236,14 +238,12 @@ python plot_lagrange_radius.py \
   --mu <MU> \
   --sigma <SIGMA> \
   --scale <SCALE> \
-  --times t1 ... tn \
+  --times <t1> ... <tn> \
   --nbody-nemo-files /path/to/dirn/out_nbody_postprocessed.nemo \
-  --nbody-times t1 ... tn
+  --nbody-times <t1> ... <tn>
 ```
 
 > Note that timestamps for gyrFalcON and Nbody0 will likely differ, so we need to feed them separately. There is also a way to get the nearest timestamp in snapshot using NEMO's `snaptrim` with option `timefuzz=nearest`. However, there is a [bug](https://github.com/savchenkoyana/Nbody/issues/9) related to close timestamps in a simulation snapshot. So my way is uglier but less error prone.
-
-> It takes about 4 hours to run a gyrFalcON simulation on our CPU. Running Nbody0 simulation takes about 3 days depending on task you choose. Running M & A experiment with `N = 20000` was not reasonable because it would take us more than two weeks, so we used `N = 10000` for this experiment.
 
 # Units
 
