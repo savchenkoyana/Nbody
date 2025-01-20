@@ -39,7 +39,7 @@ To reproduce the experiment, follow these steps:
   ```
 - Create initial coordinates for evolution:
   ```shell
-  cd 1.\ Custom\ Density\ Model\ Evolution/
+  cd 01_Custom_Density_Model_Evolution/
   python create_ic.py --density-type <DENSITY_TYPE> --N 10000
   ```
   `DENSITY_TYPE` should be `BH` (for black hole density) or `DM` (for dark matter density).

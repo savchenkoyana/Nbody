@@ -46,9 +46,17 @@ if __name__ == "__main__":
         action="store_true",
         help="Whether to store NEMO artifacts for debug",
     )
+    parser.add_argument(
+        "--remove-outliers",
+        action="store_true",
+        help="Whether to remove outliers from non-converged dense_cluster",
+    )
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
+
+    agama.setUnits(length=1, mass=1, velocity=1)  # time units used for evolution
+    timeUnitGyr = agama.getUnits()["time"] / 1e3  # time unit is 1 kpc / (1 km/s)
 
     set_units()  # set Agama units
 
@@ -99,9 +107,14 @@ if __name__ == "__main__":
             projvector=proj_vector,
             remove_artifacts=not args.store_artifacts,
         )
-        r_prof, rho_prof = prof[0], prof[1]
+        try:
+            r_prof, rho_prof = prof[0], prof[1]
+        except IndexError:  # dens_centre failed to find a center
+            if args.remove_outliers:
+                continue
+            raise
 
-        plt.plot(r_prof, rho_prof, label=f"$t$={t:.2e}")
+        plt.plot(r_prof, rho_prof, label=f"$t$={t * timeUnitGyr:.2f}")
 
     plt.legend(title=label)
     if args.projprof:
