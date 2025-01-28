@@ -6,8 +6,8 @@ import subprocess
 from pathlib import Path
 from typing import Union
 
-import agama
 import numpy as np
+from utils.snap import parse_nemo
 from utils.snap import remove
 
 
@@ -32,7 +32,8 @@ def postprocess(
 
     remove(output_file)
 
-    xv, masses = agama.readSnapshot(args.nemo_file)  # Shapes: [N, 6] and [N,]
+    snap = parse_nemo(filename=filename, t=0, transpose=False)
+    masses, xv = snap[:, 0], snap[:, 1:7]  # Shapes: [N,] and [N, 6]
     (N,) = masses.shape
 
     # Remove source mass (optional)
@@ -54,10 +55,10 @@ if __name__ == "__main__":
         "Optional: remove point source of field."
     )
     parser.add_argument(
-        "--nemo-file",
+        "--snap-file",
         type=str,
         required=True,
-        help="Nemo file used for density profile computation",
+        help="Snapshot file (could be any format supported by NEMO's 's2a')",
     )
     parser.add_argument(
         "--remove-point-source",
@@ -77,11 +78,16 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    filename = args.snap_file
+    filename_parts = filename.split(".")
+    filename_name, filename_ext = filename_parts[:-1], filename_parts[-1]
+    output_file = ".".join(filename_name) + "_postprocessed." + filename_ext
+
     postprocess(
-        filename=args.nemo_file,
+        filename=filename,
         remove_point_source=args.remove_point_source,
         source_mass=args.source_mass,
         r_scale=1e3,  # kpc -> pc
         m_scale=232533.73313343327 if args.nbody else 1.0,
-        output_file=args.nemo_file.replace(".nemo", "_postprocessed.nemo"),
+        output_file=output_file,
     )

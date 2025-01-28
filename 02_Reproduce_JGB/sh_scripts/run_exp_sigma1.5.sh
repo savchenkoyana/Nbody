@@ -52,7 +52,7 @@ nice -n 20 gyrfalcON snap_mu0.0_s1.0_sigma1.5_r10.0_N20000/IC_preprocessed.nemo 
 echo
 echo "Postprocess data:"
 python postprocess_snap.py \
-  --nemo-file snap_mu0.0_s1.0_sigma1.5_r10.0_N20000/out.nemo \
+  --snap-file snap_mu0.0_s1.0_sigma1.5_r10.0_N20000/out.nemo \
   --remove-point-source \
   --source-mass 4.37e10
 
@@ -84,7 +84,7 @@ if [[ $use_nbody -eq 1 ]]; then
   echo
   echo "Postprocess data:"
   python postprocess_snap.py \
-    --nemo-file snap_mu0.0_s1.0_sigma1.5_r10.0_N20000/out_nbody.nemo \
+    --snap-file snap_mu0.0_s1.0_sigma1.5_r10.0_N20000/out_nbody.nemo \
     --nbody \
     --remove-point-source \
     --source-mass 4.37e10

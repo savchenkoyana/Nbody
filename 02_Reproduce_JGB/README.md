@@ -30,7 +30,9 @@ To reproduce the experiment, follow these steps:
   cd $NEMO
   git remote add custom https://github.com/savchenkoyana/nemo.git
   git checkout nbodyx
-  cd src/nbody/evolve/aarseth/nbody0
+  cd $NEMO/src/nbody/evolve/aarseth/nbody0
+  make nmax
+  cd $NEMO/src/nbody/evolve/aarseth/nbody1/source
   make nmax
   cd $NEMO
   make rebuild
@@ -119,7 +121,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
   To postprocess snapshot evolved in JGB potential (the original article), run:
 
   ```shell
-  python postprocess.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source
+  python postprocess.py --snap-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source
   ```
 
   The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored in `<DIRNAME>` folder.
@@ -145,19 +147,8 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 - Another option is to use custom visualization script from this repository:
 
   ```shell
-  python animate.py --nemo-file <DIRNAME>/out_postprocessed.nemo --times <t1> <t2> ... <tn> --add-point-source
+  python animate.py --nemo-file <DIRNAME>/out_postprocessed.nemo --add-point-source
   ```
-
-  `--times <t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
-  E.g., `--times 0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
-
-  ```shell
-  python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
-  ```
-
-  where `<N>` is the desired number of timestamps.
-
-  > If you used sh-scripts, check `txt`-file in directory with your snapshot
 
 ## Plot density profile $$\\rho(r)$$
 
@@ -167,18 +158,29 @@ Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with
 python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
+`--times <t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
+E.g., `--times 0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
+
+```shell
+python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
+```
+
+where `<N>` is the desired number of timestamps.
+
+> If you used sh-scripts, check `txt`-file in directory with your snapshot
+
 ## Plot Lagrange radii
 
 To plot Lagrange radius at different timestamps for different experiments, run:
 
 ```shell
-python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn>
+python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo
 ```
 
 As NEMO's tool for computation of cluster's density center sometimes fail and I haven't fixed it yet, it is better to add `--remove-outliers` at the end of the command:
 
 ```shell
-python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --remove-outliers
+python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --remove-outliers
 ```
 
 You can compare your results with plots from the article:
@@ -238,9 +240,7 @@ python plot_lagrange_radius.py \
   --mu <MU> \
   --sigma <SIGMA> \
   --scale <SCALE> \
-  --times <t1> ... <tn> \
   --nbody-nemo-files /path/to/dirn/out_nbody_postprocessed.nemo \
-  --nbody-times <t1> ... <tn>
 ```
 
 > Note that timestamps for gyrFalcON and Nbody0 will likely differ, so we need to feed them separately. There is also a way to get the nearest timestamp in snapshot using NEMO's `snaptrim` with option `timefuzz=nearest`. However, there is a [bug](https://github.com/savchenkoyana/Nbody/issues/9) related to close timestamps in a simulation snapshot. So my way is uglier but less error prone.
