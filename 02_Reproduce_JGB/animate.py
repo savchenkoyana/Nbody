@@ -8,6 +8,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import numpy as np
 from utils.plot import create_animation
+from utils.snap import get_timestamps
 from utils.snap import parse_nemo
 
 if __name__ == "__main__":
@@ -21,11 +22,10 @@ if __name__ == "__main__":
         help="Nemo file used for animation",
     )
     parser.add_argument(
-        "--times",
-        nargs="+",
-        type=float,
-        required=True,
-        help="Which times to use. Example: '--times 0.0 0.5 1.0'",
+        "--n-timestamps",
+        type=int,
+        default=100,
+        help="The number of timestamps to use for animation. Default: 100",
     )
     parser.add_argument(
         "--store-artifacts",
@@ -57,6 +57,12 @@ if __name__ == "__main__":
             "Cannot use '--add-point-source' and '--add-mw-potential' together. Choose one depending on how you performed evolution."
         )
 
+    # Get timestamps for animation
+    times = get_timestamps(
+        nemo_file=args.nemo_file,
+        n_timestamps=args.n_timestamps,
+    )
+
     # Initialize plot and simulation parameters
     fig = plt.figure(figsize=(10, 10), dpi=75)
     ax = plt.axes([0.08, 0.08, 0.9, 0.9])
@@ -66,7 +72,7 @@ if __name__ == "__main__":
     center_x = np.array([], dtype=np.float32)
     center_y = np.array([], dtype=np.float32)
 
-    for t in args.times:
+    for t in times:
         snap = parse_nemo(
             filename=args.nemo_file, t=t, remove_artifacts=not args.store_artifacts
         )  # mass, pos, vel
@@ -133,7 +139,7 @@ if __name__ == "__main__":
         data,
         ax=ax,
         fig=fig,
-        n_frames=len(args.times),
+        n_frames=len(times),
         update_animation=update_animation,
     )
     ani.save("sim.gif", writer="pillow")

@@ -10,6 +10,7 @@ from typing import Optional
 from typing import Union
 
 import numpy as np
+import unsio.input as uns_in
 
 _PROJ_VECTOR_TYPE = Union[
     tuple[float, float, float],
@@ -241,3 +242,25 @@ def masses_in_lagrange_radius(
     print(f"Number of particles for half-mass radius {lagrange_r}: {mask.sum()}")
 
     return masses, lagrange_r, mask
+
+
+def generate_timestamps(nemo_file: Union[str, Path]):
+    """This generator yields timestamps for a given NEMO file."""
+    fp_uns = uns_in.CUNS_IN(str(nemo_file), float32=True)
+
+    while fp_uns.nextFrame("mxv"):
+        yield fp_uns.getData("time")[1]
+
+
+def get_timestamps(
+    nemo_file: Union[str, Path],
+    n_timestamps: int = 100,
+) -> np.ndarray:
+    """Return timestamps for a given NEMO file."""
+    if not n_timestamps > 0:
+        raise RuntimeError(f"n_timestamps should be positive, got {n_timestamps}")
+
+    timestamps = [_ for _ in generate_timestamps(nemo_file)]
+
+    indices = [_ * len(timestamps) // n_timestamps for _ in range(n_timestamps)]
+    return np.array(timestamps)[indices]

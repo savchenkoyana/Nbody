@@ -2,18 +2,8 @@
 
 import argparse
 from pathlib import Path
-from typing import Union
 
-import numpy as np
-import unsio.input as uns_in
-
-
-def generate_timestamps(nemo_file: Union[str, Path]):
-    fp_uns = uns_in.CUNS_IN(str(nemo_file), float32=True)
-
-    while fp_uns.nextFrame("mxv"):
-        yield fp_uns.getData("time")[1]
-
+from utils.snap import get_timestamps
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -42,12 +32,8 @@ if __name__ == "__main__":
             f"--n-timestamps should be positive, got {args.n_timestamps}"
         )
 
-    print("Printing the timestamps of a NEMO snapshot...")
-    timestamps = [_ for _ in generate_timestamps(filename)]
-
-    indices = [
-        _ * len(timestamps) // args.n_timestamps for _ in range(args.n_timestamps)
-    ]
-    chosen_timestamps = np.array(timestamps)[indices]
-
-    print("\t", *chosen_timestamps)
+    timestamps = get_timestamps(
+        nemo_file=args.nemo_file,
+        n_timestamps=args.n_timestamps,
+    )
+    print("Printing the timestamps of a NEMO snapshot...\n\t", *timestamps)

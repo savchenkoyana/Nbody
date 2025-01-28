@@ -1,4 +1,5 @@
-"""Plot lagrange radius for a given NEMO snapshot."""
+"""This program plots lagrange radius and other related stats for given
+snapshots."""
 
 from pathlib import Path
 
@@ -9,11 +10,12 @@ from utils.general import check_parameters
 from utils.general import create_argparse
 from utils.plot import create_file_label
 from utils.plot import create_label
+from utils.snap import get_timestamps
 from utils.snap import masses_in_lagrange_radius
 
 if __name__ == "__main__":
     parser = create_argparse(
-        description="This program plots mass spectrum for a given snapshot"
+        description="This program plots lagrange radius and other related stats for given snapshots"
     )
     parser.add_argument(
         "--nemo-files",
@@ -30,18 +32,10 @@ if __name__ == "__main__":
         help="Same as '--nemo-files', but for NbodyX integrator output",
     )
     parser.add_argument(
-        "--times",
-        nargs="+",
-        type=float,
-        required=True,
-        help="Which times to use. Example: '--times 0.0 0.5 1.0'",
-    )
-    parser.add_argument(
-        "--nbody-times",
-        nargs="+",
-        type=float,
-        required=False,
-        help="Same as '--times', but for NbodyX integrator output",
+        "--n-timestamps",
+        type=int,
+        default=100,
+        help="The number of timestamps to use for plot. Default: 100",
     )
     parser.add_argument(
         "--store-artifacts",
@@ -87,8 +81,7 @@ if __name__ == "__main__":
     args.nemo_files += args.nbody_nemo_files
 
     for filename in args.nemo_files:
-        filename = Path(filename)
-        if not filename.exists():
+        if not Path(filename).exists():
             raise RuntimeError(f"filename {filename} does not exist")
 
         times = np.array([], dtype=np.float32)
@@ -96,10 +89,10 @@ if __name__ == "__main__":
         n_particles = np.array([], dtype=np.float32)
         mean_mass = np.array([], dtype=np.float32)
 
-        nbody_algo = (
-            str(filename) in args.nbody_nemo_files
-        )  # whether NEMO file is produced with NbodyX algo
-        times_list = args.nbody_times if nbody_algo else args.times
+        times_list = get_timestamps(
+            nemo_file=filename,
+            n_timestamps=args.n_timestamps,
+        )
 
         for t in times_list:
             try:
@@ -121,13 +114,11 @@ if __name__ == "__main__":
             n_particles = np.append(n_particles, m_filtered.size)
             mean_mass = np.append(mean_mass, np.mean(m_filtered))
 
-        # plot_label = (
-        #     filename.parts[-2] if len(args.nemo_files) > 1 else None
-        # )  # label as filename if there are many files
         plot_label = (
             create_file_label(filename) if len(args.nemo_files) > 1 else None
         )  # label as filename if there are many files
-        fmt = "v" if nbody_algo else "."
+
+        fmt = "v" if filename in args.nbody_nemo_files else "."
         ax_rt.plot(times, lagrange_radii, fmt, label=plot_label)
         ax_nt.plot(times, n_particles / n_particles[0], fmt, label=plot_label)
         ax_mt.plot(times, mean_mass, fmt, label=plot_label)
