@@ -162,7 +162,7 @@ python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.ne
 E.g., `--times 0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
 
 ```shell
-python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
+python stat.py --nemo-files <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
 ```
 
 where `<N>` is the desired number of timestamps.

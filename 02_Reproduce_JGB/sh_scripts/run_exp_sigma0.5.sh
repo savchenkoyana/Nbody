@@ -59,11 +59,11 @@ python postprocess_snap.py \
 echo
 echo "Calculating timestamps..."
 python stat.py \
-  --nemo-file snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/out.nemo \
+  --nemo-files snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/out.nemo \
   --n-timestamps 100 > snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/timestamps_gyrfalcon.txt
 
 python stat.py \
-  --nemo-file snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/out.nemo \
+  --nemo-files snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/out.nemo \
   --n-timestamps 10 >> snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/timestamps_gyrfalcon.txt
 
 if [[ $use_nbody -eq 1 ]]; then
@@ -92,10 +92,10 @@ if [[ $use_nbody -eq 1 ]]; then
   echo
   echo "Calculating timestamps..."
   python stat.py \
-    --nemo-file snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/out_nbody.nemo \
+    --nemo-files snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/out_nbody.nemo \
     --n-timestamps 100 > snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/timestamps_nbody.txt
 
   python stat.py \
-    --nemo-file snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/out_nbody.nemo \
+    --nemo-files snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/out_nbody.nemo \
     --n-timestamps 10 >> snap_mu0.0_s1.0_sigma0.5_r10.0_N20000/timestamps_nbody.txt
 fi

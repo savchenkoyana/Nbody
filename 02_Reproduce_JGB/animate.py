@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     # Get timestamps for animation
     times = get_timestamps(
-        nemo_file=args.nemo_file,
+        filename=args.nemo_file,
         n_timestamps=args.n_timestamps,
     )
 

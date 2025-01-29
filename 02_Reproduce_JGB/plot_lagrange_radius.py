@@ -90,7 +90,7 @@ if __name__ == "__main__":
         mean_mass = np.array([], dtype=np.float32)
 
         times_list = get_timestamps(
-            nemo_file=filename,
+            filename=filename,
             n_timestamps=args.n_timestamps,
         )
 
@@ -114,6 +114,9 @@ if __name__ == "__main__":
             n_particles = np.append(n_particles, m_filtered.size)
             mean_mass = np.append(mean_mass, np.mean(m_filtered))
 
+        # plot_label = (
+        #     filename.split("/")[-1] if len(args.nemo_files) > 1 else None
+        # )  # label as filename if there are many files
         plot_label = (
             create_file_label(filename) if len(args.nemo_files) > 1 else None
         )  # label as filename if there are many files
@@ -123,7 +126,6 @@ if __name__ == "__main__":
         ax_nt.plot(times, n_particles / n_particles[0], fmt, label=plot_label)
         ax_mt.plot(times, mean_mass, fmt, label=plot_label)
 
-    # If legends are created before calling of ax.plot, there will be no labels
     ax_rt.legend(title=label)
     ax_nt.legend(title=label)
     ax_mt.legend(title=label)

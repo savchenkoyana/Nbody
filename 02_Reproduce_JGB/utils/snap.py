@@ -244,23 +244,57 @@ def masses_in_lagrange_radius(
     return masses, lagrange_r, mask
 
 
-def generate_timestamps(nemo_file: Union[str, Path]):
-    """This generator yields timestamps for a given NEMO file."""
-    fp_uns = uns_in.CUNS_IN(str(nemo_file), float32=True)
+def generate_timestamps(filename: Union[str, Path]):
+    """This generator yields timestamps for a given file."""
+    fp_uns = uns_in.CUNS_IN(str(filename), float32=True)
 
     while fp_uns.nextFrame("mxv"):
         yield fp_uns.getData("time")[1]
 
 
 def get_timestamps(
-    nemo_file: Union[str, Path],
+    filename: Union[str, Path],
     n_timestamps: int = 100,
 ) -> np.ndarray:
-    """Return timestamps for a given NEMO file."""
+    """Return timestamps for a given file."""
     if not n_timestamps > 0:
         raise RuntimeError(f"n_timestamps should be positive, got {n_timestamps}")
 
-    timestamps = [_ for _ in generate_timestamps(nemo_file)]
+    timestamps = [_ for _ in generate_timestamps(filename)]
 
     indices = [_ * len(timestamps) // n_timestamps for _ in range(n_timestamps)]
     return np.array(timestamps)[indices]
+
+
+def get_virial_parameters(
+    filename: Union[str, Path],
+    eps: float,
+    t: Union[float, str],
+    remove_artifacts: bool = True,
+):
+    """Compute virial parameters for simulation file.
+
+    Parameters
+    ----------
+    filename : Union[str, os.PathLike, Path]
+        the name of NEMO snapshot file
+    eps : float
+        gravitational softening (use the same as during the simulation)
+    t : Union[float, str]
+        which time point in snapshot to use for profile calculations
+    remove_artifacts :
+        Whether to remove artifacts after the function execution. Default: True.
+    Returns
+    -------
+    np.ndarray
+        Array with columns: time, 2T/W, T+W, T, W_acc, W_phi, W_exact, M
+    """
+    filename = str(filename)
+    virfile = filename.replace(".nemo", "") + "_vir.txt"
+
+    with RemoveFileOnEnterExit(virfile, remove_artifacts):
+        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | snapvratio - wmode=exact eps={eps} newton=t | tee {virfile}"
+        print(command)
+        subprocess.check_call(command, shell=True)
+
+        return np.loadtxt(virfile).T
