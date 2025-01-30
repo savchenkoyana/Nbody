@@ -269,6 +269,18 @@ With that in mind, I decided that the easiest choice of units for Nbody0 is: kpc
 - In these units `G=1` by definition
 - It is easy to compare results of evolution between Nbody0 and gyrFalcON and reuse the same scripts, as we do not need to change the time, velocity and length scale. We only change the mass scale.
 
+# Tips
+
+1. If you forgot how you created your snapshot, just run:
+   ```shell
+   hisf <NAME>.nemo
+   ```
+1. To resume gyrFalcON simulation, run:
+   ```shell
+   gyrfalcON in=<NAME>.nemo ... resume=t  # not tested properly yet
+   ```
+   `<NAME>.nemo` is the name of output file of the interrupted run, `resume=t` indicates that we want to resume simulation. The rest of the command for gyrFalcON (marked here as `...`) should be exactly the same.
+
 # Checklist
 
 Here is a list of what we need to fully reproduce the article:
