@@ -62,7 +62,12 @@ if __name__ == "__main__":
         ax_E.set_ylabel("T+W")
         ax_E.set_title("Energy")
 
-        fig_vir, ax_vir = plt.subplots()  # Mass in Lagrange radius vs Time
+        fig_E2, ax_E2 = plt.subplots()  # E (relative) vs Time
+        ax_E2.set_xlabel("$t$, Gyr")
+        ax_E2.set_ylabel("$E/E(t=0)$")
+        ax_E2.set_title("Energy (relative)")
+
+        fig_vir, ax_vir = plt.subplots()  # Virial ratio vs Time
         ax_vir.set_xlabel("$t$, Gyr")
         ax_vir.set_ylabel("-2T/W")
         ax_vir.set_title("Virial ratio")
@@ -99,18 +104,22 @@ if __name__ == "__main__":
             # )  # label as filename if there are many files
 
             ax_E.plot(timestamps, energy, ".", label=plot_label)
+            ax_E2.plot(timestamps, energy / energy[0], ".", label=plot_label)
             ax_vir.plot(timestamps, virial_ratio, ".", label=plot_label)
 
     if args.virial:
         ax_E.plot(
             timestamps, np.ones_like(timestamps) * energy[0], linestyle="--", label="IC"
         )
+        ax_E2.plot(timestamps, np.ones_like(timestamps), linestyle="--", label="IC")
         ax_vir.plot(timestamps, np.ones_like(timestamps), linestyle="--", label="IC")
 
         ax_E.legend()
+        ax_E2.legend()
         ax_vir.legend()
 
         fig_E.savefig(save_dir / "E.png")
+        fig_E2.savefig(save_dir / "E_relative.png")
         fig_vir.savefig(save_dir / "vir.png")
 
         plt.show()
