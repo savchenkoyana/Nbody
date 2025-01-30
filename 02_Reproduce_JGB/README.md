@@ -209,7 +209,19 @@ python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
 
 # Test pipeline
 
-To test your pipeline, you may evolve a cluster in its own gravitational field (without any potentials). The final density after the evolution should look like the initial density. This indicates that your model is truly self-consistent.
+There are several ways to test your pipeline:
+
+1. You may evolve a cluster in its own gravitational field. The final density after the evolution should look like the initial density — this would indicate that your model is truly self-consistent.
+   In our case it means that we need to use `IC.nemo` for simulation:
+   ```shell
+   gyrfalcON in=<DIRNAME>/IC.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
+   ```
+   Note that you need to use `<eps>`, `<tstop>` and `<Grav>` that correspond to your units.
+1. You can check how energy and virial ratio evolve during the simulation:
+   ```shell
+   python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial
+   ```
+   For this procedure you need snapshots with `G=1`. Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot with removed central mass.
 
 # Compare with precise Nbody methods
 
