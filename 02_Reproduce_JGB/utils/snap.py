@@ -123,8 +123,9 @@ def profile_by_snap(
 def lagrange_radius_by_snap(
     filename: Union[str, os.PathLike, Path],
     t: Union[float, str],
-    fraction: Union[float, str] = 0.5,
+    fraction: float = 0.5,
     remove_artifacts: bool = True,
+    dens_par: int = 500,
 ) -> np.ndarray:
     """
     Compute a lagrange radius for a given snapshot and time.
@@ -141,6 +142,8 @@ def lagrange_radius_by_snap(
         fraction of mass (parameter for lagrange radius evaluation)
     remove_artifacts :
         Whether to remove artifacts after the function execution. Default: True.
+    dens_par :
+        Parameter for `dens_centre` (number of neighbours in SPH-like estimation). Default: 500.
     Returns
     -------
     np.ndarray
@@ -150,7 +153,6 @@ def lagrange_radius_by_snap(
 
     filename = str(filename)
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
-    dens_par = 500
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
         command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
@@ -165,6 +167,7 @@ def center_of_snap(
     t: Union[float, str],
     density_center: bool = False,
     remove_artifacts: bool = True,
+    dens_par: int = 500,
 ) -> np.ndarray:
     """Compute a center-of-mass or density center for a given snapshot.
 
@@ -178,18 +181,22 @@ def center_of_snap(
         whether to compute density center instead of center-of-mass. Default: True
     remove_artifacts :
         Whether to remove artifacts after the function execution. Default: True.
+    dens_par :
+        Parameter for `dens_centre` (number of neighbours in SPH-like estimation). Default: 500.
     Returns
     -------
     np.ndarray
         Array with the following structure: t, x, y, z, vx, vy, vz.
     """
     manipname = "dens_centre" if density_center else "centre_of_mass"
+    if not density_center:
+        dens_par = ""
 
     filename = str(filename)
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
+        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="{dens_par}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
@@ -200,6 +207,7 @@ def masses_in_lagrange_radius(
     filename: Union[str, os.PathLike, Path],
     t: Union[float, str],
     remove_artifacts: bool = True,
+    dens_par: int = 500,
 ) -> tuple[np.ndarray[np.float32], float, np.ndarray[bool]]:
     """Compute which masses of cluster reside inside the half-mass radius.
 
@@ -211,6 +219,8 @@ def masses_in_lagrange_radius(
         which time point in snapshot to use for profile calculations
     remove_artifacts :
         Whether to remove artifacts after the function execution. Default: True.
+    dens_par :
+        Parameter for `dens_centre` (number of neighbours in SPH-like estimation). Default: 500.
     Returns
     -------
     tuple[np.ndarray[np.float32], float, np.ndarray[bool]]
@@ -227,13 +237,17 @@ def masses_in_lagrange_radius(
         t=t,
         density_center=True,
         remove_artifacts=remove_artifacts,
+        dens_par=dens_par,
     )  # center_coords : snap_t, x, y, z, vx, vy, vz
     if center.size == 0:
         raise RuntimeError(f"'dens_centre' didn't converge for t={t}")
 
     # calculate lagrange radius
     snap_t, lagrange_r = lagrange_radius_by_snap(
-        filename, t, remove_artifacts=remove_artifacts
+        filename,
+        t,
+        remove_artifacts=remove_artifacts,
+        dens_par=dens_par,
     )
 
     # create mask
@@ -290,7 +304,7 @@ def get_virial_parameters(
         Array with columns: time, 2T/W, T+W, T, W_acc, W_phi, W_exact, M
     """
     filename = str(filename)
-    virfile = filename.replace(".nemo", "") + "_vir.txt"
+    virfile = filename.replace(".nemo", "") + f"{t}_vir.txt"
 
     with RemoveFileOnEnterExit(virfile, remove_artifacts):
         command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | snapvratio - wmode=exact eps={eps} newton=t | tee {virfile}"
