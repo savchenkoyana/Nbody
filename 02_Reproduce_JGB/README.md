@@ -24,7 +24,7 @@ To reproduce the experiment, follow these steps:
   source start_nemo.sh
   ```
 
-- Switch to custom NEMO version (needed for Nbodyx methods, such as Nbody0 and Nbody6):
+- Switch to custom NEMO version (needed for $O(N^2)$ Nbody methods, such as Nbody0 and Nbody6):
 
   ```shell
   cd $NEMO
@@ -34,6 +34,9 @@ To reproduce the experiment, follow these steps:
   make nmax
   cd $NEMO/src/nbody/evolve/aarseth/nbody1/source
   make nmax
+  cd $NEMO/src/nbody/reduc/Makefile
+  make snapbinary
+  cp snapbinary $NEMOLIB/
   cd $NEMO
   make rebuild
   ```
