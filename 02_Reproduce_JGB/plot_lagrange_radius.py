@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
-from utils.plot import create_file_label
 from utils.plot import create_label
 from utils.snap import get_timestamps
 from utils.snap import masses_in_lagrange_radius
@@ -38,6 +37,12 @@ if __name__ == "__main__":
         help="The number of timestamps to use for plot. Default: 100",
     )
     parser.add_argument(
+        "--dens-parameter",
+        type=int,
+        default=500,
+        help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. Default: 500",
+    )
+    parser.add_argument(
         "--store-artifacts",
         action="store_true",
         help="Whether to store NEMO artifacts for debug",
@@ -50,6 +55,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
+    if args.n_timestamps <= 0:
+        raise RuntimeError("Got negative '--n-timestamps'")
+    if args.dens_parameter <= 0:
+        raise RuntimeError("Got negative '--dens-parameter'")
+
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
     agama.setUnits(length=1, mass=1, velocity=1)  # time units used for evolution
@@ -100,6 +110,7 @@ if __name__ == "__main__":
                     filename=filename,
                     t=t,
                     remove_artifacts=not args.store_artifacts,
+                    dens_par=args.dens_parameter,
                 )
             except RuntimeError:
                 if args.remove_outliers:
@@ -114,12 +125,12 @@ if __name__ == "__main__":
             n_particles = np.append(n_particles, m_filtered.size)
             mean_mass = np.append(mean_mass, np.mean(m_filtered))
 
-        # plot_label = (
-        #     filename.split("/")[-1] if len(args.nemo_files) > 1 else None
-        # )  # label as filename if there are many files
         plot_label = (
-            create_file_label(filename) if len(args.nemo_files) > 1 else None
+            filename.split("/")[-1] if len(args.nemo_files) > 1 else None
         )  # label as filename if there are many files
+        # plot_label = (
+        #     create_file_label(filename) if len(args.nemo_files) > 1 else None
+        # )  # label as filename if there are many files
 
         fmt = "v" if filename in args.nbody_nemo_files else "."
         ax_rt.plot(times, lagrange_radii, fmt, label=plot_label)

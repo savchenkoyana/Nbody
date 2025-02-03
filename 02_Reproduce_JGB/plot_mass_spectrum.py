@@ -44,9 +44,19 @@ if __name__ == "__main__":
         action="store_true",
         help="Whether to plot only masses into the lagrange radius from density center (will be computed)",
     )
+    parser.add_argument(
+        "--dens-parameter",
+        type=int,
+        default=500,
+        help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. Default: 500",
+    )
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
+    if args.n_timestamps <= 0:
+        raise RuntimeError("Got negative '--n-timestamps'")
+    if args.dens_parameter <= 0:
+        raise RuntimeError("Got negative '--dens-parameter'")
 
     filename = Path(args.nemo_file)
     if not filename.exists():
@@ -74,6 +84,7 @@ if __name__ == "__main__":
                     filename=filename,
                     t=t,
                     remove_artifacts=not args.store_artifacts,
+                    dens_par=args.dens_parameter,
                 )
                 masses = masses[mask]
             except RuntimeError:
