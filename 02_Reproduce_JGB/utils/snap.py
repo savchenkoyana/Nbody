@@ -280,13 +280,13 @@ def get_timestamps(
     return np.array(timestamps)[indices]
 
 
-def get_virial_parameters(
+def get_virial(
     filename: Union[str, Path],
     eps: float,
     t: Union[float, str],
     remove_artifacts: bool = True,
 ):
-    """Compute virial parameters for simulation file.
+    """Compute virial ratio and energy for simulation file.
 
     Parameters
     ----------
@@ -312,3 +312,49 @@ def get_virial_parameters(
         subprocess.check_call(command, shell=True)
 
         return np.loadtxt(virfile).T
+
+
+def get_momentum(
+    filename: Union[str, Path],
+    t: Union[float, str],
+    remove_artifacts: bool = True,
+):
+    """Compute momentum and angular momentum for simulation file.
+
+    Parameters
+    ----------
+    filename : Union[str, os.PathLike, Path]
+        the name of NEMO snapshot file
+    t : Union[float, str]
+        which time point in snapshot to use for profile calculations
+    remove_artifacts :
+        Whether to remove artifacts after the function execution. Default: True.
+    Returns
+    -------
+    list
+        List with items: pos, x, y, z, vel, vx, vy, vz, l, lx, ly, lz
+    """
+    filename = str(filename)
+    momentum_file = filename.replace(".nemo", "") + f"{t}_momentum.txt"
+
+    with RemoveFileOnEnterExit(momentum_file, remove_artifacts):
+        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | snapkinem - weight=m | tee {momentum_file}"
+        print(command)
+        subprocess.check_call(command, shell=True)
+
+        result = []
+
+        # parse file
+        with open(momentum_file) as f:
+            for line in f:
+                stripped = line.strip()
+                if (
+                    stripped.startswith("pos:")
+                    or stripped.startswith("vel:")
+                    or stripped.startswith("jvec:")
+                ):
+                    data = [float(x) for x in line.split()[1:]]
+                    result.extend(data)
+                else:
+                    continue
+        return result

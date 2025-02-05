@@ -97,7 +97,6 @@ if __name__ == "__main__":
         xv = np.concatenate((xv, np.zeros((1, 6))))
         masses = np.concatenate((masses, np.array([args.source_mass])))
 
-    # Save snapshot in units: kpc, km/s, M_sun
     snap = (xv, masses)
     in_snap_file = args.nemo_file.replace(".nemo", "_preprocessed.nemo")
     out_snap_file = filename.parent / "out.nemo"
@@ -105,23 +104,8 @@ if __name__ == "__main__":
     agama.writeSnapshot(in_snap_file, snap, "nemo")
 
     print("*" * 10, "Transformation finished!", "*" * 10)
-    print("Run this to start cluster evolution for 1 dynamical time:")
+    print("Run this to start cluster evolution in N-body units for 1 dynamical time:")
     print(
         f"\tgyrfalcON {in_snap_file} {out_snap_file} logstep=3000 "
         f"eps={eps} kmax={kmax} tstop={t_dyn} step={t_dyn / 10} Grav={Grav}"
-    )
-
-    # Save snapshot in units: kpc, km/s, 232533.7 x M_sun (G = 1)
-    m_scale = 4.300451321727918e-06
-    snap = (xv, masses * m_scale)
-    in_snap_file = args.nemo_file.replace(".nemo", "_preprocessed_nbody.nemo")
-    out_snap_file = filename.parent / "out.nemo"
-
-    agama.writeSnapshot(in_snap_file, snap, "nemo")
-
-    print("*" * 10, "Transformation finished!", "*" * 10)
-    print("Run this to start cluster evolution in units with G=1 for 1 dynamical time:")
-    print(
-        f"\tgyrfalcON {in_snap_file} {out_snap_file} logstep=3000 "
-        f"eps={eps} kmax={kmax} tstop={t_dyn} step={t_dyn / 10}"
     )

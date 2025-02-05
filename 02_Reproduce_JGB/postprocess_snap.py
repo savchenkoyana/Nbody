@@ -39,7 +39,10 @@ def postprocess(
     # Remove source mass (optional)
     if remove_point_source:
         assert np.allclose(xv[-1], np.zeros((1, 6)), atol=1e-7), xv[-1]
-        assert np.isclose(masses[-1], source_mass / m_scale), masses[-1]
+        assert np.isclose(masses[-1], source_mass / m_scale), (
+            masses[-1],
+            source_mass / m_scale,
+        )
 
         command = f"snapscale in={filename} out=- rscale={r_scale} mscale={m_scale} | snapmask - {output_file} select=0:{N - 2}"
     else:

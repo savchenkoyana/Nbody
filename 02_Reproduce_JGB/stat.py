@@ -5,8 +5,9 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from utils.snap import get_momentum
 from utils.snap import get_timestamps
-from utils.snap import get_virial_parameters
+from utils.snap import get_virial
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -35,6 +36,11 @@ if __name__ == "__main__":
         "--virial",
         action="store_true",
         help="Whether to evaluate virial statistics",
+    )
+    parser.add_argument(
+        "--momentum",
+        action="store_true",
+        help="Whether to evaluate momentum statistics",
     )
     parser.add_argument(
         "--store-artifacts",
@@ -72,6 +78,19 @@ if __name__ == "__main__":
         ax_vir.set_ylabel("-2T/W")
         ax_vir.set_title("Virial ratio")
 
+    if args.momentum:
+        fig_Vcm, ax_Vcm = plt.subplots()  # Vcm vs Time
+        ax_Vcm.set_xlabel("$t$, Gyr")
+        ax_Vcm.set_ylabel("$V_{cm}$, km/s")
+        ax_Vcm.set_yscale("log")
+        ax_Vcm.set_title("Center-of-mass velocity")
+
+        fig_Lz, ax_Lz = plt.subplots()  # Lz vs Time
+        ax_Lz.set_xlabel("$t$, Gyr")
+        ax_Lz.set_ylabel(r"$L_z$, 232533 x M_\odot x km/s x kpc")
+        ax_Lz.set_yscale("log")
+        ax_Lz.set_title("Angular momentum (z-component)")
+
     # Start task evaluation
     for filename in args.nemo_files:
         if not Path(filename).exists():
@@ -87,7 +106,7 @@ if __name__ == "__main__":
             virial_ratio, energy = [], []
 
             for t in timestamps:
-                data = get_virial_parameters(
+                data = get_virial(
                     filename=filename,
                     eps=args.eps,
                     t=t,
@@ -107,6 +126,29 @@ if __name__ == "__main__":
             ax_E2.plot(timestamps, energy / energy[0], ".", label=plot_label)
             ax_vir.plot(timestamps, virial_ratio, ".", label=plot_label)
 
+        if args.momentum:
+            velocity_cm, angular_momentum = [], []
+
+            for t in timestamps:
+                data = get_momentum(
+                    filename=filename,
+                    t=t,
+                    remove_artifacts=not args.store_artifacts,
+                )  # pos, x, y, z, vel, vx, vy, vz, l, lx, ly, lz
+
+                velocity_cm.append(data[4])
+                angular_momentum.append(data[-1])
+
+            plot_label = (
+                filename.split("/")[-1] if len(args.nemo_files) > 1 else None
+            )  # label as filename if there are many files
+            # plot_label = (
+            #     create_file_label(filename) if len(args.nemo_files) > 1 else None
+            # )  # label as filename if there are many files
+
+            ax_Vcm.plot(timestamps, velocity_cm, ".", label=plot_label)
+            ax_Lz.plot(timestamps, angular_momentum, ".", label=plot_label)
+
     if args.virial:
         ax_E.plot(
             timestamps, np.ones_like(timestamps) * energy[0], linestyle="--", label="IC"
@@ -122,4 +164,25 @@ if __name__ == "__main__":
         fig_E2.savefig(save_dir / "E_relative.png")
         fig_vir.savefig(save_dir / "vir.png")
 
+    if args.momentum:
+        ax_Vcm.plot(
+            timestamps,
+            np.ones_like(timestamps) * velocity_cm[0],
+            linestyle="--",
+            label="IC",
+        )
+        ax_Lz.plot(
+            timestamps,
+            np.ones_like(timestamps) * angular_momentum[0],
+            linestyle="--",
+            label="IC",
+        )
+
+        ax_Vcm.legend()
+        ax_Lz.legend()
+
+        fig_Vcm.savefig(save_dir / "Vcm.png")
+        fig_Lz.savefig(save_dir / "Lz.png")
+
+    if args.virial or args.momentum:
         plt.show()

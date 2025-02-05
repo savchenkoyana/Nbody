@@ -68,6 +68,12 @@ python stat.py \
 
 if [[ $use_nbody -eq 1 ]]; then
   echo
+  echo "Preprocess data..."
+  snapscale in=snap_mu0.0_s1.0_sigma1.5_r10.0_N20000/IC_preprocessed.nemo \
+    out=snap_mu0.0_s1.0_sigma1.5_r10.0_N20000/IC_preprocessed_nbody.nemo \
+    mscale=4.300451321727918e-06
+
+  echo
   echo "Start evolution with NBODY0 for 13.7 Gyr for: sigma=1.5"
   nice -n 20 nbody0 snap_mu0.0_s1.0_sigma1.5_r10.0_N20000/IC_preprocessed_nbody.nemo \
     snap_mu0.0_s1.0_sigma1.5_r10.0_N20000/out_nbody.nemo \
