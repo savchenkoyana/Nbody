@@ -59,7 +59,7 @@ To reproduce the experiment, follow these steps:
 
   > It takes about 4 hours to run a gyrFalcON simulation on our CPU. Running Nbody0 simulation takes about 3 days depending on task you choose. Running M & A experiment with `N = 20000` was not reasonable because it would take us more than two weeks, so we used `N = 10000` for this experiment.
 
-## Compare results
+# Results interpretation
 
 You can compare gyrFalcON and Nbody0 results visually (by running `animate.py`) or plot all statistics: density profile, mass spectrum or lagrange radius.
 
@@ -97,3 +97,7 @@ The main diffrence between Nbody0 and gyrFalcON is that Nbody0 always uses `G=1`
    hisf <NAME>.nemo
    ```
 1. If Aarseth's NBODY code does not save a snapshot, use NEMO's `u3tos`
+
+# About direct methods
+
+The detailed description of different direct methods was [given](https://www.jstor.org/stable/10.1086/316455) by Aarseth.

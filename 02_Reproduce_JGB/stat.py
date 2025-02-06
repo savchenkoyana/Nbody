@@ -100,6 +100,13 @@ if __name__ == "__main__":
         )
         print(f"\tTimestamps for\t{filename}\n", *timestamps)
 
+        plot_label = (
+            filename if len(args.nemo_files) > 1 else None
+        )  # label as filename if there are many files
+        # plot_label = (
+        #     create_file_label(filename) if len(args.nemo_files) > 1 else None
+        # )  # label as filename if there are many files
+
         if args.virial:
             virial_ratio, energy = [], []
 
@@ -112,13 +119,6 @@ if __name__ == "__main__":
                 )  # time, 2T/W, T+W, T, W_acc, W_phi, W_exact, M
                 virial_ratio.append(data[1])
                 energy.append(data[2])
-
-            plot_label = (
-                filename.split("/")[-1] if len(args.nemo_files) > 1 else None
-            )  # label as filename if there are many files
-            # plot_label = (
-            #     create_file_label(filename) if len(args.nemo_files) > 1 else None
-            # )  # label as filename if there are many files
 
             ax_E.plot(timestamps, energy, ".", label=plot_label)
             ax_E2.plot(timestamps, energy / energy[0], ".", label=plot_label)
@@ -136,13 +136,6 @@ if __name__ == "__main__":
 
                 velocity_cm.append(data[4])
                 angular_momentum.append(data[-1])
-
-            plot_label = (
-                filename.split("/")[-1] if len(args.nemo_files) > 1 else None
-            )  # label as filename if there are many files
-            # plot_label = (
-            #     create_file_label(filename) if len(args.nemo_files) > 1 else None
-            # )  # label as filename if there are many files
 
             ax_Vcm.plot(timestamps, velocity_cm, ".", label=plot_label)
             ax_Lz.plot(timestamps, angular_momentum, ".", label=plot_label)

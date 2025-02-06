@@ -126,7 +126,7 @@ if __name__ == "__main__":
             mean_mass = np.append(mean_mass, np.mean(m_filtered))
 
         plot_label = (
-            filename.split("/")[-1] if len(args.nemo_files) > 1 else None
+            filename if len(args.nemo_files) > 1 else None
         )  # label as filename if there are many files
         # plot_label = (
         #     create_file_label(filename) if len(args.nemo_files) > 1 else None
