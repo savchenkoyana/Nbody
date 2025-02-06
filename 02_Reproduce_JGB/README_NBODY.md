@@ -61,7 +61,7 @@ To reproduce the experiment, follow these steps:
 
 ## Compare results
 
-You can compare results visually (by running `animate.py`) or plot all statistics: density profile, mass spectrum or lagrange radius.
+You can compare gyrFalcON and Nbody0 results visually (by running `animate.py`) or plot all statistics: density profile, mass spectrum or lagrange radius.
 
 To plot lagrange radii for gyrFalcON and Nbody0 together, run this command:
 
@@ -74,6 +74,14 @@ python plot_lagrange_radius.py \
   --scale <SCALE> \
   --nbody-nemo-files /path/to/dirn/out_nbody_postprocessed.nemo \
 ```
+
+It can be useful to plot energy, virial ratio, angular momentum as a function of time for both simulations:
+
+```shell
+python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial
+```
+
+For this procedure you need snapshots with `G=1`. Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot with removed central mass.
 
 # Units
 
