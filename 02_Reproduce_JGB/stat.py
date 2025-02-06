@@ -82,13 +82,11 @@ if __name__ == "__main__":
         fig_Vcm, ax_Vcm = plt.subplots()  # Vcm vs Time
         ax_Vcm.set_xlabel("$t$, Gyr")
         ax_Vcm.set_ylabel("$V_{cm}$, km/s")
-        ax_Vcm.set_yscale("log")
         ax_Vcm.set_title("Center-of-mass velocity")
 
         fig_Lz, ax_Lz = plt.subplots()  # Lz vs Time
         ax_Lz.set_xlabel("$t$, Gyr")
         ax_Lz.set_ylabel(r"$L_z$, 232533 x M_\odot x km/s x kpc")
-        ax_Lz.set_yscale("log")
         ax_Lz.set_title("Angular momentum (z-component)")
 
     # Start task evaluation
