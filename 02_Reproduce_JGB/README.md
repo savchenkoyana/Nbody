@@ -203,7 +203,7 @@ There are several ways to test your pipeline:
 
 # Compare with precise Nbody methods
 
-The comparison with precise Nbody methods is descriped in details in \[README_NBODY.md\].
+The comparison with precise Nbody methods is descriped in details in [README_NBODY.md](README_NBODY.md).
 
 # Units
 
