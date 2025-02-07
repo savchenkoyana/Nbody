@@ -24,6 +24,31 @@ To reproduce the experiment, follow these steps:
   source start_nemo.sh
   ```
 
+- Switch to custom NEMO version:
+
+  ```shell
+  cd $NEMO
+  git remote add custom https://github.com/savchenkoyana/nemo.git
+  git checkout nbodyx
+  cd $NEMO/src/nbody/evolve/aarseth/nbody0
+  make nmax
+  cd $NEMO/src/nbody/evolve/aarseth/nbody1/source
+  make nmax
+  cd $NEMO/src/nbody/reduc/Makefile
+  make snapbinary
+  cp snapbinary $NEMOLIB/
+  cd $NEMO
+  make rebuild
+  ```
+
+  If you want to go back to the default NEMO version, run:
+
+  ```shell
+  cd $NEMO
+  git checkout master
+  make rebuild
+  ```
+
 - Go to the experiment root directory:
 
   ```shell
@@ -40,6 +65,8 @@ To reproduce the experiment, follow these steps:
 
   > Note that all scripts in this experiment overwrite the existing files.
   > Don't forget to backup your experiments before trying to reproduce them!
+
+  > Running Nbody0 simulation takes about 3 days depending on task you choose. Running M & A experiment with `N = 20000` was not reasonable because it would take us more than two weeks, so it is recommended to use `N = 10000` for this experiment.
 
 The combinations of parameters from the original article and corresponding sh-scripts are listed below:
 
@@ -84,22 +111,34 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   After this step, you will get a new file `<DIRNAME>/IC_preprocessed.nemo` with the old data concatenated with the new data (a steady point of mass $4.37\\times10^{10} M\_\\odot$ at (0, 0, 0)).
 
-  Note that `preprocess.py` also converts parsecs to kiloparsecs for convenience using NEMO's `snapscale`. The reverse transformation is performed by `postrprocess.py`. For more details see section [Units](#Units).
+  To convert data to units with `G=1` (kpc, km/s and $\\sim 232533.7 \\times M\_{☉}$), run:
+
+  ```shell
+  snapscale in=`DIRNAME`/IC_preprocessed.nemo \
+    out=`DIRNAME`/IC_preprocessed_nbody.nemo \
+    mscale=4.300451321727918e-06
+  ```
+
+  For more details see section [Units](#Units).
 
 - Run evolution of this snapshot with SMBH:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/IC_preprocessed.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
+  nbody0 `DIRNAME`/IC_preprocessed_nbody.nemo \
+    `DIRNAME`/out_nbody.nemo \
+    tcrit=14 \
+    deltat=0.01 \
+    eps=0.0003684031498640387
   ```
 
-  A set of recommended parameters for `gyrFalcON` is provided by `preprocess_snap.py` script at the end of its output.
+  `eps` is computed in code and provided by `preprocess_snap.py` script at the end of its output.
 
 - It would be useful to postprocess your data to plot profiles, spectras, etc.
 
   To postprocess snapshot evolved in JGB potential (the original article), run:
 
   ```shell
-  python postprocess.py --snap-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source
+  python postprocess.py --snap-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source --nbody
   ```
 
   The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored in `<DIRNAME>` folder.
@@ -190,27 +229,23 @@ python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
 There are several ways to test your pipeline:
 
 1. You may evolve a cluster in its own gravitational field. The final density after the evolution should look like the initial density — this would indicate that your model is truly self-consistent.
-   In our case it means that we need to use `IC.nemo` for simulation:
-   ```shell
-   gyrfalcON in=<DIRNAME>/IC.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
-   ```
-   Note that you need to use `<eps>`, `<tstop>` and `<Grav>` that correspond to your units.
+   In our case it means that we should not add point mass and shifts when preprocessing.
 1. You can check how energy and virial ratio evolve during the simulation:
    ```shell
    python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial
    ```
-   For this procedure you need snapshots with `G=1`. Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot with removed central mass.
+   Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot with removed central mass.
 
-# Compare with precise Nbody methods
+# Compare with other N-body methods
 
-The comparison with precise Nbody methods is descriped in details in [README_NBODY.md](README_NBODY.md).
+The comparison with other methods is descriped in details in [README_NBODY.md](README_NBODY.md).
 
 # Units
 
 We use non-usual units in our experiments:
 
 - We use pc (length), km/s (velocity) and $M\_{☉}$ (mass) units for creating a cluster model because of convenience
-- We use another units for evolution: kpc for lenght, km/s for velocity and $M\_{☉}$ for mass. Mostly these units are motivated by the fact that they are used with the Milky Way potential from Portail et al. (2017) [implemented in Agama](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_mw_potential_hunter24.py) and we would probably like to reuse our code for this task in future. Also characteristic size of the system changes to kpc (the size of cluster orbit).
+- We use units with `G=1` for evolution: kpc for lenght, km/s for velocity and $\\sim 232533.7 \\times M\_{☉}$ for mass
 
 # Tips
 
@@ -218,17 +253,13 @@ We use non-usual units in our experiments:
    ```shell
    hisf <NAME>.nemo
    ```
-1. To resume gyrFalcON simulation, run:
-   ```shell
-   gyrfalcON in=<NAME>.nemo ... resume=t  # not tested properly yet
-   ```
-   `<NAME>.nemo` is the name of output file of the interrupted run, `resume=t` indicates that we want to resume simulation. The rest of the command for gyrFalcON (marked here as `...`) should be exactly the same.
 
 # Checklist
 
 Here is a list of what we need to fully reproduce the article:
 
-- [x] N-body simulation
-- [ ] Comparison between Nbody6++GPU (or Nbody6) and GyrfalcON
+- [x] N-body simulation (simple version)
+- [ ] Comparison with other methods (in process)
+- [ ] Nbody6 (simple run)
 - [ ] Gravitational waves
 - [ ] Black hole mergers
