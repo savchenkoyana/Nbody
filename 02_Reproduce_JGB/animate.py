@@ -3,6 +3,7 @@
 import argparse
 import os
 from functools import partial
+from pathlib import Path
 from typing import Optional
 
 import matplotlib.pyplot as plt
@@ -142,5 +143,6 @@ if __name__ == "__main__":
         n_frames=len(times),
         update_animation=update_animation,
     )
-    ani.save("sim.gif", writer="pillow")
+    gif_name = Path(args.nemo_file).with_suffix(".gif")
+    ani.save(str(gif_name), writer="pillow")
     plt.show()
