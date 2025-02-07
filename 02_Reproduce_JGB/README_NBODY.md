@@ -28,15 +28,15 @@ To reproduce the experiment, follow these steps:
 
   ```shell
   gyrfalcON snap_mu0.0_s1.0_sigma1.5_r10.0_N10000/IC_preprocessed_nbody.nemo \
-  snap_mu0.0_s1.0_sigma1.5_r10.0_N10000/out_g1_kmax15_Nlev8_theta01_fac001.nemo \
-  kmax=15 \
-  Nlev=8 \
-  logstep=3000 \
-  eps=0.0003684031498640387 \
-  tstop=14 \
-  step=0.01 \
-  theta=0.1 \
-  fac=0.01
+    snap_mu0.0_s1.0_sigma1.5_r10.0_N10000/out_g1_kmax15_Nlev8_theta01_fac001.nemo \
+    kmax=15 \
+    Nlev=8 \
+    logstep=3000 \
+    eps=0.0003684031498640387 \
+    tstop=14 \
+    step=0.01 \
+    theta=0.1 \
+    fac=0.01
   ```
 
 # Results interpretation
@@ -73,7 +73,7 @@ Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot
    ```shell
    gyrfalcON in=<NAME>.nemo ... resume=t  # not tested properly yet
    ```
-   `<NAME>.nemo` is the name of output file of the interrupted run, `resume=t` indicates that we want to resume simulation. The rest of the command for gyrFalcON (marked here as `...`) should be exactly the same.
+   `<NAME>.nemo` is the name of output file of the interrupted run, `out=` is ignored, and `resume=t` indicates that we want to resume simulation. The rest of the command for gyrFalcON (marked here as `...`) should be exactly the same.
 1. If Aarseth's NBODY code does not save a snapshot, use NEMO's `u3tos`
 
 # About direct methods
