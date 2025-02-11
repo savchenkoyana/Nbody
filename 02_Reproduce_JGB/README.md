@@ -247,13 +247,6 @@ We use non-usual units in our experiments:
 - We use pc (length), km/s (velocity) and $M\_{☉}$ (mass) units for creating a cluster model because of convenience
 - We use units with `G=1` for evolution: kpc for lenght, km/s for velocity and $\\sim 232533.7 \\times M\_{☉}$ for mass
 
-# Tips
-
-1. If you forgot how you created your snapshot, just run:
-   ```shell
-   hisf <NAME>.nemo
-   ```
-
 # Checklist
 
 Here is a list of what we need to fully reproduce the article:

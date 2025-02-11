@@ -65,16 +65,17 @@ Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot
 
 # Tips
 
-1. If you forgot how you created your snapshot, just run:
-   ```shell
-   hisf <NAME>.nemo
-   ```
 1. To resume gyrFalcON simulation, run:
    ```shell
    gyrfalcON in=<NAME>.nemo ... resume=t  # not tested properly yet
    ```
    `<NAME>.nemo` is the name of output file of the interrupted run, `out=` is ignored, and `resume=t` indicates that we want to resume simulation. The rest of the command for gyrFalcON (marked here as `...`) should be exactly the same.
 1. If Aarseth's NBODY code does not save a snapshot, use NEMO's `u3tos`
+1. If you forgot how you created your snapshot, just run:
+   ```shell
+   hisf <NAME>.nemo
+   ```
+1. A list of hacks on how to check N-body simulation results is given [here](https://arxiv.org/pdf/1105.1082).
 
 # About direct methods
 
