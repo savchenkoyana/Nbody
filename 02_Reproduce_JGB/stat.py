@@ -32,7 +32,7 @@ if __name__ == "__main__":
         nargs="+",
         type=float,
         default=None,
-        help="Gravitational softening. Required if target is 'E' or '2T/W'",
+        help="Gravitational softening. Required with '--virial'",
     )
     parser.add_argument(
         "--virial",

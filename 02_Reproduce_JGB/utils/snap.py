@@ -372,7 +372,6 @@ def count_binaries(
 
     binary_counts = 0
 
-    # Iterate through pairs to analyze potential binaries
     for i in range(N):
         jmin = None
         epot_min = math.inf
