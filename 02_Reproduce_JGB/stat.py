@@ -32,7 +32,8 @@ if __name__ == "__main__":
         nargs="+",
         type=float,
         default=None,
-        help="Gravitational softening. Required with '--virial'",
+        help="Gravitational softening. Required with '--virial' (used for softening) and '--binaries' (used to compute a threshold on distance)."
+        " Note that we don't use --eps for softetning when counting binaries!",
     )
     parser.add_argument(
         "--virial",
@@ -61,7 +62,7 @@ if __name__ == "__main__":
         raise RuntimeError(
             f"--n-timestamps should be positive, got {args.n_timestamps}"
         )
-    if args.virial:
+    if args.virial or args.binaries:
         if not args.eps:
             raise RuntimeError(
                 f"Gravitational softening eps should be set, got {args.eps}"
@@ -209,7 +210,7 @@ if __name__ == "__main__":
         fig_Vcm.savefig(save_dir / "Vcm.png")
         fig_Lz.savefig(save_dir / "Lz.png")
 
-    if args.momentum:
+    if args.binaries:
         ax_binaries.legend()
 
         fig_binaries.savefig(save_dir / "binaries.png")
