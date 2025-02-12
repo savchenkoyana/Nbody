@@ -1,6 +1,7 @@
 """Scripts for snapshot transformations and other manipulations with
 snapshots."""
 
+import math
 import os
 import subprocess
 from pathlib import Path
@@ -358,3 +359,40 @@ def get_momentum(
                 else:
                     continue
         return result
+
+
+def count_binaries(
+    filename: Union[str, Path],
+    t: Union[float, str],
+    r_threshold: float,
+):
+    """Count the number of binaries in snapshot (G=1 is assumed)."""
+    snap = parse_nemo(filename=filename, t=t)  # m, x, y, z, vx, vy, vz
+    N = snap.shape[1]
+
+    binary_counts = 0
+
+    # Iterate through pairs to analyze potential binaries
+    for i in range(N):
+        jmin = None
+        epot_min = math.inf
+
+        for j in range(N):
+            if j == i:
+                continue
+
+            dr = np.linalg.norm(snap[1:4, i] - snap[1:4, j])
+            dv = np.linalg.norm(snap[4:7, i] - snap[4:7, j])
+            m = snap[0, i] + snap[0, j]
+            ekin = 0.5 * dv**2
+            epot = -m / dr
+
+            if ekin + epot < 0 and epot < epot_min and dr < r_threshold:
+                epot_min = epot
+                jmin = j
+
+        if jmin is not None and jmin > i:  # TODO: rewrite?
+            # print(i, jmin)
+            binary_counts += 1
+
+    return binary_counts

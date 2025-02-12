@@ -5,6 +5,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from utils.snap import count_binaries
 from utils.snap import get_momentum
 from utils.snap import get_timestamps
 from utils.snap import get_virial
@@ -28,6 +29,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--eps",
+        nargs="+",
         type=float,
         default=None,
         help="Gravitational softening. Required if target is 'E' or '2T/W'",
@@ -43,6 +45,11 @@ if __name__ == "__main__":
         help="Whether to evaluate momentum statistics",
     )
     parser.add_argument(
+        "--binaries",
+        action="store_true",
+        help="Whether to plot the number of binaries. Warning: this option is slow, better use with '--n-timestamps 10'",
+    )
+    parser.add_argument(
         "--store-artifacts",
         action="store_true",
         help="Whether to store NEMO artifacts for debug",
@@ -54,8 +61,18 @@ if __name__ == "__main__":
         raise RuntimeError(
             f"--n-timestamps should be positive, got {args.n_timestamps}"
         )
-    if args.virial and not args.eps:
-        raise RuntimeError(f"Gravitational softening eps should be set, got {args.eps}")
+    if args.virial:
+        if not args.eps:
+            raise RuntimeError(
+                f"Gravitational softening eps should be set, got {args.eps}"
+            )
+
+        if len(args.eps) == 1:
+            args.eps = args.eps * len(args.nemo_files)
+        elif len(args.eps) != len(args.nemo_files):
+            raise RuntimeError(
+                f"--eps should have the same length as --nemo-files (or 1), got len={len(args.eps)}"
+            )
 
     # assuming filenames are: /path/to/Nbody/02_Reproduce_JGB/<DIRNAME>/out.nemo
     # we will save data into /path/to/Nbody/02_Reproduce_JGB
@@ -89,8 +106,14 @@ if __name__ == "__main__":
         ax_Lz.set_ylabel(r"$L_z$, 232533 x M_\odot x km/s x kpc")
         ax_Lz.set_title("Angular momentum (z-component)")
 
+    if args.binaries:
+        fig_binaries, ax_binaries = plt.subplots()  # Number of binaries vs Times
+        ax_binaries.set_xlabel("$t$, Gyr")
+        ax_binaries.set_ylabel("$N_{binaries}$")
+        ax_binaries.set_title("Number of binaries")
+
     # Start task evaluation
-    for filename in args.nemo_files:
+    for i, filename in enumerate(args.nemo_files):
         if not Path(filename).exists():
             raise RuntimeError(f"filename {filename} does not exist")
 
@@ -113,7 +136,7 @@ if __name__ == "__main__":
             for t in timestamps:
                 data = get_virial(
                     filename=filename,
-                    eps=args.eps,
+                    eps=args.eps[i],
                     t=t,
                     remove_artifacts=not args.store_artifacts,
                 )  # time, 2T/W, T+W, T, W_acc, W_phi, W_exact, M
@@ -139,6 +162,17 @@ if __name__ == "__main__":
 
             ax_Vcm.plot(timestamps, velocity_cm, ".", label=plot_label)
             ax_Lz.plot(timestamps, angular_momentum, ".", label=plot_label)
+
+        if args.binaries:
+            binaries = []
+
+            for t in timestamps:
+                count = count_binaries(
+                    filename=filename, t=t, r_threshold=100 * args.eps[i]
+                )
+                binaries.append(count)
+
+            ax_binaries.plot(timestamps, binaries, ".", label=plot_label)
 
     if args.virial:
         ax_E.plot(
@@ -175,5 +209,10 @@ if __name__ == "__main__":
         fig_Vcm.savefig(save_dir / "Vcm.png")
         fig_Lz.savefig(save_dir / "Lz.png")
 
-    if args.virial or args.momentum:
+    if args.momentum:
+        ax_binaries.legend()
+
+        fig_binaries.savefig(save_dir / "binaries.png")
+
+    if args.virial or args.momentum or args.binaries:
         plt.show()
