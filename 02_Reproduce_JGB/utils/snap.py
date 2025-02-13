@@ -1,6 +1,7 @@
 """Scripts for snapshot transformations and other manipulations with
 snapshots."""
 
+import math
 import os
 import subprocess
 from pathlib import Path
@@ -10,6 +11,7 @@ from typing import Optional
 from typing import Union
 
 import numpy as np
+import unsio.input as uns_in
 
 _PROJ_VECTOR_TYPE = Union[
     tuple[float, float, float],
@@ -122,8 +124,9 @@ def profile_by_snap(
 def lagrange_radius_by_snap(
     filename: Union[str, os.PathLike, Path],
     t: Union[float, str],
-    fraction: Union[float, str] = 0.5,
+    fraction: float = 0.5,
     remove_artifacts: bool = True,
+    dens_par: int = 500,
 ) -> np.ndarray:
     """
     Compute a lagrange radius for a given snapshot and time.
@@ -140,6 +143,8 @@ def lagrange_radius_by_snap(
         fraction of mass (parameter for lagrange radius evaluation)
     remove_artifacts :
         Whether to remove artifacts after the function execution. Default: True.
+    dens_par :
+        Parameter for `dens_centre` (number of neighbours in SPH-like estimation). Default: 500.
     Returns
     -------
     np.ndarray
@@ -149,7 +154,6 @@ def lagrange_radius_by_snap(
 
     filename = str(filename)
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
-    dens_par = 500
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
         command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
@@ -164,6 +168,7 @@ def center_of_snap(
     t: Union[float, str],
     density_center: bool = False,
     remove_artifacts: bool = True,
+    dens_par: int = 500,
 ) -> np.ndarray:
     """Compute a center-of-mass or density center for a given snapshot.
 
@@ -177,18 +182,22 @@ def center_of_snap(
         whether to compute density center instead of center-of-mass. Default: True
     remove_artifacts :
         Whether to remove artifacts after the function execution. Default: True.
+    dens_par :
+        Parameter for `dens_centre` (number of neighbours in SPH-like estimation). Default: 500.
     Returns
     -------
     np.ndarray
         Array with the following structure: t, x, y, z, vx, vy, vz.
     """
     manipname = "dens_centre" if density_center else "centre_of_mass"
+    if not density_center:
+        dens_par = ""
 
     filename = str(filename)
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
+        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="{dens_par}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
@@ -199,6 +208,7 @@ def masses_in_lagrange_radius(
     filename: Union[str, os.PathLike, Path],
     t: Union[float, str],
     remove_artifacts: bool = True,
+    dens_par: int = 500,
 ) -> tuple[np.ndarray[np.float32], float, np.ndarray[bool]]:
     """Compute which masses of cluster reside inside the half-mass radius.
 
@@ -210,6 +220,8 @@ def masses_in_lagrange_radius(
         which time point in snapshot to use for profile calculations
     remove_artifacts :
         Whether to remove artifacts after the function execution. Default: True.
+    dens_par :
+        Parameter for `dens_centre` (number of neighbours in SPH-like estimation). Default: 500.
     Returns
     -------
     tuple[np.ndarray[np.float32], float, np.ndarray[bool]]
@@ -226,13 +238,17 @@ def masses_in_lagrange_radius(
         t=t,
         density_center=True,
         remove_artifacts=remove_artifacts,
+        dens_par=dens_par,
     )  # center_coords : snap_t, x, y, z, vx, vy, vz
     if center.size == 0:
         raise RuntimeError(f"'dens_centre' didn't converge for t={t}")
 
     # calculate lagrange radius
     snap_t, lagrange_r = lagrange_radius_by_snap(
-        filename, t, remove_artifacts=remove_artifacts
+        filename,
+        t,
+        remove_artifacts=remove_artifacts,
+        dens_par=dens_par,
     )
 
     # create mask
@@ -241,3 +257,141 @@ def masses_in_lagrange_radius(
     print(f"Number of particles for half-mass radius {lagrange_r}: {mask.sum()}")
 
     return masses, lagrange_r, mask
+
+
+def generate_timestamps(filename: Union[str, Path]):
+    """This generator yields timestamps for a given file."""
+    fp_uns = uns_in.CUNS_IN(str(filename), float32=True)
+
+    while fp_uns.nextFrame("mxv"):
+        yield fp_uns.getData("time")[1]
+
+
+def get_timestamps(
+    filename: Union[str, Path],
+    n_timestamps: int = 100,
+) -> np.ndarray:
+    """Return timestamps for a given file."""
+    if not n_timestamps > 0:
+        raise RuntimeError(f"n_timestamps should be positive, got {n_timestamps}")
+
+    timestamps = [_ for _ in generate_timestamps(filename)]
+
+    indices = [_ * len(timestamps) // n_timestamps for _ in range(n_timestamps)]
+    return np.array(timestamps)[indices]
+
+
+def get_virial(
+    filename: Union[str, Path],
+    eps: float,
+    t: Union[float, str],
+    remove_artifacts: bool = True,
+):
+    """Compute virial ratio and energy for simulation file.
+
+    Parameters
+    ----------
+    filename : Union[str, os.PathLike, Path]
+        the name of NEMO snapshot file
+    eps : float
+        gravitational softening (use the same as during the simulation)
+    t : Union[float, str]
+        which time point in snapshot to use for profile calculations
+    remove_artifacts :
+        Whether to remove artifacts after the function execution. Default: True.
+    Returns
+    -------
+    np.ndarray
+        Array with columns: time, 2T/W, T+W, T, W_acc, W_phi, W_exact, M
+    """
+    filename = str(filename)
+    virfile = filename.replace(".nemo", "") + f"{t}_vir.txt"
+
+    with RemoveFileOnEnterExit(virfile, remove_artifacts):
+        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | snapvratio - wmode=exact eps={eps} newton=t | tee {virfile}"
+        print(command)
+        subprocess.check_call(command, shell=True)
+
+        return np.loadtxt(virfile).T
+
+
+def get_momentum(
+    filename: Union[str, Path],
+    t: Union[float, str],
+    remove_artifacts: bool = True,
+):
+    """Compute momentum and angular momentum for simulation file.
+
+    Parameters
+    ----------
+    filename : Union[str, os.PathLike, Path]
+        the name of NEMO snapshot file
+    t : Union[float, str]
+        which time point in snapshot to use for profile calculations
+    remove_artifacts :
+        Whether to remove artifacts after the function execution. Default: True.
+    Returns
+    -------
+    list
+        List with items: pos, x, y, z, vel, vx, vy, vz, l, lx, ly, lz
+    """
+    filename = str(filename)
+    momentum_file = filename.replace(".nemo", "") + f"{t}_momentum.txt"
+
+    with RemoveFileOnEnterExit(momentum_file, remove_artifacts):
+        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | snapkinem - weight=m | tee {momentum_file}"
+        print(command)
+        subprocess.check_call(command, shell=True)
+
+        result = []
+
+        # parse file
+        with open(momentum_file) as f:
+            for line in f:
+                stripped = line.strip()
+                if (
+                    stripped.startswith("pos:")
+                    or stripped.startswith("vel:")
+                    or stripped.startswith("jvec:")
+                ):
+                    data = [float(x) for x in line.split()[1:]]
+                    result.extend(data)
+                else:
+                    continue
+        return result
+
+
+def count_binaries(
+    filename: Union[str, Path],
+    t: Union[float, str],
+    r_threshold: float,
+):
+    """Count the number of binaries in snapshot (G=1 is assumed)."""
+    snap = parse_nemo(filename=filename, t=t)  # m, x, y, z, vx, vy, vz
+    N = snap.shape[1]
+
+    binary_counts = 0
+
+    for i in range(N):
+        jmin = None
+        epot_min = math.inf
+
+        for j in range(N):
+            if j == i:
+                continue
+
+            dr = np.linalg.norm(snap[1:4, i] - snap[1:4, j])
+            dv = np.linalg.norm(snap[4:7, i] - snap[4:7, j])
+            m = snap[0, i] + snap[0, j]
+            ekin = 0.5 * dv**2
+            epot = -m / dr
+
+            if ekin + epot < 0 and epot < epot_min and dr < r_threshold:
+                epot_min = epot
+                jmin = j
+
+        if jmin is not None and jmin > i:  # TODO: rewrite?
+            # print(i, jmin)
+            binary_counts += 1
+
+    return binary_counts

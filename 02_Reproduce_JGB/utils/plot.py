@@ -4,6 +4,7 @@ from functools import partial
 from pathlib import Path
 from typing import Callable
 from typing import Optional
+from typing import Union
 
 import matplotlib.animation
 import matplotlib.pyplot as plt
@@ -21,12 +22,12 @@ def create_label(mu: float, scale: float, sigma: float) -> str:
     return label
 
 
-def create_file_label(filename: Path) -> str:
+def create_file_label(filename: Union[str, Path]) -> str:
     """Creates label by filename.
 
-    Filename should be like this: f'/path/to/dirname/snap_mu{mu}_s{scale}_sigma{sigma}_r{plummer_r}_N{N}_{postfix}'.
+    Filename should be like this: f'/path/to/dirname/snap_mu{mu}_s{scale}_sigma{sigma}_r{plummer_r}_N{N}_{postfix}/{name}.nemo'.
     """
-    dirname = filename.parts[-2]
+    dirname = Path(filename).parts[-2]
     postfix = "_".join(dirname.split("_")[6:])
 
     return postfix

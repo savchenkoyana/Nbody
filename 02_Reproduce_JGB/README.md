@@ -24,14 +24,19 @@ To reproduce the experiment, follow these steps:
   source start_nemo.sh
   ```
 
-- Switch to custom NEMO version (needed for Nbodyx methods, such as Nbody0 and Nbody6):
+- Switch to custom NEMO version:
 
   ```shell
   cd $NEMO
   git remote add custom https://github.com/savchenkoyana/nemo.git
   git checkout nbodyx
-  cd src/nbody/evolve/aarseth/nbody0
+  cd $NEMO/src/nbody/evolve/aarseth/nbody0
   make nmax
+  cd $NEMO/src/nbody/evolve/aarseth/nbody1/source
+  make nmax
+  cd $NEMO/src/nbody/reduc/Makefile
+  make snapbinary
+  cp snapbinary $NEMOLIB/
   cd $NEMO
   make rebuild
   ```
@@ -60,6 +65,8 @@ To reproduce the experiment, follow these steps:
 
   > Note that all scripts in this experiment overwrite the existing files.
   > Don't forget to backup your experiments before trying to reproduce them!
+
+  > Running Nbody0 simulation takes about 3 days depending on task you choose. Running M & A experiment with `N = 20000` was not reasonable because it would take us more than two weeks, so it is recommended to use `N = 10000` for this experiment.
 
 The combinations of parameters from the original article and corresponding sh-scripts are listed below:
 
@@ -104,22 +111,34 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   After this step, you will get a new file `<DIRNAME>/IC_preprocessed.nemo` with the old data concatenated with the new data (a steady point of mass $4.37\\times10^{10} M\_\\odot$ at (0, 0, 0)).
 
-  Note that `preprocess.py` also converts parsecs to kiloparsecs for convenience using NEMO's `snapscale`. The reverse transformation is performed by `postrprocess.py`. For more details see section [Units](#Units).
+  To convert data to units with `G=1` (kpc, km/s and $\\sim 232533.7 \\times M\_{☉}$), run:
+
+  ```shell
+  snapscale in=`DIRNAME`/IC_preprocessed.nemo \
+    out=`DIRNAME`/IC_preprocessed_nbody.nemo \
+    mscale=4.300451321727918e-06
+  ```
+
+  For more details see section [Units](#Units).
 
 - Run evolution of this snapshot with SMBH:
 
   ```shell
-  gyrfalcON in=<DIRNAME>/IC_preprocessed.nemo out=<DIRNAME>/<OUT_NAME>.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
+  nbody0 `DIRNAME`/IC_preprocessed_nbody.nemo \
+    `DIRNAME`/out_nbody.nemo \
+    tcrit=14 \
+    deltat=0.01 \
+    eps=0.0003684031498640387
   ```
 
-  A set of recommended parameters for `gyrFalcON` is provided by `preprocess_snap.py` script at the end of its output.
+  `eps` is computed in code and provided by `preprocess_snap.py` script at the end of its output.
 
 - It would be useful to postprocess your data to plot profiles, spectras, etc.
 
   To postprocess snapshot evolved in JGB potential (the original article), run:
 
   ```shell
-  python postprocess.py --nemo-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source
+  python postprocess.py --snap-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source --nbody
   ```
 
   The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored in `<DIRNAME>` folder.
@@ -145,19 +164,8 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 - Another option is to use custom visualization script from this repository:
 
   ```shell
-  python animate.py --nemo-file <DIRNAME>/out_postprocessed.nemo --times <t1> <t2> ... <tn> --add-point-source
+  python animate.py --nemo-file <DIRNAME>/out_postprocessed.nemo --add-point-source
   ```
-
-  `--times <t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
-  E.g., `--times 0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
-
-  ```shell
-  python stat.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
-  ```
-
-  where `<N>` is the desired number of timestamps.
-
-  > If you used sh-scripts, check `txt`-file in directory with your snapshot
 
 ## Plot density profile $$\\rho(r)$$
 
@@ -167,18 +175,29 @@ Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with
 python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
+`--times <t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
+E.g., `--times 0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
+
+```shell
+python stat.py --nemo-files <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
+```
+
+where `<N>` is the desired number of timestamps.
+
+> If you used sh-scripts, check `txt`-file in directory with your snapshot
+
 ## Plot Lagrange radii
 
 To plot Lagrange radius at different timestamps for different experiments, run:
 
 ```shell
-python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn>
+python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo
 ```
 
 As NEMO's tool for computation of cluster's density center sometimes fail and I haven't fixed it yet, it is better to add `--remove-outliers` at the end of the command:
 
 ```shell
-python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --remove-outliers
+python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --remove-outliers
 ```
 
 You can compare your results with plots from the article:
@@ -207,61 +226,33 @@ python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo
 
 # Test pipeline
 
-To test your pipeline, you may evolve a cluster in its own gravitational field (without any potentials). The final density after the evolution should look like the initial density. This indicates that your model is truly self-consistent.
+There are several ways to test your pipeline:
 
-# Compare with precise Nbody methods
+1. You may evolve a cluster in its own gravitational field. The final density after the evolution should look like the initial density — this would indicate that your model is truly self-consistent.
+   In our case it means that we should not add point mass and shifts when preprocessing.
+1. You can check how energy and virial ratio evolve during the simulation:
+   ```shell
+   python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial
+   ```
+   Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot with removed central mass.
 
-Many researchers use Nbody6++GPU in order to perform evolution of clusters. We need to compare our method (fast gytFalcON with complexity $O(N)$) with precise but slow Nbodyx methods (Nbody0, Nbody4, Nbody6, etc.) with complexity $O(N^2)$ to make sure that our method suits good for this task.
+# Compare with other N-body methods
 
-## How to perform evolution with Nbody
-
-At the moment I compare gyrfalcON with Nbody0 (the simplest Nbody method). To run both gyrFalcON and Nbody0 methods together, use `1` in a bash script for evolution:
-
-```shell
-bash sh_scripts/run_exp_MA.sh 1
-```
-
-> The default command `bash sh_scripts/run_exp_MA.sh` is equivalent to `bash sh_scripts/run_exp_MA.sh 0`, the latter argument means whether to run Nbody0 or not.
-
-## Compare results
-
-You can compare results visually (by running `animate.py`) or plot all statistics: density profile, mass spectrum or lagrange radius.
-
-To plot lagrange radii for gyrFalcON and Nbody0 together, run this command:
-
-```shell
-python plot_lagrange_radius.py \
-  --remove-outliers \
-  --nemo-files /path/to/dir1/out_postprocessed.nemo ... /path/to/dirn/out_postprocessed.nemo \
-  --mu <MU> \
-  --sigma <SIGMA> \
-  --scale <SCALE> \
-  --times t1 ... tn \
-  --nbody-nemo-files /path/to/dirn/out_nbody_postprocessed.nemo \
-  --nbody-times t1 ... tn
-```
-
-> Note that timestamps for gyrFalcON and Nbody0 will likely differ, so we need to feed them separately. There is also a way to get the nearest timestamp in snapshot using NEMO's `snaptrim` with option `timefuzz=nearest`. However, there is a [bug](https://github.com/savchenkoyana/Nbody/issues/9) related to close timestamps in a simulation snapshot. So my way is uglier but less error prone.
-
-> It takes about 4 hours to run a gyrFalcON simulation on our CPU. Running Nbody0 simulation takes about 3 days depending on task you choose. Running M & A experiment with `N = 20000` was not reasonable because it would take us more than two weeks, so we used `N = 10000` for this experiment.
+The comparison with other methods is descriped in details in [README_NBODY.md](README_NBODY.md).
 
 # Units
 
-The main diffrence between Nbody0 and gyrFalcON is that Nbody0 always uses `G=1`. We, on the other hand, use non-usual units in our experiments:
+We use non-usual units in our experiments:
 
 - We use pc (length), km/s (velocity) and $M\_{☉}$ (mass) units for creating a cluster model because of convenience
-- We use another units for evolution: kpc for lenght, km/s for velocity and $M\_{☉}$ for mass. Mostly these units are motivated by the fact that they are used with the Milky Way potential from Portail et al. (2017) [implemented in Agama](https://github.com/GalacticDynamics-Oxford/Agama/blob/master/py/example_mw_potential_hunter24.py) and we would probably like to reuse our code for this task in future. Also characteristic size of the system changes to kpc (the size of cluster orbit).
-
-With that in mind, I decided that the easiest choice of units for Nbody0 is: kpc, km/s and $\\sim 232533.7 \\times M\_{☉}$:
-
-- In these units `G=1` by definition
-- It is easy to compare results of evolution between Nbody0 and gyrFalcON and reuse the same scripts, as we do not need to change the time, velocity and length scale. We only change the mass scale.
+- We use units with `G=1` for evolution: kpc for lenght, km/s for velocity and $\\sim 232533.7 \\times M\_{☉}$ for mass
 
 # Checklist
 
 Here is a list of what we need to fully reproduce the article:
 
-- [x] N-body simulation
-- [ ] Comparison between Nbody6++GPU (or Nbody6) and GyrfalcON
+- [x] N-body simulation (simple version)
+- [ ] Comparison with other methods (in process)
+- [ ] Nbody6 (simple run)
 - [ ] Gravitational waves
 - [ ] Black hole mergers
