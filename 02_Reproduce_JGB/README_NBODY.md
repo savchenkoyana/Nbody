@@ -39,11 +39,17 @@ To reproduce the experiment, follow these steps:
     fac=0.01
   ```
 
+- This scripts demonstrates evolution on $\\sigma=1.5$ with different N-body methods:
+
+  ```shell
+  bash sh_scripts/run_simN1000.sh
+  ```
+
 # Results interpretation
 
-You can compare gyrFalcON and Nbody0 results visually (by running `animate.py`) or plot all statistics: density profile, mass spectrum or lagrange radius.
+You can compare different integrators visually (by running `animate.py`) or plot all snapshot statistics: density profile, mass spectrum or lagrange radius.
 
-To plot lagrange radii for gyrFalcON and Nbody0 together, run this command:
+To plot lagrange radii for different methods together, run this command:
 
 ```shell
 python plot_lagrange_radius.py \
@@ -55,13 +61,15 @@ python plot_lagrange_radius.py \
   --nbody-nemo-files /path/to/dirn/out_nbody_postprocessed.nemo \
 ```
 
+> Do not forget to use post-processed data (without SMBH at the center) with the command above
+
 It can be useful to plot energy, virial ratio, angular momentum as a function of time for both simulations:
 
 ```shell
-python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial
+python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --momentum --binaries
 ```
 
-Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot with removed central mass.
+> Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot with removed central mass.
 
 # Tips
 
