@@ -24,31 +24,31 @@ python preprocess_snap.py \
 echo
 echo "Preprocess data..."
 snapscale in=snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/IC_preprocessed.nemo \
-out=snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/IC_preprocessed_nbody.nemo \
-mscale=4.300451321727918e-06
+  out=snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/IC_preprocessed_nbody.nemo \
+  mscale=4.300451321727918e-06
 
 echo
 echo "Start evolution with NBODY0 for 13.7 Gyr for: sigma=1.0"
 nice -n 20 nbody0 snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/IC_preprocessed_nbody.nemo \
-snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out_nbody.nemo \
-tcrit=14 \
-deltat=0.01 \
-eps=0.0003684031498640387
+  snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out_nbody.nemo \
+  tcrit=14 \
+  deltat=0.01 \
+  eps=0.0003684031498640387
 
 echo
 echo "Postprocess data:"
 python postprocess_snap.py \
---snap-file snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out_nbody.nemo \
---nbody \
---remove-point-source \
---source-mass 4.37e10
+  --snap-file snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out_nbody.nemo \
+  --nbody \
+  --remove-point-source \
+  --source-mass 4.37e10
 
 echo
 echo "Calculating timestamps..."
 python stat.py \
---nemo-files snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out_nbody.nemo \
---n-timestamps 100 > snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/timestamps_nbody.txt
+  --nemo-files snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out_nbody.nemo \
+  --n-timestamps 100 > snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/timestamps_nbody.txt
 
 python stat.py \
---nemo-files snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out_nbody.nemo \
---n-timestamps 10 >> snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/timestamps_nbody.txt
+  --nemo-files snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/out_nbody.nemo \
+  --n-timestamps 10 >> snap_mu0.0_s1.0_sigma1.0_r10.0_N20000/timestamps_nbody.txt
