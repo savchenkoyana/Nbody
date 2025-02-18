@@ -10,9 +10,10 @@ echo "1 --- to run gyrfalcON;"
 echo "2 --- to run nbody0;"
 echo "3 --- to run runbody1;"
 echo "4 --- to run runbody2;"
+echo
 
 if [ $# -ne 2 ]; then
-    echo "Wrong number of arguments"
+    echo "Wrong number of arguments!"
     exit 1
 fi
 
@@ -63,7 +64,7 @@ elif [[ $TASK -eq 1 ]]; then
   echo "Running gyrfalcON"
 
   # GyrFalcON
-  gyrfalcON $IC_NBODY \
+  time nice -n 20 gyrfalcON $IC_NBODY \
     $DIR/out_gyrfalcon.nemo \
     kmax=15 \
     Nlev=8 \
@@ -83,7 +84,7 @@ elif [[ $TASK -eq 2 ]]; then
   echo "Running nbody0"
 
   # Nbody0
-  nice -n 20 nbody0 \
+  time nice -n 20 nbody0 \
     $IC_NBODY \
     $DIR/out_nbody0.nemo \
     tcrit=14 \
@@ -100,7 +101,7 @@ elif [[ $TASK -eq 3 ]]; then
   echo "Running runbody1"
 
   # Nbody1
-  nice -n 20 runbody1 \
+  time nice -n 20 runbody1 \
     in=$IC_NBODY \
     deltat=0.1 \
     tcrit=14 \
@@ -118,7 +119,7 @@ elif [[ $TASK -eq 4 ]]; then
   echo "Running runbody2"
 
   # Nbody2
-  nice -n 20 runbody2 \
+  time nice -n 20 runbody2 \
     in=$IC_NBODY \
     deltat=0.1 \
     tcrit=14 \
