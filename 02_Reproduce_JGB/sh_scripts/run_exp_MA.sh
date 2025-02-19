@@ -33,6 +33,7 @@ nice -n 20 nbody0 snap_mu10.0_s1.5_sigma0.954_r10.0_N20000/IC_preprocessed_nbody
   snap_mu10.0_s1.5_sigma0.954_r10.0_N20000/out_nbody.nemo \
   tcrit=14 \
   deltat=0.01 \
+  eta=0.01 \
   eps=0.0003684031498640387
 
 echo
