@@ -72,12 +72,12 @@ To reproduce the experiment, follow these steps:
 
 The combinations of parameters from the original article and corresponding sh-scripts are listed below:
 
-| Experiment name | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles | Script to reproduce evolution  |
-| --------------- | ---------------- | ----------- | --------- | ------------------ | ------------------- | ------------------------------ |
-| $\\sigma$ = 0.5 | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma0.5.sh |
-| $\\sigma$ = 1   | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma1.0.sh |
-| $\\sigma$ = 1.5 | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma1.5.sh |
-| M & A           | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_MA.sh       |
+| Experiment name | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles | Command to reproduce evolution     |
+| --------------- | ---------------- | ----------- | --------- | ------------------ | ------------------- | ---------------------------------- |
+| M & A           | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 1 |
+| $\\sigma$ = 0.5 | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 2 |
+| $\\sigma$ = 1   | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 3 |
+| $\\sigma$ = 1.5 | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 4 |
 
 ## More detailed overview
 
