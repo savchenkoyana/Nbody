@@ -34,6 +34,8 @@ To reproduce the experiment, follow these steps:
   make nmax
   cd $NEMO/src/nbody/evolve/aarseth/nbody1/source
   make nmax
+  cd $NEMO/src/nbody/evolve/aarseth/nbody2/source
+  make nmax
   cd $NEMO/src/nbody/reduc/Makefile
   make snapbinary
   cp snapbinary $NEMOLIB/

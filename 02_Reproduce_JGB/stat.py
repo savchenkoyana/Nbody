@@ -19,7 +19,7 @@ if __name__ == "__main__":
         nargs="+",
         type=str,
         required=True,
-        help="Nemo files used for lagrange radii computation",
+        help="Nemo files used for analysis",
     )
     parser.add_argument(
         "--n-timestamps",
