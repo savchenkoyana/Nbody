@@ -1,24 +1,29 @@
 #!/bin/bash
 
 echo "This script is used to run full simulation with variuos N-body methods"
-echo "Usage: bash sh_scripts/compare_methods_slow.sh <N> <TASK>"
+echo "Usage: bash sh_scripts/compare_methods_slow.sh <N> <TASK> <ETA>"
 echo
 echo "<N> should be one of: 1000, 2000, 5000, 10000"
 echo "<TASK> should be:"
 echo "0 --- to create IC;"
-echo "1 --- to run gyrfalcON;"
-echo "2 --- to run nbody0;"
-echo "3 --- to run runbody1;"
-echo "4 --- to run runbody2;"
+echo "1 --- to run nbody0;"
+echo "2 --- to run runbody1;"
+echo "3 --- to run runbody2;"
+echo "Choose <ETA> carefully (default value is 0.02)"
 echo
 
-if [ $# -ne 2 ]; then
+if [ $# -lt 2 ] || [ $# -gt 3 ]; then
     echo "Wrong number of arguments!"
     exit 1
 fi
 
 N=$1
 TASK=$2
+ETA="${3:-0.001}"
+ETAR=2*$ETA
+
+echo $ETA
+echo $ETAR
 
 if [[ $N == 1000 ]]; then
    EPS=0.001
@@ -61,26 +66,6 @@ if [[ $TASK -eq 0 ]]; then
     mscale=4.300451321727918e-06
 
 elif [[ $TASK -eq 1 ]]; then
-  echo "Running gyrfalcON"
-
-  # GyrFalcON
-  time nice -n 20 gyrfalcON $IC_NBODY \
-    $DIR/out_gyrfalcon.nemo \
-    kmax=15 \
-    Nlev=8 \
-    logstep=3000 \
-    eps=$EPS \
-    tstop=14 \
-    step=0.01 \
-    theta=0.1 \
-    fac=0.01
-
-  python postprocess_snap.py \
-    --snap-file $DIR/out_gyrfalcon.nemo \
-    --remove-point-source \
-    --nbody
-
-elif [[ $TASK -eq 2 ]]; then
   echo "Running nbody0"
 
   # Nbody0
@@ -90,14 +75,14 @@ elif [[ $TASK -eq 2 ]]; then
     tcrit=14 \
     deltat=0.01 \
     eps=$EPS \
-    eta=0.001
+    eta=$ETA
 
   python postprocess_snap.py \
     --snap-file $DIR/out_nbody0.nemo \
     --remove-point-source \
     --nbody
 
-elif [[ $TASK -eq 3 ]]; then
+elif [[ $TASK -eq 2 ]]; then
   echo "Running runbody1"
 
   # Nbody1
@@ -107,7 +92,8 @@ elif [[ $TASK -eq 3 ]]; then
     tcrit=14 \
     nbody=$NPART \
     eps=$EPS \
-    eta=0.001 \
+    eta=$ETA \
+    KZ6=0 \
     outdir=$DIR/runbody1
 
   python postprocess_snap.py \
@@ -115,7 +101,7 @@ elif [[ $TASK -eq 3 ]]; then
     --remove-point-source \
     --nbody
 
-elif [[ $TASK -eq 4 ]]; then
+elif [[ $TASK -eq 3 ]]; then
   echo "Running runbody2"
 
   # Nbody2
@@ -125,8 +111,9 @@ elif [[ $TASK -eq 4 ]]; then
     tcrit=14 \
     nbody=$NPART \
     eps=$EPS \
-    etai=0.001 \
-    etar=0.001 \
+    etai=$ETA \
+    etar=$ETAR \
+    KZ6=0 \
     outdir=$DIR/runbody2
 
   u3tos $DIR/runbody2/OUT3 \

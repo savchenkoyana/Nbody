@@ -24,13 +24,6 @@ if __name__ == "__main__":
         help="Nemo files used for lagrange radii computation",
     )
     parser.add_argument(
-        "--nbody-nemo-files",
-        nargs="+",
-        type=str,
-        required=False,
-        help="Same as '--nemo-files', but for NbodyX integrator output",
-    )
-    parser.add_argument(
         "--n-timestamps",
         type=int,
         default=100,
@@ -85,11 +78,6 @@ if __name__ == "__main__":
     ax_mt.set_ylabel(r"$M(t)$, $M_\odot$")
     ax_mt.set_title("Mean mass of particles in cluster")
 
-    if args.nbody_nemo_files is None:
-        args.nbody_nemo_files = []
-
-    args.nemo_files += args.nbody_nemo_files
-
     for filename in args.nemo_files:
         if not Path(filename).exists():
             raise RuntimeError(f"filename {filename} does not exist")
@@ -132,7 +120,7 @@ if __name__ == "__main__":
         #     create_file_label(filename) if len(args.nemo_files) > 1 else None
         # )  # label as filename if there are many files
 
-        fmt = "v" if filename in args.nbody_nemo_files else "."
+        fmt = "."
         ax_rt.plot(times, lagrange_radii, fmt, label=plot_label)
         ax_nt.plot(times, n_particles / n_particles[0], fmt, label=plot_label)
         ax_mt.plot(times, mean_mass, fmt, label=plot_label)
