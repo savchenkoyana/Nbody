@@ -24,7 +24,7 @@ To reproduce the experiment, follow these steps:
   git status
   ```
 
-  If your version differs, use installation instruction from \[README.md\]
+  If your version differs, use installation instruction from [README.md](README.md).
 
 - Go to the experiment root directory:
 
@@ -85,6 +85,7 @@ python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --mom
    hisf <NAME>.nemo
    ```
 1. A list of hacks on how to check N-body simulation results is given [here](https://arxiv.org/pdf/1105.1082).
+1. There is another way to start an Aarseth simulation, e.g. use [`nbody1`](https://teuben.github.io/nemo/man_html/nbody1.1.html) instead of its NEMO wrapper [`runbody1`](https://teuben.github.io/nemo/man_html/runbody1.1.html). For more details see `$NEMO/src/nbody/evolve/aarseth/tools/`
 
 # About direct methods
 

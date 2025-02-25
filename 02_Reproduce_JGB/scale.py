@@ -34,7 +34,7 @@ def get_scaling(filename, current_units):
             W += -0.5 * agama.G * m[i] * m[j] / np.sqrt(r2)
 
     E = T + W
-    print(f"T / E = {T / E}, W / E = {W / E}")
+    print(f"E = {E}, T / E = {T / E}, W / E = {W / E}")
 
     M = np.sum(m)
     R = -0.25 * agama.G * M**2 / E
