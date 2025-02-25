@@ -22,9 +22,6 @@ TASK=$2
 ETA="${3:-0.001}"
 ETAR=2*$ETA
 
-echo $ETA
-echo $ETAR
-
 if [[ $N == 1000 ]]; then
    EPS=0.001
 elif [[ $N == 2000 ]]; then
