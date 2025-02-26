@@ -41,10 +41,10 @@ To reproduce the experiment, follow these steps:
 - To start full simulation with different N-body methods, run:
 
   ```shell
-  bash sh_scripts/compare_methods_slow.sh <N> <TASK>
+  bash sh_scripts/compare_methods_slow.sh <N> <TASK> <ETA>
   ```
 
-  At first I recommend to choose `N=1000` (you can set a higher `N` later). Use options `1000 0` to create coordinates and then `1000 1`, `1000 2`, `1000 3`, etc. to run all N-body methods.
+  At first I recommend to choose `N=1000` (you can set a higher `N` later). Use options `1000 -1` to create coordinates and then `1000 0`, `1000 1`, `1000 2`, etc. to run all N-body methods.
 
 # Results interpretation
 
@@ -58,8 +58,7 @@ python plot_lagrange_radius.py \
   --nemo-files /path/to/dir1/out_postprocessed.nemo ... /path/to/dirn/out_postprocessed.nemo \
   --mu <MU> \
   --sigma <SIGMA> \
-  --scale <SCALE> \
-  --nbody-nemo-files /path/to/dirn/out_nbody_postprocessed.nemo \
+  --scale <SCALE>
 ```
 
 > Do not forget to use post-processed data (without SMBH at the center) with the command above

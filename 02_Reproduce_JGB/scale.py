@@ -82,19 +82,13 @@ if __name__ == "__main__":
         required=True,
     )
     parser.add_argument(
-        "--length",
-        type=float,
-        required=True,
+        "--length", type=float, required=True, help="Length units scale in kpc"
     )
     parser.add_argument(
-        "--mass",
-        type=float,
-        required=True,
+        "--mass", type=float, required=True, help="Mass units scale in Msun"
     )
     parser.add_argument(
-        "--velocity",
-        type=float,
-        required=True,
+        "--velocity", type=float, required=True, help="Velocity units scale in km/s"
     )
     args = parser.parse_args()
 

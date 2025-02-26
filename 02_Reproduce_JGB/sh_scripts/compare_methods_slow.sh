@@ -5,10 +5,10 @@ echo "Usage: bash sh_scripts/compare_methods_slow.sh <N> <TASK> <ETA>"
 echo
 echo "<N> should be one of: 1000, 2000, 5000, 10000"
 echo "<TASK> should be:"
-echo "0 --- to create IC;"
-echo "1 --- to run nbody0;"
-echo "2 --- to run runbody1;"
-echo "3 --- to run runbody2;"
+echo "-1 --- to create IC;"
+echo "0 --- to run nbody0;"
+echo "1 --- to run runbody1;"
+echo "2 --- to run runbody2;"
 echo "Choose <ETA> carefully (default value is 0.02)"
 echo
 
@@ -23,15 +23,15 @@ ETA="${3:-0.001}"
 ETAR=2*$ETA
 
 if [[ $N == 1000 ]]; then
-   EPS=0.001
+   EPS=1
 elif [[ $N == 2000 ]]; then
-   EPS=0.00079
+   EPS=0.79
 elif [[ $N == 5000 ]]; then
-   EPS=0.00058
+   EPS=0.58
 elif [[ $N == 10000 ]]; then
-   EPS=0.00046
+   EPS=0.46
 else
-   echo "Invalid N=$N! Choose one of: 1000, 5000, 10000"
+   echo "Invalid N=$N! Choose one of: 1000, 2000, 5000, 10000"
    exit 1
 fi
 
@@ -39,7 +39,7 @@ NPART=$N+1
 DIR="snap_mu0.0_s1.0_sigma1.5_r10.0_N${N}"
 IC_NBODY="${DIR}/IC_preprocessed_nbody.nemo"
 
-if [[ $TASK -eq 0 ]]; then
+if [[ $TASK -eq -1 ]]; then
   echo "Creating IC"
 
   python create_ic.py \
@@ -60,64 +60,80 @@ if [[ $TASK -eq 0 ]]; then
 
   snapscale in=$DIR/IC_preprocessed.nemo \
     out=$IC_NBODY \
-    mscale=4.300451321727918e-06
+    mscale=4.300451321727918e-03 \
+    rscale=1000
 
-elif [[ $TASK -eq 1 ]]; then
+elif [[ $TASK -eq 0 ]]; then
   echo "Running nbody0"
+
+  OUTFILE="${DIR}/out_nbody0_${ETA}.nemo"
 
   # Nbody0
   time nice -n 20 nbody0 \
     $IC_NBODY \
-    $DIR/out_nbody0.nemo \
-    tcrit=14 \
-    deltat=0.01 \
+    $OUTFILE \
+    tcrit=14000 \
+    deltat=100 \
     eps=$EPS \
     eta=$ETA
 
   python postprocess_snap.py \
-    --snap-file $DIR/out_nbody0.nemo \
+    --snap-file $OUTFILE \
     --remove-point-source \
-    --nbody
+    --length 0.001 \
+    --mass 232.5337331 \
+    --velocity 1.0
 
-elif [[ $TASK -eq 2 ]]; then
+elif [[ $TASK -eq 1 ]]; then
   echo "Running runbody1"
+
+  OUTDIR="${DIR}/runbody1_${ETA}"
 
   # Nbody1
   time nice -n 20 runbody1 \
     in=$IC_NBODY \
-    deltat=0.1 \
-    tcrit=14 \
+    tcrit=14000 \
+    deltat=100 \
     nbody=$NPART \
     eps=$EPS \
     eta=$ETA \
     KZ6=0 \
-    outdir=$DIR/runbody1
+    tcomp=4000 \
+    outdir=$OUTDIR
 
   python postprocess_snap.py \
-    --snap-file $DIR/runbody1/OUT3.snap \
+    --snap-file "${OUTDIR}/OUT3.snap" \
     --remove-point-source \
-    --nbody
+    --length 0.001 \
+    --mass 232.5337331 \
+    --velocity 1.0
 
-elif [[ $TASK -eq 3 ]]; then
+elif [[ $TASK -eq 2 ]]; then
   echo "Running runbody2"
+
+  OUTDIR="${DIR}/runbody2_${ETA}_${ETAR}"
 
   # Nbody2
   time nice -n 20 runbody2 \
     in=$IC_NBODY \
-    deltat=0.1 \
-    tcrit=14 \
+    tcrit=14000 \
+    deltat=100 \
     nbody=$NPART \
     eps=$EPS \
     etai=$ETA \
     etar=$ETAR \
     KZ6=0 \
-    outdir=$DIR/runbody2
+    tcomp=4000 \
+    outdir=$OUTDIR
 
-  u3tos $DIR/runbody2/OUT3 \
-    $DIR/runbody2/OUT3.snap
+  u3tos "${OUTDIR}/OUT3" \
+    "${OUTDIR}/OUT3.snap"
 
   python postprocess_snap.py \
-    --snap-file $DIR/runbody2/OUT3.snap \
+    --snap-file "${OUTDIR}/OUT3.snap" \
     --remove-point-source \
-    --nbody
+    --length 0.001 \
+    --mass 232.5337331 \
+    --velocity 1.0
+
 fi

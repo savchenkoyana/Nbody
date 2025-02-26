@@ -18,15 +18,15 @@ N=$1
 EXP=$2
 
 if [[ $N == 1000 ]]; then
-   EPS=0.001
+   EPS=1.0
 elif [[ $N == 2000 ]]; then
-   EPS=0.00079
+   EPS=0.79
 elif [[ $N == 5000 ]]; then
-   EPS=0.00058
+   EPS=0.58
 elif [[ $N == 10000 ]]; then
-   EPS=0.00046
+   EPS=0.46
 elif [[ $N == 20000 ]]; then
-   EPS=0.000368
+   EPS=0.368
 else
    echo "Invalid N=$N! Choose one of: 1000, 2000, 5000, 10000, 20000"
    exit 1
@@ -80,14 +80,15 @@ echo
 echo "Preprocess data..."
 snapscale in=$ROOT_DIR/IC_preprocessed.nemo \
   out=$ROOT_DIR/IC_preprocessed_nbody.nemo \
-  mscale=4.300451321727918e-06
+  mscale=4.300451321727918e-03 \
+  rscale=1000
 
 echo
 echo "Start evolution with NBODY0 for 13.7 Gyr for: M & A"
 nice -n 20 nbody0 $ROOT_DIR/IC_preprocessed_nbody.nemo \
   $ROOT_DIR/out_nbody.nemo \
-  tcrit=14 \
-  deltat=0.01 \
+  tcrit=14000 \
+  deltat=100 \
   eta=$ETA \
   eps=$EPS
 
@@ -95,9 +96,11 @@ echo
 echo "Postprocess data:"
 python postprocess_snap.py \
   --snap-file $ROOT_DIR/out_nbody.nemo \
-  --nbody \
   --remove-point-source \
-  --source-mass 4.37e10
+  --source-mass 4.37e10 \
+  --length 0.001 \
+  --mass 232.5337331 \
+  --velocity 1.0
 
 echo
 echo "Calculating timestamps..."

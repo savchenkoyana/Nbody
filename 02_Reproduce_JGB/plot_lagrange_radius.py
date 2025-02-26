@@ -3,7 +3,6 @@ snapshots."""
 
 from pathlib import Path
 
-import agama
 import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
@@ -36,6 +35,12 @@ if __name__ == "__main__":
         help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. Default: 500",
     )
     parser.add_argument(
+        "--timeUnitGyr",
+        type=float,
+        default=9.7779e-4,
+        help="Time unit in Gyr. Default: 9.7779e-4",
+    )
+    parser.add_argument(
         "--store-artifacts",
         action="store_true",
         help="Whether to store NEMO artifacts for debug",
@@ -54,9 +59,6 @@ if __name__ == "__main__":
         raise RuntimeError("Got negative '--dens-parameter'")
 
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
-
-    agama.setUnits(length=1, mass=1, velocity=1)  # time units used for evolution
-    timeUnitGyr = agama.getUnits()["time"] / 1e3  # time unit is 1 kpc / (1 km/s)
 
     # assuming filenames are: /path/to/Nbody/02_Reproduce_JGB/<DIRNAME>/out.nemo
     # we will save data into /path/to/Nbody/02_Reproduce_JGB
@@ -108,7 +110,7 @@ if __name__ == "__main__":
             m_tot = np.sum(masses)
             m_filtered = masses[mask]
 
-            times = np.append(times, t * timeUnitGyr)
+            times = np.append(times, t * args.timeUnitGyr)
             lagrange_radii = np.append(lagrange_radii, lagrange_r)
             n_particles = np.append(n_particles, m_filtered.size)
             mean_mass = np.append(mean_mass, np.mean(m_filtered))

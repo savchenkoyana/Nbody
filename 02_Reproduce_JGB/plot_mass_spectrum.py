@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-import agama
 import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
@@ -28,6 +27,12 @@ if __name__ == "__main__":
         type=float,
         required=True,
         help="Which times to use. Example: '--times 0.0 0.5 1.0'",
+    )
+    parser.add_argument(
+        "--timeUnitGyr",
+        type=float,
+        default=9.7779e-4,
+        help="Time unit in Gyr. Default: 9.7779e-4",
     )
     parser.add_argument(
         "--store-artifacts",
@@ -74,9 +79,6 @@ if __name__ == "__main__":
 
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
-    agama.setUnits(length=1, mass=1, velocity=1)  # time units used for evolution
-    timeUnitGyr = agama.getUnits()["time"] / 1e3  # time unit is 1 kpc / (1 km/s)
-
     for t in args.times:
         if args.lagrange:
             try:
@@ -100,7 +102,7 @@ if __name__ == "__main__":
             bins[:-1],
             bins,
             weights=counts,
-            label=f"$t$={t * timeUnitGyr:.2f}",
+            label=f"$t$={t * args.timeUnitGyr:.2f}",
             histtype="step",
         )
 
