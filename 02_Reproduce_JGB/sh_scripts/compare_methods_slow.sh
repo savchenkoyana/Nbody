@@ -19,8 +19,8 @@ fi
 
 N=$1
 TASK=$2
-ETA="${3:-0.001}"
-ETAR=2*$ETA
+ETA=0.001
+ETAR=$(echo "2 * $ETA" | bc -l)
 
 if [[ $N == 1000 ]]; then
    EPS=1
@@ -87,7 +87,7 @@ elif [[ $TASK -eq 0 ]]; then
 elif [[ $TASK -eq 1 ]]; then
   echo "Running runbody1"
 
-  OUTDIR="${DIR}/runbody1_${ETA}"
+  OUTDIR="${DIR}/runbody1_ETA${ETA}"
 
   # Nbody1
   time nice -n 20 runbody1 \
@@ -111,7 +111,11 @@ elif [[ $TASK -eq 1 ]]; then
 elif [[ $TASK -eq 2 ]]; then
   echo "Running runbody2"
 
-  OUTDIR="${DIR}/runbody2_${ETA}_${ETAR}"
+  OUTDIR="${DIR}/runbody2_ETA${ETA}_ETAR${ETAR}"
+
+# TO DO: add SMBH as an external potential
+# TO DO: add option for Rs (neighborhood radius)
+# TO DO: add option for Nnbmax (10 + N**0.5 for small N, (N/8)**0.75 for large N)
 
   # Nbody2
   time nice -n 20 runbody2 \

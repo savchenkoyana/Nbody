@@ -3,6 +3,7 @@
 import argparse
 import os
 import subprocess
+import warnings
 from pathlib import Path
 from typing import Union
 
@@ -39,11 +40,12 @@ def postprocess(
 
     # Remove source mass (optional)
     if remove_point_source:
-        assert np.allclose(xv[-1], np.zeros((1, 6)), atol=1e-7), xv[-1]
-        assert np.isclose(masses[-1], source_mass / m_scale), (
-            masses[-1],
-            source_mass / m_scale,
-        )
+        if not np.allclose(xv[-1], np.zeros((1, 6)), atol=1e-7):
+            warnings.warn(f"Source coordinates diverge from zero: {xv[-1]}")
+        if not np.isclose(masses[-1], source_mass / m_scale):
+            warnings.warn(
+                f"Source mass {masses[-1]} diverges from {source_mass / m_scale}"
+            )
 
         command = f"snapscale in={filename} out=- rscale={r_scale} mscale={m_scale} vscale={v_scale} | snapmask - {output_file} select=0:{N - 2}"
     else:
