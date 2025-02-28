@@ -8,13 +8,13 @@ This repository contains astrophysical N-body simulation experiments.
 
 First prepare an environment. I used conda environment with Python 3.9:
 
-```shell
+```bash
 conda create -n agama python=3.9
 ```
 
 Clone this repository and install all required packages in the environment:
 
-```shell
+```bash
 git clone https://github.com/savchenkoyana/Nbody.git
 cd Nbody
 conda activate agama
@@ -26,7 +26,7 @@ pre-commit install  # optional, only if you want to commit to repository
 
 To install NEMO, follow these steps:
 
-```shell
+```bash
 git clone https://github.com/teuben/nemo  # I use commit 8a2cbf4fcd565d7a55403ba135fd64716ef0b812
 cd nemo
 ./configure --with-yapp=pgplot
@@ -38,7 +38,7 @@ If installation completed successfully, you should get "TESTSUITE: OK" for each 
 
 > **Note:** Everytime you want to use NEMO, you first need to execute this from `nemo` repository root:
 >
-> ```shell
+> ```bash
 > source nemo_start.sh
 > ```
 >
@@ -50,13 +50,13 @@ For more info about NEMO see [NEMO's official documentation](https://astronemo.r
 
 Activate conda environment, if it is not activated:
 
-```shell
+```bash
 conda activate agama
 ```
 
 To install Agama, follow these steps:
 
-```shell
+```bash
 git clone https://github.com/GalacticDynamics-Oxford/Agama.git  # I use commit acf08a656e2aa67d466cafd7c92ba2cd277ff9e8
 cd Agama
 pip install .
@@ -71,7 +71,7 @@ To install `glnemo2` for snapshot visualization, follow the instructions at [the
 
 After installation, you will have the following repository structure:
 
-```shell
+```bash
 Nbody
 ├── Agama  # Agama repository root
 ├── nemo  # nemo repository root
