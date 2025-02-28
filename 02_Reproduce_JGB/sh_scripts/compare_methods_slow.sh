@@ -66,7 +66,7 @@ if [[ $TASK -eq -1 ]]; then
 elif [[ $TASK -eq 0 ]]; then
   echo "Running nbody0"
 
-  OUTFILE="${DIR}/out_nbody0_${ETA}.nemo"
+  OUTFILE="${DIR}/out_nbody0_ETA${ETA}.nemo"
 
   # Nbody0
   time nice -n 20 nbody0 \

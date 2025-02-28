@@ -19,11 +19,9 @@ How to reproduce:
 - Run star cluster simulation with external tidal field:
 
   ```bash
+  cd nbody6_simple_exp
+  nbody6 < input 1> exp.out 2> exp.err
+  cd ..
   ```
 
--
-
-- but no stellar evolution.
-  Suitable for standard NBODY6 (no GPU) or sse.
-
-1. The fastest way is to run an existing config for Nbody6: https://github.com/nbodyx/Nbody6/blob/master/Docs/input
+  This example is taken from official Nbody6 repository ([source](https://github.com/nbodyx/Nbody6/blob/master/Docs/input)). It is suitable for standard NBODY6 (no GPU) or sse. No stellar evolution is taken into account.
