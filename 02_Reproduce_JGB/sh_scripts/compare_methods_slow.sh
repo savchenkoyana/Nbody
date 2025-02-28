@@ -19,7 +19,7 @@ fi
 
 N=$1
 TASK=$2
-ETA=0.001
+ETA=$3
 ETAR=$(echo "2 * $ETA" | bc -l)
 
 if [[ $N == 1000 ]]; then
