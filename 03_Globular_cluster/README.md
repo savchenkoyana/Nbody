@@ -29,7 +29,7 @@ Parameters of stellar system:
 - Eggleton IMF, see `imf2.f` for details
   - $M\_{low} = 0.2 M\_{☉}$
   - $M\_{high} = 10 M\_{☉}$
-  - $f(M) = \\frac{0.19 * M}{(1-M)^0.75 + 0.032\*(1-M)^0.25}$ (in $M\_{☉}$ units)
+  - $f(M) = \\frac{0.19 * M}{(1-M)^{0.75} + 0.032\*(1-M)^{0.25}}$ (in $M\_{☉}$ units)
 - Masses scaled so that $M^{bar}=1$
 
 Parameter of external force:
@@ -53,8 +53,6 @@ cd ..
 
 # Useful links
 
-- [NBODY6++GPU manual](https://wwwstaff.ari.uni-heidelberg.de/spurzem/lehre/WS17/cuda/nbody6++_manual.pdf)
-  Should be useful for NBODY6 (without GPU) for some extent
 - Repositories:
   - https://github.com/nbodyx/Nbody6
   - https://github.com/nbodyx/Nbody6ppGPU
