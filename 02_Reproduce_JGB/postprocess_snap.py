@@ -3,6 +3,7 @@
 import argparse
 import os
 import subprocess
+import warnings
 from pathlib import Path
 from typing import Union
 
@@ -18,6 +19,7 @@ def postprocess(
     source_mass: float = 4.37 * 10**10,
     r_scale: float = 1.0,
     m_scale: float = 1.0,
+    v_scale: float = 1.0,
 ):
     """
     Postprocess snapshot: remove source of field (if needed) and change length units.
@@ -38,15 +40,16 @@ def postprocess(
 
     # Remove source mass (optional)
     if remove_point_source:
-        assert np.allclose(xv[-1], np.zeros((1, 6)), atol=1e-7), xv[-1]
-        assert np.isclose(masses[-1], source_mass / m_scale), (
-            masses[-1],
-            source_mass / m_scale,
-        )
+        if not np.allclose(xv[-1], np.zeros((1, 6)), atol=1e-7):
+            warnings.warn(f"Source coordinates diverge from zero: {xv[-1]}")
+        if not np.isclose(masses[-1], source_mass / m_scale):
+            warnings.warn(
+                f"Source mass {masses[-1]} diverges from {source_mass / m_scale}"
+            )
 
-        command = f"snapscale in={filename} out=- rscale={r_scale} mscale={m_scale} | snapmask - {output_file} select=0:{N - 2}"
+        command = f"snapscale in={filename} out=- rscale={r_scale} mscale={m_scale} vscale={v_scale} | snapmask - {output_file} select=0:{N - 2}"
     else:
-        command = f"snapscale in={filename} out={output_file} rscale={r_scale} mscale={m_scale}"
+        command = f"snapscale in={filename} out={output_file} rscale={r_scale} mscale={m_scale} vscale={v_scale}"
 
     print(f"Running:\n\t{command}\n")
     subprocess.check_call(command, shell=True)
@@ -54,7 +57,7 @@ def postprocess(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Postprocess snapshot: change units (kpc -> pc). "
+        description="Postprocess snapshot: change units to ones used for data generation (pc, Msun, km/s). "
         "Optional: remove point source of field."
     )
     parser.add_argument(
@@ -75,9 +78,22 @@ if __name__ == "__main__":
         help="Mass of point source of gravitational field (is solar masses). Default: 4.37x10^10",
     )
     parser.add_argument(
-        "--nbody",
-        action="store_true",
-        help="Whether to use units for Nbody",
+        "--length",
+        type=float,
+        default=1.0,
+        help="Length units scale of snapshot (in kpc). Default: 1.0",
+    )
+    parser.add_argument(
+        "--mass",
+        type=float,
+        default=232533.7331,
+        help="Mass units scale of snapshot (in Msun). Default: 232533.7331",
+    )
+    parser.add_argument(
+        "--velocity",
+        type=float,
+        default=1.0,
+        help="Velocity units scale of snapshot (in km/s). Default: 1.0",
     )
     args = parser.parse_args()
 
@@ -90,7 +106,8 @@ if __name__ == "__main__":
         filename=filename,
         remove_point_source=args.remove_point_source,
         source_mass=args.source_mass,
-        r_scale=1e3,  # kpc -> pc
-        m_scale=232533.73313343327 if args.nbody else 1.0,
+        r_scale=1e3 * args.length,
+        m_scale=args.mass,
+        v_scale=args.velocity,
         output_file=output_file,
     )

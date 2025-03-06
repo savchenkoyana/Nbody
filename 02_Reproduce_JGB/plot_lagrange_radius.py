@@ -3,7 +3,6 @@ snapshots."""
 
 from pathlib import Path
 
-import agama
 import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
@@ -24,13 +23,6 @@ if __name__ == "__main__":
         help="Nemo files used for lagrange radii computation",
     )
     parser.add_argument(
-        "--nbody-nemo-files",
-        nargs="+",
-        type=str,
-        required=False,
-        help="Same as '--nemo-files', but for NbodyX integrator output",
-    )
-    parser.add_argument(
         "--n-timestamps",
         type=int,
         default=100,
@@ -41,6 +33,12 @@ if __name__ == "__main__":
         type=int,
         default=500,
         help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. Default: 500",
+    )
+    parser.add_argument(
+        "--timeUnitGyr",
+        type=float,
+        default=9.7779e-4,
+        help="Time unit in Gyr. Default: 9.7779e-4",
     )
     parser.add_argument(
         "--store-artifacts",
@@ -62,9 +60,6 @@ if __name__ == "__main__":
 
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
-    agama.setUnits(length=1, mass=1, velocity=1)  # time units used for evolution
-    timeUnitGyr = agama.getUnits()["time"] / 1e3  # time unit is 1 kpc / (1 km/s)
-
     # assuming filenames are: /path/to/Nbody/02_Reproduce_JGB/<DIRNAME>/out.nemo
     # we will save data into /path/to/Nbody/02_Reproduce_JGB
     save_dir = Path(args.nemo_files[0]).parents[1]
@@ -84,11 +79,6 @@ if __name__ == "__main__":
     ax_mt.set_xlabel("$t$, Gyr")
     ax_mt.set_ylabel(r"$M(t)$, $M_\odot$")
     ax_mt.set_title("Mean mass of particles in cluster")
-
-    if args.nbody_nemo_files is None:
-        args.nbody_nemo_files = []
-
-    args.nemo_files += args.nbody_nemo_files
 
     for filename in args.nemo_files:
         if not Path(filename).exists():
@@ -120,7 +110,7 @@ if __name__ == "__main__":
             m_tot = np.sum(masses)
             m_filtered = masses[mask]
 
-            times = np.append(times, t * timeUnitGyr)
+            times = np.append(times, t * args.timeUnitGyr)
             lagrange_radii = np.append(lagrange_radii, lagrange_r)
             n_particles = np.append(n_particles, m_filtered.size)
             mean_mass = np.append(mean_mass, np.mean(m_filtered))
@@ -132,7 +122,7 @@ if __name__ == "__main__":
         #     create_file_label(filename) if len(args.nemo_files) > 1 else None
         # )  # label as filename if there are many files
 
-        fmt = "v" if filename in args.nbody_nemo_files else "."
+        fmt = "."
         ax_rt.plot(times, lagrange_radii, fmt, label=plot_label)
         ax_nt.plot(times, n_particles / n_particles[0], fmt, label=plot_label)
         ax_mt.plot(times, mean_mass, fmt, label=plot_label)

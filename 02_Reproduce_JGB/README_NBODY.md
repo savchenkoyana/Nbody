@@ -18,32 +18,33 @@ To reproduce the experiment, follow these steps:
   source start_nemo.sh
   ```
 
+  Note that you neeed custom NEMO version from https://github.com/savchenkoyana/nemo.git (branch nbodyx). To check your current branch, run:
+
+  ```shell
+  git status
+  ```
+
+  If your version differs, use installation instruction from [README.md](README.md).
+
 - Go to the experiment root directory:
 
   ```shell
   cd /path/to/Nbody/02_Reproduce_JGB/
   ```
 
-- At the moment I compare gyrfalcON with Nbody0 (the simplest Nbody method). GyrFalcON is not designed to treat dense clusters, but it is possible to get more or less correct results by setting gyrFalcON's `theta` to a very low value. The best results I got for `N=10000` and $\\sigma=1.5$:
+- To make fast checks that everything works fine, run:
 
   ```shell
-  gyrfalcON snap_mu0.0_s1.0_sigma1.5_r10.0_N10000/IC_preprocessed_nbody.nemo \
-    snap_mu0.0_s1.0_sigma1.5_r10.0_N10000/out_g1_kmax15_Nlev8_theta01_fac001.nemo \
-    kmax=15 \
-    Nlev=8 \
-    logstep=3000 \
-    eps=0.0003684031498640387 \
-    tstop=14 \
-    step=0.01 \
-    theta=0.1 \
-    fac=0.01
+  bash sh_scripts/compare_methods_fast.sh
   ```
 
-- This scripts demonstrates evolution on $\\sigma=1.5$ with different N-body methods:
+- To start full simulation with different N-body methods, run:
 
   ```shell
-  bash sh_scripts/run_simN1000.sh
+  bash sh_scripts/compare_methods_slow.sh <N> <TASK> <ETA>
   ```
+
+  At first I recommend to choose `N=1000` (you can set a higher `N` later). Use options `1000 -1` to create coordinates and then `1000 0`, `1000 1`, `1000 2`, etc. to run all N-body methods.
 
 # Results interpretation
 
@@ -57,8 +58,7 @@ python plot_lagrange_radius.py \
   --nemo-files /path/to/dir1/out_postprocessed.nemo ... /path/to/dirn/out_postprocessed.nemo \
   --mu <MU> \
   --sigma <SIGMA> \
-  --scale <SCALE> \
-  --nbody-nemo-files /path/to/dirn/out_nbody_postprocessed.nemo \
+  --scale <SCALE>
 ```
 
 > Do not forget to use post-processed data (without SMBH at the center) with the command above
@@ -84,6 +84,7 @@ python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --mom
    hisf <NAME>.nemo
    ```
 1. A list of hacks on how to check N-body simulation results is given [here](https://arxiv.org/pdf/1105.1082).
+1. There is another way to start an Aarseth simulation, e.g. use [`nbody1`](https://teuben.github.io/nemo/man_html/nbody1.1.html) instead of its NEMO wrapper [`runbody1`](https://teuben.github.io/nemo/man_html/runbody1.1.html). For more details see `$NEMO/src/nbody/evolve/aarseth/tools/`
 
 # About direct methods
 

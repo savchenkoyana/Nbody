@@ -34,6 +34,8 @@ To reproduce the experiment, follow these steps:
   make nmax
   cd $NEMO/src/nbody/evolve/aarseth/nbody1/source
   make nmax
+  cd $NEMO/src/nbody/evolve/aarseth/nbody2/source
+  make nmax
   cd $NEMO/src/nbody/reduc/Makefile
   make snapbinary
   cp snapbinary $NEMOLIB/
@@ -70,12 +72,12 @@ To reproduce the experiment, follow these steps:
 
 The combinations of parameters from the original article and corresponding sh-scripts are listed below:
 
-| Experiment name | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles | Script to reproduce evolution  |
-| --------------- | ---------------- | ----------- | --------- | ------------------ | ------------------- | ------------------------------ |
-| $\\sigma$ = 0.5 | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma0.5.sh |
-| $\\sigma$ = 1   | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma1.0.sh |
-| $\\sigma$ = 1.5 | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_sigma1.5.sh |
-| M & A           | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    | sh_scripts/run_exp_MA.sh       |
+| Experiment name | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles | Command to reproduce evolution     |
+| --------------- | ---------------- | ----------- | --------- | ------------------ | ------------------- | ---------------------------------- |
+| M & A           | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 1 |
+| $\\sigma$ = 0.5 | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 2 |
+| $\\sigma$ = 1   | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 3 |
+| $\\sigma$ = 1.5 | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 4 |
 
 ## More detailed overview
 
@@ -111,12 +113,13 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   After this step, you will get a new file `<DIRNAME>/IC_preprocessed.nemo` with the old data concatenated with the new data (a steady point of mass $4.37\\times10^{10} M\_\\odot$ at (0, 0, 0)).
 
-  To convert data to units with `G=1` (kpc, km/s and $\\sim 232533.7 \\times M\_{☉}$), run:
+  To convert data to units with `G=1` (pc, km/s and $\\sim 232.5337 \\times M\_{☉}$), run:
 
   ```shell
   snapscale in=`DIRNAME`/IC_preprocessed.nemo \
     out=`DIRNAME`/IC_preprocessed_nbody.nemo \
-    mscale=4.300451321727918e-06
+    mscale=4.300451321727918e-03 \
+    rscale=1000
   ```
 
   For more details see section [Units](#Units).
@@ -125,21 +128,15 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   ```shell
   nbody0 `DIRNAME`/IC_preprocessed_nbody.nemo \
-    `DIRNAME`/out_nbody.nemo \
-    tcrit=14 \
-    deltat=0.01 \
-    eps=0.0003684031498640387
+    `DIRNAME`/out_nbody0.nemo \
+    tcrit=14000 \
+    deltat=10 \
+    eps=0.3684031498640387
   ```
-
-  `eps` is computed in code and provided by `preprocess_snap.py` script at the end of its output.
 
 - It would be useful to postprocess your data to plot profiles, spectras, etc.
 
-  To postprocess snapshot evolved in JGB potential (the original article), run:
-
-  ```shell
-  python postprocess.py --snap-file <DIRNAME>/<OUT_NAME>.nemo --remove-point-source --nbody
-  ```
+  To postprocess snapshot evolved in JGB potential (the original article), run `python postprocess.py`
 
   The postprocessed file with name `<OUT_NAME>_postprocessed.nemo` will be stored in `<DIRNAME>` folder.
 
@@ -245,7 +242,7 @@ The comparison with other methods is descriped in details in [README_NBODY.md](R
 We use non-usual units in our experiments:
 
 - We use pc (length), km/s (velocity) and $M\_{☉}$ (mass) units for creating a cluster model because of convenience
-- We use units with `G=1` for evolution: kpc for lenght, km/s for velocity and $\\sim 232533.7 \\times M\_{☉}$ for mass
+- We use units with `G=1` for evolution: pc for lenght, km/s for velocity and $\\sim 232.5337 \\times M\_{☉}$ for mass
 
 # Checklist
 

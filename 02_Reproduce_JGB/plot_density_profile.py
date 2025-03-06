@@ -42,6 +42,12 @@ if __name__ == "__main__":
         help="Which times to use. Example: '--times 0.0 0.5 1.0'",
     )
     parser.add_argument(
+        "--timeUnitGyr",
+        type=float,
+        default=9.7779e-4,
+        help="Time unit in Gyr. Default: 9.7779e-4",
+    )
+    parser.add_argument(
         "--store-artifacts",
         action="store_true",
         help="Whether to store NEMO artifacts for debug",
@@ -54,9 +60,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
-
-    agama.setUnits(length=1, mass=1, velocity=1)  # time units used for evolution
-    timeUnitGyr = agama.getUnits()["time"] / 1e3  # time unit is 1 kpc / (1 km/s)
 
     set_units()  # set Agama units
 
@@ -114,7 +117,7 @@ if __name__ == "__main__":
                 continue
             raise
 
-        plt.plot(r_prof, rho_prof, label=f"$t$={t * timeUnitGyr:.2f}")
+        plt.plot(r_prof, rho_prof, label=f"$t$={t * args.timeUnitGyr:.2f}")
 
     plt.legend(title=label)
     if args.projprof:
