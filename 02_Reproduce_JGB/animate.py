@@ -44,6 +44,18 @@ if __name__ == "__main__":
         help="Whether to add Milky Way potential (file with potential should be stored at "
         " 'Nbody/Agama/py/MWPotentialHunter24_rotating.ini')",
     )
+    parser.add_argument(
+        "--xlim",
+        type=float,
+        default=40_000,
+        help="The limit on X axis: (-xlim, xlim). Default: 40_000",
+    )
+    parser.add_argument(
+        "--ylim",
+        type=float,
+        default=40_000,
+        help="The limit on Y axis: (-ylim, ylim). Default: 40_000",
+    )
     args = parser.parse_args()
 
     # Sanity checks
@@ -130,8 +142,8 @@ if __name__ == "__main__":
         custom_update,
         data=data,
         ax=ax,
-        xlim=(-40000, 40000),
-        ylim=(-40000, 40000),
+        xlim=(-args.xlim, args.xlim),
+        ylim=(-args.ylim, args.ylim),
         center_x=center_x,
         center_y=center_y,
     )

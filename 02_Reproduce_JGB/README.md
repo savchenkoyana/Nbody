@@ -14,19 +14,19 @@ To reproduce the experiment, follow these steps:
 
 - Activate the Agama environment:
 
-  ```shell
+  ```bash
   conda activate agama
   ```
 
 - Start Nemo (from `nemo` repository root):
 
-  ```shell
+  ```bash
   source start_nemo.sh
   ```
 
 - Switch to custom NEMO version:
 
-  ```shell
+  ```bash
   cd $NEMO
   git remote add custom https://github.com/savchenkoyana/nemo.git
   git checkout nbodyx
@@ -45,7 +45,7 @@ To reproduce the experiment, follow these steps:
 
   If you want to go back to the default NEMO version, run:
 
-  ```shell
+  ```bash
   cd $NEMO
   git checkout master
   make rebuild
@@ -53,13 +53,13 @@ To reproduce the experiment, follow these steps:
 
 - Go to the experiment root directory:
 
-  ```shell
+  ```bash
   cd /path/to/Nbody/02_Reproduce_JGB/
   ```
 
 - To reproduce any experiment from the original article, run the corresponding sh-script. For example:
 
-  ```shell
+  ```bash
   bash sh_scripts/run_exp_MA.sh
   ```
 
@@ -85,7 +85,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
 - Create initial coordinates of cluster:
 
-  ```shell
+  ```bash
   python create_ic.py --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS> --N <N>
   ```
 
@@ -101,7 +101,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   The easiest way to create this point-mass potential is to add a new particle representing the central mass to the existing snapshot with PBH cluster data:
 
-  ```shell
+  ```bash
   python preprocess_snap.py \
     --nemo-file `DIRNAME`/IC.nemo \
     --r 10 \
@@ -115,7 +115,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
   To convert data to units with `G=1` (pc, km/s and $\\sim 232.5337 \\times M\_{☉}$), run:
 
-  ```shell
+  ```bash
   snapscale in=`DIRNAME`/IC_preprocessed.nemo \
     out=`DIRNAME`/IC_preprocessed_nbody.nemo \
     mscale=4.300451321727918e-03 \
@@ -126,7 +126,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
 - Run evolution of this snapshot with SMBH:
 
-  ```shell
+  ```bash
   nbody0 `DIRNAME`/IC_preprocessed_nbody.nemo \
     `DIRNAME`/out_nbody0.nemo \
     tcrit=14000 \
@@ -146,13 +146,13 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
 - To visualize cluster evolution, run:
 
-  ```shell
+  ```bash
   snapplot <DIRNAME>/out.nemo
   ```
 
   Use these options for customization:
 
-  ```shell
+  ```bash
   snapplot <DIRNAME>/out.nemo xrange=<xmin>:<xmax> yrange=<ymin>:<ymax> times=<tmin>:<tmax>
   ```
 
@@ -160,7 +160,7 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
 - Another option is to use custom visualization script from this repository:
 
-  ```shell
+  ```bash
   python animate.py --nemo-file <DIRNAME>/out_postprocessed.nemo --add-point-source
   ```
 
@@ -168,14 +168,14 @@ This section desctibes how to perform the evolution of PBH cluster in an externa
 
 Plot density profile $$\\rho(r)$$ for the resulting snapshot and compare it with initial density:
 
-```shell
+```bash
 python plot_density_profile.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
 `--times <t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.
 E.g., `--times 0.0 1.0 2.0`. Before feeding timestamps, make sure they are present in the snapshot. To get a list of timestamps from a snapshot, run:
 
-```shell
+```bash
 python stat.py --nemo-files <DIRNAME>/<OUT_NAME>_postprocessed.nemo --n-timestamps <N>
 ```
 
@@ -187,13 +187,13 @@ where `<N>` is the desired number of timestamps.
 
 To plot Lagrange radius at different timestamps for different experiments, run:
 
-```shell
+```bash
 python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo
 ```
 
 As NEMO's tool for computation of cluster's density center sometimes fail and I haven't fixed it yet, it is better to add `--remove-outliers` at the end of the command:
 
-```shell
+```bash
 python plot_lagrange_radius.py --nemo-files <DIRNAME1>/<OUT_NAME>_postprocessed.nemo <DIRNAME2>/<OUT_NAME>_postprocessed.nemo --remove-outliers
 ```
 
@@ -209,7 +209,7 @@ Note that Lagrange radius at $t=0$ should be approximately 13 pc according to [a
 
 Compute and plot mass spectrum for a given snapshot along with the original distribution function:
 
-```shell
+```bash
 python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS>
 ```
 
@@ -217,7 +217,7 @@ The mass distribution for your snapshot (the resulting histograms) and original 
 
 To plot the distribution of masses only for particles inside the half-mass radius, run:
 
-```shell
+```bash
 python plot_mass_spectrum.py --nemo-file <DIRNAME>/<OUT_NAME>_postprocessed.nemo --times <t1> <t2> ... <tn> --mu <MU> --sigma <SIGMA> --scale <SCALE> --r <PLUMMER_RADIUS> --lagrange --remove-outliers
 ```
 
@@ -228,7 +228,7 @@ There are several ways to test your pipeline:
 1. You may evolve a cluster in its own gravitational field. The final density after the evolution should look like the initial density — this would indicate that your model is truly self-consistent.
    In our case it means that we should not add point mass and shifts when preprocessing.
 1. You can check how energy and virial ratio evolve during the simulation:
-   ```shell
+   ```bash
    python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial
    ```
    Use the same `<eps>` as during the simulation. Do not use postprocessed snapshot with removed central mass.

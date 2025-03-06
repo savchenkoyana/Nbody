@@ -30,15 +30,15 @@ After the model creation, we sample $N=10^4$ bodies in the custom density potent
 To reproduce the experiment, follow these steps:
 
 - Activate the Agama environment:
-  ```shell
+  ```bash
   conda activate agama
   ```
 - Start Nemo (from `nemo` repository root):
-  ```shell
+  ```bash
   source start_nemo.sh
   ```
 - Create initial coordinates for evolution:
-  ```shell
+  ```bash
   cd 01_Custom_Density_Model_Evolution/
   python create_ic.py --density-type <DENSITY_TYPE> --N 10000
   ```
@@ -46,18 +46,18 @@ To reproduce the experiment, follow these steps:
   The above command will automatically create (or re-create) a directory `<DENSITY_TYPE>` containing file `IC.nemo` with initial coordinates for evolution.
   You may change the number of particles `N` if you want.
 - Evolve for a couple of crossing times:
-  ```shell
+  ```bash
   gyrfalcON in=<DENSITY_TYPE>/IC.nemo out=<DENSITY_TYPE>/out.nemo eps=<eps> kmax=<kmax> Grav=<Grav> tstop=<tstop> step=<step> logstep=300
   ```
   `logstep=300` controls console output size. Other parameters such as `<eps>`, `<kmax>` and `<Grav>` should be thoroughly
   chosen. The previous python script `create_ic.py` prints a set of recommended `gyrfalcON` parameters at the end of the
   output.
 - Visualize cluster evolution:
-  ```shell
+  ```bash
   snapplot3 <DENSITY_TYPE>/out.nemo
   ```
 - Plot mass density $$\\rho(r)$$ for the resulting snapshot and compare with initial density:
-  ```shell
+  ```bash
   python plot_snap_density.py --nemo-file <DENSITY_TYPE>/out.nemo --times <t1> <t2> ... <tn> --density-type <DENSITY_TYPE>
   ```
   `<t1> <t2> ... <tn>` means that all timestamps from snapshot that you want to use to plot the graph should be separated by a space.

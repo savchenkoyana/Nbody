@@ -19,7 +19,7 @@ fi
 
 N=$1
 TASK=$2
-ETA=0.001
+ETA=$3
 ETAR=$(echo "2 * $ETA" | bc -l)
 
 if [[ $N == 1000 ]]; then
@@ -66,7 +66,7 @@ if [[ $TASK -eq -1 ]]; then
 elif [[ $TASK -eq 0 ]]; then
   echo "Running nbody0"
 
-  OUTFILE="${DIR}/out_nbody0_${ETA}.nemo"
+  OUTFILE="${DIR}/out_nbody0_ETA${ETA}.nemo"
 
   # Nbody0
   time nice -n 20 nbody0 \
