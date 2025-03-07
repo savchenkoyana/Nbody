@@ -47,30 +47,30 @@ To make sure that snapshot masses have Salpeter distribution:
 
 1. Scale snapshot using `M*, R*, V*` from `exp.out`:
 
-```bash
-cd nbody6_salpeter
-snapscale OUT3.snap OUT3_scaled.snap rscale=<R*> vscale=<V*> mscale=<M*>
-cd ..
-```
+   ```bash
+   cd nbody6_salpeter
+   snapscale OUT3.snap OUT3_scaled.snap rscale=<R*> vscale=<V*> mscale=<M*>
+   cd ..
+   ```
 
-2. Run notebook [Salpeter.ipynb](Salpeter.ipynb)
+1. Run notebook [Salpeter.ipynb](Salpeter.ipynb)
 
 To feed scaled data in physical units:
 
 1. Get data file in Fortran format (`fort.10` file):
 
-```bash
-cd nbody6_salpeter
-runbody6 OUT3_scaled.snap outdir tcrit=1 nbody6=1 exe=nbody6
-```
+   ```bash
+   cd nbody6_salpeter
+   runbody6 OUT3_scaled.snap outdir tcrit=1 nbody6=1 exe=nbody6
+   ```
 
-2. Use generated `outdir/fort.10` for nbody6:
+1. Use generated `outdir/fort.10` for nbody6:
 
-```bash
-cp outdir/fort.10 reproduce/
-cd reproduce
-nbody6 < input 1> exp.out 2> exp.err
-```
+   ```bash
+   cp outdir/fort.10 reproduce/
+   cd reproduce
+   nbody6 < input 1> exp.out 2> exp.err
+   ```
 
 The new input file contains options like `KZ(20)=0` and `KZ(22)=-1`, which ensure that we use data from loaded snapshot. (!!! Needs checking)
 
