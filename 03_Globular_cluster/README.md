@@ -72,6 +72,14 @@ u3tos OUT3 OUT3.snap
 cd ..
 ```
 
+To feed your data:
+
+```bash
+runbody6 yourfile.nemo outdir tcrit=1 nbody6=1 exe=nbody6
+```
+
+and the use generated `outdir/fort.10` for nbody6
+
 <!-- - Bulge (~1 kpc, $10^{10} M\_{☉}$, spherical potentail such as Hernquist or Plummer). Represents the dense central region of the galaxy.
 
 - Disk (radial ~3 kpc, vertical ~300 pc, $5\times 10^{10} M\_{☉}$, flattented potential such as Miyamoto–Nagai potential)
@@ -82,6 +90,16 @@ cd ..
 # Useful links
 
 - Repositories:
-  - https://github.com/nbodyx/Nbody6
-  - https://github.com/nbodyx/Nbody6ppGPU
-  - https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing
+  - https://github.com/nbodyx/Nbody6 (note NEMO uses version from ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz)
+  - https://github.com/nbodyx/Nbody6ppGPU (version used in NEMO, but not supported by developers now)
+  - https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing (supported by developers at the moment)
+
+# Tips
+
+- To convert NEMO snapshot to NbodyX input, use:
+
+  ```bash
+  stou4 data.nemo fort.10
+  ```
+
+  Note that `runbody4` and `runbody6` use slightly different conversion (see `$NEMO/src/nbody/evolve/aarseth/tools/runbody6.c`)
