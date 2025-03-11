@@ -49,7 +49,8 @@ To make sure that snapshot masses have Salpeter distribution:
 
    ```bash
    cd nbody6_salpeter
-   snapscale OUT3.snap OUT3_scaled.snap rscale=<R*> vscale=<V*> mscale=<M*>
+   u3tos OUT3 OUT3.snap
+   snaptrim OUT3.snap - times=0 | snapscale - OUT3_scaled.snap rscale=<R*> vscale=<V*> mscale=<M*>
    cd ..
    ```
 
@@ -61,10 +62,10 @@ To feed scaled data in physical units:
 
    ```bash
    cd nbody6_salpeter
-   runbody6 OUT3_scaled.snap outdir tcrit=1 nbody6=1 exe=nbody6
+   runbody6 OUT3_scaled.snap outdir tcrit=0 nbody6=1 exe=nbody6
    ```
 
-1. Use generated `outdir/fort.10` for nbody6:
+1. Use generated file for nbody6:
 
    ```bash
    cp outdir/fort.10 reproduce/
@@ -74,16 +75,9 @@ To feed scaled data in physical units:
 
 The new input file contains options like `KZ(20)=0` and `KZ(22)=-1`, which ensure that we use data from loaded snapshot. (!!! Needs checking)
 
-<!-- - Bulge (~1 kpc, $10^{10} M\_{☉}$, spherical potentail such as Hernquist or Plummer). Represents the dense central region of the galaxy.
-
-- Disk (radial ~3 kpc, vertical ~300 pc, $5\times 10^{10} M\_{☉}$, flattented potential such as Miyamoto–Nagai potential)
-
-- Halo (virial radius ~200 kpc, $10^{12} M\_{☉}$, logarithmic or Navarro–Frenk–White (NFW) profiles). This component dominates at large radii and is critical for explaining the flat rotation curve of the Milky Way.
- -->
-
 # Useful links
 
 - Repositories:
-  - https://github.com/nbodyx/Nbody6 (note NEMO uses [the official version](ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz) by Sverre Aarseth)
+  - https://github.com/nbodyx/Nbody6 (note NEMO uses the official version from `ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz` by Sverre Aarseth)
   - https://github.com/nbodyx/Nbody6ppGPU (version used in NEMO, but not supported by developers now)
   - https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing (supported by developers at the moment)

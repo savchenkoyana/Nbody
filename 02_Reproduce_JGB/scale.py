@@ -43,6 +43,10 @@ def get_scaling(filename, current_units):
     rscale = 1 / R
     vscale = np.sqrt(mscale / rscale / agama.G)
     print(f"mscale={mscale}, rscale={rscale}, vscale={vscale}")
+
+    print(
+        f"Rbar(pc)={R * 1e-3 / current_units['length']}, Zmbar(Msun)={np.mean(m) / current_units['mass']}, Q={T / W}"
+    )
     scale = {
         "mscale": mscale,
         "rscale": rscale,
