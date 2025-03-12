@@ -1,6 +1,7 @@
 """Print statistics for a given NEMO snapshot."""
 
 import argparse
+import os
 import subprocess
 from pathlib import Path
 from typing import Union
@@ -98,7 +99,9 @@ if __name__ == "__main__":
 
     if not Path(args.nemo_file).exists():
         raise RuntimeError(f"filename {args.nemo_file} does not exist")
-    outfile = args.nemo_file.replace(".nemo", "_NBODY_UNITS.nemo")
+
+    file_extension = os.path.splitext(args.nemo_file)[1]
+    outfile = args.nemo_file.replace(file_extension, "_NBODY_UNITS" + file_extension)
 
     # Compute units
     new_units, scale = get_scaling(
