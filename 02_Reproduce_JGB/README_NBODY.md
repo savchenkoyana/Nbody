@@ -85,6 +85,8 @@ python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --mom
    ```
 1. A list of hacks on how to check N-body simulation results is given [here](https://arxiv.org/pdf/1105.1082).
 1. There is another way to start an Aarseth simulation, e.g. use [`nbody1`](https://teuben.github.io/nemo/man_html/nbody1.1.html) instead of its NEMO wrapper [`runbody1`](https://teuben.github.io/nemo/man_html/runbody1.1.html). For more details see `$NEMO/src/nbody/evolve/aarseth/tools/`
+1. Some useful info about run options can be found in file `define.f` (see either `$NEMO/src/nbody/evolve/aarseth/nbody*` or nbody6 source code from `ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz`, depending on your NbodyX version)
+1. Nbody codes save data in N-body units by default. To transform your data into astrophysical units (pc, km/s, $M\_{☉}$), use coefficients from simulation log. You can also perfrom scaling to N-body units yourself and compute coefficients using `scale.py`
 
 # About direct methods
 
