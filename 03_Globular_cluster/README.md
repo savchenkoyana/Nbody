@@ -25,7 +25,7 @@ This experiment is based on an example from the official Nbody6 repository ([sou
 Parameters of stellar system:
 
 - 5000 particles
-- Plummer distribution (standart notation $r=1$, $M\_{tot}=1$)
+- Plummer distribution (standard notation $r=1$, $M\_{tot}=1$)
 - Salpeter IMF ($\\alpha=2.35$)
   - $M\_{low} = 0.2 M\_{☉}$
   - $M\_{high} = 10 M\_{☉}$
@@ -56,7 +56,7 @@ To make sure that snapshot masses have Salpeter distribution:
 
 1. Run notebook [Salpeter.ipynb](Salpeter.ipynb)
 
-To feed scaled data in physical units:
+To feed scaled data in astrophysical units (pc, km/s and $M\_{☉}$):
 
 1. Get data file in Fortran format (`fort.10` file):
 
@@ -68,12 +68,32 @@ To feed scaled data in physical units:
 1. Use generated file for nbody6:
 
    ```bash
-   cp outdir/fort.10 reproduce/
-   cd reproduce
+   cp outdir/fort.10 reproduce_astro/
+   cd reproduce_astro
    nbody6 < input 1> exp.out 2> exp.err
    ```
 
-The new input file contains options like `KZ(20)=0` and `KZ(22)=-1`, which ensure that we use data from loaded snapshot. (!!! Needs checking)
+   The new input file contains options like `KZ(20)=0` and `KZ(22)=-1`. It's strange, but astrophysical units don't work at the moment!
+
+To feed data in any units with `G=1`:
+
+1. Get data in these units:
+
+   ```bash
+   cd nbody6_salpeter
+   snapscale OUT3_scaled.snap OUT3_g1.snap  mscale=4.300451321727918e-03  # ~232 Msun, km/s and pc, G=1
+   runbody6 OUT3_g1.snap outdir_g1 tcrit=0 nbody6=1 exe=nbody6
+   ```
+
+1. Use generated file for nbody6:
+
+   ```bash
+   cp outdir_g1/fort.10 reproduce_g1/
+   cd reproduce_g1
+   nbody6 < input 1> exp.out 2> exp.err
+   ```
+
+   The new input file contains options like `KZ(20)=0` and `KZ(22)=2` (for scaling).
 
 # Useful links
 
