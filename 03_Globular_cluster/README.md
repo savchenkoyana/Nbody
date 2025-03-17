@@ -104,6 +104,8 @@ Steps to reproduce the experiment:
 
 ## Experiment 2
 
+This experiment shows an evolution of cluster with lognormal IMF.
+
 1. Create IC for lognormal spectra:
 
    ```bash
@@ -136,6 +138,27 @@ Steps to reproduce the experiment:
    cp outdir/fort.10 point_mass/
    cd point_mass
    nbody6 < input 1> exp.out 2> exp.err
+   u3tos OUT3 OUT3.snap
+   cd ..
+   ```
+
+1. Try the same with `Nbody4`:
+
+   ```bash
+   cd ../nbody4_lognormal
+   cp ../nbody6_lognormal/outdir/fort.10 standard/
+   cd standard
+   nbody4 < input 1> exp.out 2> exp.err
+   u3tos OUT3 OUT3.snap
+   cd ..
+   ```
+
+   and
+
+   ```bash
+   cp ../nbody6_lognormal/outdir/fort.10 point_mass/
+   cd point_mass
+   nbody4 < input 1> exp.out 2> exp.err
    u3tos OUT3 OUT3.snap
    cd ..
    ```
