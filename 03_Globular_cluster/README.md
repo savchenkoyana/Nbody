@@ -2,7 +2,7 @@
 
 These experiments reproduce a motion of stellar cluster in tidal field.
 
-How to reproduce:
+Before running experiments, do this:
 
 - Start NEMO:
 
@@ -29,71 +29,68 @@ Parameters of stellar system:
 - Salpeter IMF ($\\alpha=2.35$)
   - $M\_{low} = 0.2 M\_{☉}$
   - $M\_{high} = 10 M\_{☉}$
-
-Parameter of external force:
-
 - Solar neighbor tidal field (linear approximation), see `xtrnl0.f` for details
 
-Run this command to reproduce:
-
-```bash
-cd nbody6_salpeter
-nbody6 < input 1> exp.out 2> exp.err
-u3tos OUT3 OUT3.snap
-cd ..
-```
-
-To make sure that snapshot masses have Salpeter distribution:
-
-1. Scale snapshot using `M*, R*, V*` from `exp.out`:
+1. Run these commands to reproduce:
 
    ```bash
    cd nbody6_salpeter
+   nbody6 < input 1> exp.out 2> exp.err
    u3tos OUT3 OUT3.snap
-   snaptrim OUT3.snap - times=0 | snapscale - OUT3_scaled.snap rscale=<R*> vscale=<V*> mscale=<M*>
    cd ..
    ```
 
-1. Run notebook [Salpeter.ipynb](Salpeter.ipynb)
+1. To make sure that snapshot masses have Salpeter distribution:
 
-To feed scaled data in astrophysical units (pc, km/s and $M\_{☉}$):
+   1. Scale snapshot using `M*, R*, V*` from `exp.out`:
 
-1. Get data file in Fortran format (`fort.10` file):
+      ```bash
+      cd nbody6_salpeter
+      u3tos OUT3 OUT3.snap
+      snaptrim OUT3.snap - times=0 | snapscale - OUT3_scaled.snap rscale=<R*> vscale=<V*> mscale=<M*>
+      cd ..
+      ```
 
-   ```bash
-   cd nbody6_salpeter
-   runbody6 OUT3_scaled.snap outdir tcrit=0 nbody6=1 exe=nbody6
-   ```
+   1. Run notebook [Salpeter.ipynb](Salpeter.ipynb)
 
-1. Use generated file for nbody6:
+1. Try to feed the same data in astrophysical units (pc, km/s and $M\_{☉}$):
 
-   ```bash
-   cp outdir/fort.10 reproduce_astro/
-   cd reproduce_astro
-   nbody6 < input 1> exp.out 2> exp.err
-   ```
+   1. Get data file in Fortran format (`fort.10` file):
+
+      ```bash
+      cd nbody6_salpeter
+      runbody6 OUT3_scaled.snap outdir tcrit=0 nbody6=1 exe=nbody6
+      ```
+
+   1. Use generated file for nbody6:
+
+      ```bash
+      cp outdir/fort.10 reproduce_astro/
+      cd reproduce_astro
+      nbody6 < input 1> exp.out 2> exp.err
+      ```
 
    The new input file contains options like `KZ(20)=0` and `KZ(22)=-1`. It's strange, but astrophysical units don't work at the moment!
 
-To feed data in any units with `G=1`:
+1. Try to feed the same data in any units with `G=1`:
 
-1. Get data in these units:
+   1. Get `fort.10` in these units:
 
-   ```bash
-   cd nbody6_salpeter
-   snapscale OUT3_scaled.snap OUT3_g1.snap  mscale=4.300451321727918e-03  # ~232 Msun, km/s and pc, G=1
-   runbody6 OUT3_g1.snap outdir_g1 tcrit=0 nbody6=1 exe=nbody6
-   ```
+      ```bash
+      cd nbody6_salpeter
+      snapscale OUT3_scaled.snap OUT3_g1.snap  mscale=4.300451321727918e-03  # ~232 Msun, km/s and pc, G=1
+      runbody6 OUT3_g1.snap outdir_g1 tcrit=0 nbody6=1 exe=nbody6
+      ```
 
-1. Use generated file for nbody6:
+   1. Use generated file for nbody6:
 
-   ```bash
-   cp outdir_g1/fort.10 reproduce_g1/
-   cd reproduce_g1
-   nbody6 < input 1> exp.out 2> exp.err
-   ```
+      ```bash
+      cp outdir_g1/fort.10 reproduce_g1/
+      cd reproduce_g1
+      nbody6 < input 1> exp.out 2> exp.err
+      ```
 
-   The new input file contains options like `KZ(20)=0` and `KZ(22)=2` (for scaling).
+      The new input file contains options like `KZ(20)=0` and `KZ(22)=2` (for scaling).
 
 # Useful links
 
