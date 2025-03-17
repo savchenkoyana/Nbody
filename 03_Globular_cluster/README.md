@@ -31,22 +31,21 @@ Parameters of stellar system:
   - $M\_{high} = 10 M\_{☉}$
 - Solar neighbor tidal field (linear approximation), see `xtrnl0.f` for details
 
-1. Run these commands to reproduce:
+Steps to reproduce the experiment:
+
+1. Create snapshot with Salpeter IMF cluster evolution:
 
    ```bash
    cd nbody6_salpeter
    nbody6 < input 1> exp.out 2> exp.err
    u3tos OUT3 OUT3.snap
-   cd ..
    ```
 
-1. To make sure that snapshot masses have Salpeter distribution:
+1. To make sure that snapshot masses have the Salpeter distribution:
 
    1. Scale snapshot using `M*, R*, V*` from `exp.out`:
 
       ```bash
-      cd nbody6_salpeter
-      u3tos OUT3 OUT3.snap
       snaptrim OUT3.snap - times=0 | snapscale - OUT3_scaled.snap rscale=<R*> vscale=<V*> mscale=<M*>
       cd ..
       ```
@@ -62,12 +61,14 @@ Parameters of stellar system:
       runbody6 OUT3_scaled.snap outdir tcrit=0 nbody6=1 exe=nbody6
       ```
 
-   1. Use generated file for nbody6:
+   1. Use the generated file for nbody6:
 
       ```bash
       cp outdir/fort.10 reproduce_astro/
       cd reproduce_astro
       nbody6 < input 1> exp.out 2> exp.err
+      u3tos OUT3 OUT3.snap
+      cd ..
       ```
 
    The new input file contains options like `KZ(20)=0` and `KZ(22)=-1`. It's strange, but astrophysical units don't work at the moment!
@@ -77,20 +78,67 @@ Parameters of stellar system:
    1. Get `fort.10` in these units:
 
       ```bash
-      cd nbody6_salpeter
       snapscale OUT3_scaled.snap OUT3_g1.snap  mscale=4.300451321727918e-03  # ~232 Msun, km/s and pc, G=1
       runbody6 OUT3_g1.snap outdir_g1 tcrit=0 nbody6=1 exe=nbody6
       ```
 
-   1. Use generated file for nbody6:
+   1. Use the generated file for nbody6:
 
       ```bash
       cp outdir_g1/fort.10 reproduce_g1/
       cd reproduce_g1
       nbody6 < input 1> exp.out 2> exp.err
+      u3tos OUT3 OUT3.snap
+      cd ../..  # back to experiment root
       ```
 
       The new input file contains options like `KZ(20)=0` and `KZ(22)=2` (for scaling).
+
+1. Compare lagrange radius 50% for all three experiments:
+
+   ```bash
+   cd ../02_Reproduce_JGB
+   python plot_lagrange_radius.py --nemo-files ../03_Globular_cluster/nbody6_salpeter/OUT3.snap  ../03_Globular_cluster/nbody6_salpeter/reproduce_astro/OUT3.snap ../03_Globular_cluster/nbody6_salpeter/reproduce_g1/OUT3.snap --remove-outliers
+   cd -
+   ```
+
+## Experiment 2
+
+1. Create IC for lognormal spectra:
+
+   ```bash
+   cd ../02_Reproduce_JGB
+   python create_ic.py --mu 0 --sigma 1.5 --scale 1 --r 10 --N 5000
+   snapscale snap_mu0.0_s1.0_sigma1.5_r10.0_N5000/IC.nemo snap_mu0.0_s1.0_sigma1.5_r10.0_N5000/IC_g1.nemo mscale=4.300451321727918e-03  # ~232 Msun, km/s and pc, G=1
+   cp snap_mu0.0_s1.0_sigma1.5_r10.0_N5000/IC_g1.nemo ../03_Globular_cluster/nbody6_lognormal/
+   ```
+
+1. Prepare `fort.10` for the experiment:
+
+   ```bash
+   cd ../03_Globular_cluster/nbody6_lognormal
+   runbody6 IC_g1.nemo outdir tcrit=0 nbody6=1 exe=nbody6
+   ```
+
+1. Run simulation in a standard tidal field:
+
+   ```bash
+   cp outdir/fort.10 standard/
+   cd standard
+   nbody6 < input 1> exp.out 2> exp.err
+   u3tos OUT3 OUT3.snap
+   cd ..
+   ```
+
+1. Run simulation in a point-mass field of SMBH (compare with JGB):
+
+   ```bash
+   cp outdir/fort.10 point_mass/
+   cd point_mass
+   nbody6 < input 1> exp.out 2> exp.err
+   u3tos OUT3 OUT3.snap
+   cd ..
+   ```
 
 # Useful links
 
