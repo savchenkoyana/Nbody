@@ -1,8 +1,8 @@
 # About
 
-These experiments reproduce a motion of stellar cluster in tidal field.
+These experiments reproduce a motion of stellar cluster in a tidal field.
 
-Before running experiments, do this:
+Before running the experiments, do this:
 
 - Start NEMO:
 
@@ -18,7 +18,7 @@ Before running experiments, do this:
 
 # Experiments
 
-## Experiment 1
+## Salpeter IMF
 
 This experiment is based on an example from the official Nbody6 repository ([source](https://github.com/nbodyx/Nbody6/blob/master/Docs/input)). It is suitable for standard NBODY6 (no GPU). No stellar evolution is taken into account.
 
@@ -38,7 +38,7 @@ Steps to reproduce the experiment:
    ```bash
    cd nbody6_salpeter
    nbody6 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap
+   u3tos OUT3 OUT3.snap mode=6
    ```
 
 1. To make sure that snapshot masses have the Salpeter distribution:
@@ -67,7 +67,7 @@ Steps to reproduce the experiment:
       cp outdir/fort.10 reproduce_astro/
       cd reproduce_astro
       nbody6 < input 1> exp.out 2> exp.err
-      u3tos OUT3 OUT3.snap
+      u3tos OUT3 OUT3.snap mode=6
       cd ..
       ```
 
@@ -88,7 +88,7 @@ Steps to reproduce the experiment:
       cp outdir_g1/fort.10 reproduce_g1/
       cd reproduce_g1
       nbody6 < input 1> exp.out 2> exp.err
-      u3tos OUT3 OUT3.snap
+      u3tos OUT3 OUT3.snap mode=6
       cd ../..  # back to experiment root
       ```
 
@@ -102,7 +102,7 @@ Steps to reproduce the experiment:
    cd -
    ```
 
-## Experiment 2
+## Lognormal IMF
 
 This experiment shows an evolution of cluster with lognormal IMF.
 
@@ -128,7 +128,7 @@ This experiment shows an evolution of cluster with lognormal IMF.
    cp outdir/fort.10 standard/
    cd standard
    nbody6 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap
+   u3tos OUT3 OUT3.snap mode=6
    cd ..
    ```
 
@@ -138,7 +138,7 @@ This experiment shows an evolution of cluster with lognormal IMF.
    cp outdir/fort.10 point_mass/
    cd point_mass
    nbody6 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap
+   u3tos OUT3 OUT3.snap mode=6
    cd ..
    ```
 
@@ -149,7 +149,7 @@ This experiment shows an evolution of cluster with lognormal IMF.
    cp ../nbody6_lognormal/outdir/fort.10 standard/
    cd standard
    nbody4 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap
+   u3tos OUT3 OUT3.snap mode=4
    cd ..
    ```
 
@@ -159,7 +159,7 @@ This experiment shows an evolution of cluster with lognormal IMF.
    cp ../nbody6_lognormal/outdir/fort.10 point_mass/
    cd point_mass
    nbody4 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap
+   u3tos OUT3 OUT3.snap mode=4
    cd ..
    ```
 

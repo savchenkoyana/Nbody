@@ -19,15 +19,19 @@ nbody0 nbody0.in nbody0.out tcrit=10 deltat=0.01 eta=$ETA eps=$EPS
 runbody1 nbody0.in nbody1.out tcrit=10 deltat=0.01 eta=$ETA eps=$EPS
 
 runbody2 nbody0.in nbody2.out tcrit=10 deltat=0.01 etai=$ETA etar=2*$ETA eps=$EPS
-u3tos nbody2.out/OUT3 nbody2.out/OUT3.snap
+u3tos nbody2.out/OUT3 nbody2.out/OUT3.snap mode=2
 
 gyrfalcON nbody0.in gyrfalcon.out kmax=20 eps=$EPS tstop=10 step=0.01 theta=0.0001 Ncrit=1
+
+runbody4 nbody0.in nbody4.out tcrit=10 deltat=0.01 eta=$ETA eps=0
+u3tos nbody4.out/OUT3 nbody4.out/OUT3.snap mode=4
 
 for i in $(seq 0 9); do
    echo "Particle $i"
    snapmask nbody0.out           - $i | snapplot - trak=t yapp=1/xs
    snapmask nbody1.out/OUT3.snap - $i | snapplot - trak=t yapp=2/xs
    snapmask nbody2.out/OUT3.snap - $i | snapplot - trak=t yapp=3/xs
-   snapmask gyrfalcon.out        - $i | snapplot - trak=t yapp=4/xs
+   snapmask nbody4.out/OUT3.snap - $i | snapplot - trak=t yapp=4/xs
+   snapmask gyrfalcon.out        - $i | snapplot - trak=t yapp=5/xs
    echo -n "Enter to continue:"; read _
 done

@@ -9,6 +9,7 @@ echo "-1 --- to create IC;"
 echo "0 --- to run nbody0;"
 echo "1 --- to run runbody1;"
 echo "2 --- to run runbody2;"
+echo "4 --- to run runbody4 (SMBH as external potential);"
 echo "Choose <ETA> carefully (default value is 0.02)"
 echo
 
@@ -22,18 +23,20 @@ TASK=$2
 ETA=$3
 ETAR=$(echo "2 * $ETA" | bc -l)
 
-if [[ $N == 1000 ]]; then
-   EPS=1
-elif [[ $N == 2000 ]]; then
-   EPS=0.79
-elif [[ $N == 5000 ]]; then
-   EPS=0.58
-elif [[ $N == 10000 ]]; then
-   EPS=0.46
-else
-   echo "Invalid N=$N! Choose one of: 1000, 2000, 5000, 10000"
-   exit 1
-fi
+EPS=0.01
+
+# if [[ $N == 1000 ]]; then
+#    EPS=1
+# elif [[ $N == 2000 ]]; then
+#    EPS=0.79
+# elif [[ $N == 5000 ]]; then
+#    EPS=0.58
+# elif [[ $N == 10000 ]]; then
+#    EPS=0.46
+# else
+#    echo "Invalid N=$N! Choose one of: 1000, 2000, 5000, 10000"
+#    exit 1
+# fi
 
 NPART=$N+1
 DIR="snap_mu0.0_s1.0_sigma1.5_r10.0_N${N}"
@@ -66,7 +69,7 @@ if [[ $TASK -eq -1 ]]; then
 elif [[ $TASK -eq 0 ]]; then
   echo "Running nbody0"
 
-  OUTFILE="${DIR}/out_nbody0_ETA${ETA}.nemo"
+  OUTFILE="${DIR}/out_nbody0_ETA${ETA}_EPS${EPS}.nemo"
 
   # Nbody0
   time nice -n 20 nbody0 \
@@ -87,7 +90,7 @@ elif [[ $TASK -eq 0 ]]; then
 elif [[ $TASK -eq 1 ]]; then
   echo "Running runbody1"
 
-  OUTDIR="${DIR}/runbody1_ETA${ETA}"
+  OUTDIR="${DIR}/runbody1_ETA${ETA}_EPS${EPS}"
 
   # Nbody1
   time nice -n 20 runbody1 \
@@ -111,7 +114,7 @@ elif [[ $TASK -eq 1 ]]; then
 elif [[ $TASK -eq 2 ]]; then
   echo "Running runbody2"
 
-  OUTDIR="${DIR}/runbody2_ETA${ETA}_ETAR${ETAR}"
+  OUTDIR="${DIR}/runbody2_ETA${ETA}_ETAR${ETAR}_EPS${EPS}"
 
 # TO DO: add SMBH as an external potential
 # TO DO: add option for Rs (neighborhood radius)
@@ -131,7 +134,8 @@ elif [[ $TASK -eq 2 ]]; then
     outdir=$OUTDIR
 
   u3tos "${OUTDIR}/OUT3" \
-    "${OUTDIR}/OUT3.snap"
+    "${OUTDIR}/OUT3.snap" \
+    mode=2
 
   python postprocess_snap.py \
     --snap-file "${OUTDIR}/OUT3.snap" \
@@ -139,5 +143,36 @@ elif [[ $TASK -eq 2 ]]; then
     --length 0.001 \
     --mass 232.5337331 \
     --velocity 1.0
+
+elif [[ $TASK -eq 4 ]]; then
+  echo "Running runbody4 with SMBH as external potential"
+
+#   OUTDIR="${DIR}/runbody4_ext_ETA${ETA}_ETAR${ETAR}"
+
+# # TO DO: add option for Rs (neighborhood radius)
+# # TO DO: add option for Nnbmax (10 + N**0.5 for small N, (N/8)**0.75 for large N)
+
+#   # Nbody4
+#   time nice -n 20 runbody4 \
+#     in=$IC_NBODY \
+#     tcrit=14000 \
+#     deltat=100 \
+#     nbody=$NPART \
+#     eps=$EPS \
+#     etai=$ETA \
+#     etar=$ETAR \
+#     KZ6=0 \
+#     tcomp=4000 \
+#     outdir=$OUTDIR
+
+#   u3tos "${OUTDIR}/OUT3" \
+#     "${OUTDIR}/OUT3.snap"
+
+#   python postprocess_snap.py \
+#     --snap-file "${OUTDIR}/OUT3.snap" \
+#     --remove-point-source \
+#     --length 0.001 \
+#     --mass 232.5337331 \
+#     --velocity 1.0
 
 fi

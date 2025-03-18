@@ -78,7 +78,7 @@ python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --mom
    gyrfalcON in=<NAME>.nemo ... resume=t  # not tested properly yet
    ```
    `<NAME>.nemo` is the name of output file of the interrupted run, `out=` is ignored, and `resume=t` indicates that we want to resume simulation. The rest of the command for gyrFalcON (marked here as `...`) should be exactly the same.
-1. If Aarseth's NBODY code does not save a snapshot, use NEMO's `u3tos`
+1. If Aarseth's NBODY code does not save a snapshot, use NEMO's `u3tos` with key `mode=X`, where `X` is your algorithm version (`mode=1` for Nbody1, `mode=4` for Nbody4, etc.)
 1. If you forgot how you created your snapshot, just run:
    ```bash
    hisf <NAME>.nemo
