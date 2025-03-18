@@ -163,6 +163,32 @@ This experiment shows an evolution of cluster with lognormal IMF.
    cd ..
    ```
 
+1. Run these experiments with other IMFs (for example, with Salpeter IMF) and compare results:
+
+   ```bash
+   cd ../nbody4_salpeter
+   cp ../nbody6_salpeter/outdir/fort.10 standard/
+   cd standard
+   nbody4 < input 1> exp.out 2> exp.err
+   u3tos OUT3 OUT3.snap mode=4
+   cd ..
+   ```
+
+   and
+
+   ```bash
+   cp ../nbody6_salpeter/outdir/fort.10 point_mass/
+   cd point_mass
+   nbody4 < input 1> exp.out 2> exp.err
+   u3tos OUT3 OUT3.snap mode=4
+   cd ..
+   ```
+
+1. Plot the results:
+
+   ```bash
+   ```
+
 # Useful links
 
 - Repositories:
