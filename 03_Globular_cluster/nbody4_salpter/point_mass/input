@@ -1,0 +1,77 @@
+1 10000.0 0
+5000 1 25 10000 1
+0.02 2.0 10.0 1000.0 4.0E-05 2.0 0.5
+2 2 1 0 1 0 1 0 0 0
+0 0 0 2 2 1 1 1 0 0
+1 2 2 0 0 2 0 0 0 1
+0 0 0 0 0 0 1 0 0 0
+1.0E-04 1.0E-03 0.2 1.0 1.0E-06 0.001
+2.35 10.0 0.2 0 0.002 0.0 0.0
+0.5 0.0 0.0 0.0
+4.37E+10 34.0
+
+KSTART TCOMP GPID
+N NFIX NCRIT NRAND NRUN
+ETA DTADJ DELTAT TCRIT QE RBAR ZMBAR
+KZ1-KZ10
+KZ11-KZ20
+KZ21-KZ30
+KZ31-KZ40
+DTMIN RMIN ETAU ECLOSE GMIN GMAX
+ALPHA BODY1 BODYN NBIN0 ZMET EPOCH0 DTPLOT
+Q VXROT VZROT RTIDE
+GMG RG0
+
+kz=                 Non-zero options for alternative paths (see below) [Default: 1,2,0::4,1::2,0::2,1]
+1    COMMON save on unit 1 at end of run (=2: every 100*NMAX steps).
+2    COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).
+3    Basic data on unit 3 at output (freq. NFIX; >1: cluster + tail).
+4 #  Binary diagnostics on unit 4 (# threshold levels = KZ(4) < 10).
+5    Initial conditions (#22 =0; =0: uniform & isotropic sphere;
+                 =1: Plummer; =2: two Plummer models in orbit, extra input;
+                 =3: massive perturber and planetesimal disk, extra input).
+                 =4: massive initial binary, extra input; output on unit 35).
+6    Output of significant & regularized binaries (=1, 2, 3 & 4).
+7    Lagrangian radii (>0: RSCALE; =2, 3, 4: output units 6, 7, 12;
+                 >=5: density & rms velocity at given radii on unit 26 & 27;
+              >=5: average mass at given radii on unit 36 every DELTAT;
+                  =6: Lagrangian radii for two mass groups on unit 31 & 32.
+8    Primordial binaries (=1 & >=3; >0: BINOUT; >2: BINDAT; >3: HIDAT).
+9    Individual bodies printed at output time (MIN(5**KZ9,NTOT)).
+10   Diagnostic KS output (>0: begin; >1: end; >=3: each step).
+11 # Synchronization of circular orbits (suppressed).
+12   Disk shocks (=1: standard model) or interstellar clouds (< 0).
+13   Scaling of time (1: variable by t_cr; 2: variable by t_r;
+                  -1: constant scaling to t_r; -2: constant scaling to t_c).
+14   External force (=1: linearized; -1: cutoff; =2: point-mass galaxy;
+              =3: point-mass + disk + logarithmic halo in any combination).
+15   Triple, quad, chain (#30 > 0) or merger search (>1: full output).
+16   Updating of regularization parameters (RMIN, DTMIN & ECLOSE).
+17   Modification of ETA (>=1) & ETAU (>1) by tolerance QE.
+18   Hierarchical systems (=1: diagnostics; =2: primordial; =3: both).
+19   Stellar evolution and mass loss (=1: old supernova scheme;
+                       =3: Eggleton, Tout & Hurley; >4: Chernoff--Weinberg).
+20   Initial mass function (=0,1: Salpeter; >1: various, see IMF).
+21   Extra output (>0: model, etc; >1: CENTRE; >2: MTRACE; >3: GLOBAL).
+22   Initial conditions on unit 10 (=1: output; =2,3(unscaled): input).
+23   Escaper removal (>1: diagnostics in file ESC; =2: angles unit #6;
+ >1: tidal tails output if #14 = 3).
+24   Initial conditions for subsystem (routine SCALE; KZ(24) = #).
+25 # Partial reflection of KS binary orbit (GAMMA < GMIN; suppressed).
+25   HR diagnostics of evolving stars (output of B & S on #82 & 83).
+26   Slow-down of two-body motion (=1: KS binary; =2: chain binary).
+27   Two-body interactions (-2: RADIUS = 0; -1: collision detection;
+       =1: sequential circ; > 0: collision).
+28   (not used).
+29 # Boundary reflection for hot system (suppressed).
+30   Chain regularization (=1: basic; >1: main output; >2: each step).
+31   Centre of mass correction after energy check.
+32   Increase of output intervals (based on single particle energy).
+33   Block-step diagnostics at main output (=2: active pipes).
+34 # Roche lobe overflow (suppressed).
+35   Time offset (global time from TTOT = TIME + DTOFF; offset = 100).
+36   Step reduction for hierarchical systems (not recommended).
+37   Step reduction for encounters with high-velocity particles.
+38 # Multiple use of GRAPE-6 (sleep 1 sec after each timer check).
+39   Neighbour list (=-1: on host; =0: full list or closest on GRAPE).
+40   (not used).

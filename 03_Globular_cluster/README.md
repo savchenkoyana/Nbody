@@ -187,6 +187,8 @@ This experiment shows an evolution of cluster with lognormal IMF.
 1. Plot the results:
 
    ```bash
+   cd ../../02_Reproduce_JGB
+   python plot_lagrange_radius.py --nemo-files ../03_Globular_cluster/nbody4_lognormal/standard/OUT3.snap  ../03_Globular_cluster/nbody4_lognormal/point_mass/OUT3.snap ../03_Globular_cluster/nbody6_lognormal/standard/OUT3.snap ../03_Globular_cluster/nbody6_lognormal/point_mass/OUT3.snap  --remove-outliers --sigma 1.5 --dens-par 500
    ```
 
 # Useful links
