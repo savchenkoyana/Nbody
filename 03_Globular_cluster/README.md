@@ -197,3 +197,14 @@ This experiment shows an evolution of cluster with lognormal IMF.
   - https://github.com/nbodyx/Nbody6 (note NEMO uses the official version from `ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz` by Sverre Aarseth)
   - https://github.com/nbodyx/Nbody6ppGPU (version used in NEMO, but not supported by developers now)
   - https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing (supported by developers at the moment)
+
+# Other
+
+Note that Nbody6 input file may have two indentical lines at the end:
+
+```bash
+20000.0 2 0
+20000.0 2 0
+```
+
+Those lines are needed for reading `CLIGHT` (`Ncode/brake4.f`) and `Clight, NBH, IDIS` (`ARchain/chain.f`).

@@ -4,7 +4,7 @@
 #              Based on discussion in https://github.com/teuben/nemo/issues/170
 # Usage: bash sh_scripts/run_fast_check.sh
 
-rm -rf nbody0.in nbody0.out nbody1.out nbody2.out gyrfalcon.out
+rm -rf nbody0.in nbody0.out nbody1.out nbody2.out nbody4.out gyrfalcon.out
 
 # Peter Teuben used N=10, ETA=0.001 for tests
 # However, I found that even ETA=0.01 is good (tested with N=1000)
@@ -23,8 +23,12 @@ u3tos nbody2.out/OUT3 nbody2.out/OUT3.snap mode=2
 
 gyrfalcON nbody0.in gyrfalcon.out kmax=20 eps=$EPS tstop=10 step=0.01 theta=0.0001 Ncrit=1
 
-runbody4 nbody0.in nbody4.out tcrit=10 deltat=0.01 eta=$ETA eps=0
-u3tos nbody4.out/OUT3 nbody4.out/OUT3.snap mode=4
+runbody4 nbody0.in nbody4.out \
+  tcrit=10 \
+  deltat=0.01 \
+  dtadj=0.01 \
+  eta=$ETA \
+  kz=2,2,1,0,0,0,1,0,0,0,0,0,0,0,2,1,1,1,0,0,1,2,0,0,0,2,0,0,0,1,0,0,0,0,0,0,1,0,0,0
 
 for i in $(seq 0 9); do
    echo "Particle $i"
