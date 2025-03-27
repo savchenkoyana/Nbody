@@ -63,6 +63,8 @@ def parse_input_file(filename):
 
     data = {}
 
+    lines = [line.replace("D", "E") for line in lines]
+
     data["KSTART"], data["TCOMP"] = map(float, lines[0].split())
     (
         data["N"],
@@ -112,7 +114,7 @@ def parse_input_file(filename):
         float, lines[10].split()
     )
 
-    (data["GMG"], data["RG0"]) = map(float, lines[11].split())
+    # TODO: parse next lines!
 
     return data
 
@@ -145,8 +147,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.version not in ["nbody6", "nbody6++gpu", "nbody4"]:
-        raise NotImplementedError(f"Version '{args.version}' is not implemented.")
+    if args.version not in ["nbody6"]:
+        raise NotImplementedError(f"Version '{args.version}' is not implemented yet.")
 
     data = parse_input_file(args.filename)
     print_results(data)
