@@ -79,13 +79,13 @@ python preprocess_snap.py \
 echo
 echo "Preprocess data..."
 snapscale in=$ROOT_DIR/IC_preprocessed.nemo \
-  out=$ROOT_DIR/IC_preprocessed_nbody.nemo \
+  out=$ROOT_DIR/IC_preprocessed_g1.nemo \
   mscale=4.300451321727918e-03 \
   rscale=1000
 
 echo
 echo "Start evolution with NBODY0 for 13.7 Gyr for: M & A"
-nice -n 20 nbody0 $ROOT_DIR/IC_preprocessed_nbody.nemo \
+nice -n 20 nbody0 $ROOT_DIR/IC_preprocessed_g1.nemo \
   $ROOT_DIR/out_nbody.nemo \
   tcrit=14000 \
   deltat=100 \

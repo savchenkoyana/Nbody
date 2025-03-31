@@ -20,27 +20,29 @@ fi
 
 N=$1
 TASK=$2
-ETA=$3
+ETA=${3:-0.02}
 ETAR=$(echo "2 * $ETA" | bc -l)
 
-EPS=0.01
+EPS=0.01  # default
 
+# EPS computed as a_plummer / N^(1/3), see https://td.lpi.ru/~eugvas/nbody/tutor.pdf
 # if [[ $N == 1000 ]]; then
-#    EPS=1
+#   EPS=1
 # elif [[ $N == 2000 ]]; then
-#    EPS=0.79
+#   EPS=0.79
 # elif [[ $N == 5000 ]]; then
-#    EPS=0.58
+#   EPS=0.58
 # elif [[ $N == 10000 ]]; then
-#    EPS=0.46
+#   EPS=0.46
 # else
 #    echo "Invalid N=$N! Choose one of: 1000, 2000, 5000, 10000"
 #    exit 1
 # fi
 
+
 NPART=$N+1
 DIR="snap_mu0.0_s1.0_sigma1.5_r10.0_N${N}"
-IC_NBODY="${DIR}/IC_preprocessed_nbody.nemo"
+IC_G1="${DIR}/IC_preprocessed_g1.nemo"
 
 if [[ $TASK -eq -1 ]]; then
   echo "Creating IC"
@@ -62,7 +64,7 @@ if [[ $TASK -eq -1 ]]; then
     --source-mass 4.37e10
 
   snapscale in=$DIR/IC_preprocessed.nemo \
-    out=$IC_NBODY \
+    out=$IC_G1 \
     mscale=4.300451321727918e-03 \
     rscale=1000
 
@@ -73,7 +75,7 @@ elif [[ $TASK -eq 0 ]]; then
 
   # Nbody0
   time nice -n 20 nbody0 \
-    $IC_NBODY \
+    $IC_G1 \
     $OUTFILE \
     tcrit=14000 \
     deltat=100 \
@@ -94,7 +96,7 @@ elif [[ $TASK -eq 1 ]]; then
 
   # Nbody1
   time nice -n 20 runbody1 \
-    in=$IC_NBODY \
+    in=$IC_G1 \
     tcrit=14000 \
     deltat=100 \
     nbody=$NPART \
@@ -116,13 +118,9 @@ elif [[ $TASK -eq 2 ]]; then
 
   OUTDIR="${DIR}/runbody2_ETA${ETA}_ETAR${ETAR}_EPS${EPS}"
 
-# TO DO: add SMBH as an external potential
-# TO DO: add option for Rs (neighborhood radius)
-# TO DO: add option for Nnbmax (10 + N**0.5 for small N, (N/8)**0.75 for large N)
-
   # Nbody2
   time nice -n 20 runbody2 \
-    in=$IC_NBODY \
+    in=$IC_G1 \
     tcrit=14000 \
     deltat=100 \
     nbody=$NPART \
@@ -147,32 +145,26 @@ elif [[ $TASK -eq 2 ]]; then
 elif [[ $TASK -eq 4 ]]; then
   echo "Running runbody4 with SMBH as external potential"
 
-#   OUTDIR="${DIR}/runbody4_ext_ETA${ETA}_ETAR${ETAR}"
+  if [[ $N -ne 1000 ]]; then
+    echo "Not implemented for N=$N! Please use 5000 or modify code"
+    exit 1
+  fi
+
+  OUTDIR="${DIR}/runbody4_ext_ETA${ETA}_ETAR${ETAR}"
+  mkdir $OUTDIR
+
+  cp sh_scripts/nbodyx_inputs/nbody4.in $OUTDIR
+  runbody4 $IC_G1 "${OUTDIR}/outdir" tcrit=0
+  cd $OUTDIR
+  cp outdir/fort.10 .
+
+  time nice -n nbody4 < nbody4.in 1> exp.out 2> exp.err
 
 # # TO DO: add option for Rs (neighborhood radius)
 # # TO DO: add option for Nnbmax (10 + N**0.5 for small N, (N/8)**0.75 for large N)
 
-#   # Nbody4
-#   time nice -n 20 runbody4 \
-#     in=$IC_NBODY \
-#     tcrit=14000 \
-#     deltat=100 \
-#     nbody=$NPART \
-#     eps=$EPS \
-#     etai=$ETA \
-#     etar=$ETAR \
-#     KZ6=0 \
-#     tcomp=4000 \
-#     outdir=$OUTDIR
+  u3tos "OUT3" "OUT3.snap" mode=4
+  cd ..
 
-#   u3tos "${OUTDIR}/OUT3" \
-#     "${OUTDIR}/OUT3.snap"
-
-#   python postprocess_snap.py \
-#     --snap-file "${OUTDIR}/OUT3.snap" \
-#     --remove-point-source \
-#     --length 0.001 \
-#     --mass 232.5337331 \
-#     --velocity 1.0
-
+# TODO: postprocess?
 fi
