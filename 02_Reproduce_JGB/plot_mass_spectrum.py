@@ -58,8 +58,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
-    if args.n_timestamps <= 0:
-        raise RuntimeError("Got negative '--n-timestamps'")
+    if not args.times:
+        raise RuntimeError("Empty '--times'")
     if args.dens_parameter <= 0:
         raise RuntimeError("Got negative '--dens-parameter'")
 

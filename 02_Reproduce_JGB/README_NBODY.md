@@ -61,7 +61,7 @@ python plot_lagrange_radius.py \
   --scale <SCALE>
 ```
 
-> Do not forget to use post-processed data (without SMBH at the center) with the command above
+> **For Nbody0, Nbody1, and Nbody2**: Do not forget to use post-processed data (without SMBH at the center) with the command above
 
 It can be useful to plot energy, virial ratio, angular momentum as a function of time for both simulations:
 
