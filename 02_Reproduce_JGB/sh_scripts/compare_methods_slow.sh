@@ -180,15 +180,15 @@ elif [[ $TASK -eq 4 ]]; then
 elif [[ $TASK -eq 6 ]]; then
   echo "Running runbody6 with SMBH as external potential"
 
-  if [[ $N -ne 5000 ]]; then
-    echo "Not implemented for N=$N! Please use 5000 or modify code"
-    exit 1
-  fi
-
   OUTDIR="${DIR}/runbody6_ETA${ETA}_ETAR${ETAR}"
   mkdir $OUTDIR
 
-  cp sh_scripts/nbodyx_inputs/nbody6.in $OUTDIR
+  if [[ $N -eq 5000 ]]; then
+    cp sh_scripts/nbodyx_inputs/nbody6.in "${OUTDIR}/nbody6.in"
+  elif  [[ $N -eq 1000 ]]; then
+    cp sh_scripts/nbodyx_inputs/nbody6_1000.in "${OUTDIR}/nbody6.in"
+  fi
+
   cd $OUTDIR
 
   # create fort.10

@@ -277,6 +277,10 @@ def get_timestamps(
 
     timestamps = [_ for _ in generate_timestamps(filename)]
 
+    if len(timestamps) < n_timestamps:
+        return timestamps
+
+    # else filter
     indices = [_ * len(timestamps) // n_timestamps for _ in range(n_timestamps)]
     return np.array(timestamps)[indices]
 
