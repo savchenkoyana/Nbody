@@ -200,11 +200,13 @@ This experiment shows an evolution of cluster with lognormal IMF.
 
 # Other
 
-Note that Nbody6 input file may have two indentical lines at the end:
+- Note that Nbody6 input file may have two indentical lines at the end:
 
-```bash
-20000.0 2 0
-20000.0 2 0
-```
+  ```bash
+  20000.0 2 0
+  20000.0 2 0
+  ```
 
-Those lines are needed for reading `CLIGHT` (`Ncode/brake4.f`) and `Clight, NBH, IDIS` (`ARchain/chain.f`).
+  Those lines are needed for reading `CLIGHT` (`Ncode/brake4.f`) and `Clight, NBH, IDIS` (`ARchain/chain.f`).
+
+- There are input files for Nbody6 (`input` and `inlog`). These two are almost identical to the ones from official repository, but slightly modified by me to reach the end of the simulation.
