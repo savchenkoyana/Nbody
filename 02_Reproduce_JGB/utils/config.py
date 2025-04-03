@@ -1,6 +1,6 @@
 """Configs for NbodyX codes."""
 
-_NBODY6_CONFIG = {
+_NBODY6_KZ = {
     1: "COMMON save unit 1 (=1: 'touch STOP'; =2: every 100*NMAX steps).",
     2: "COMMON save unit 2 (=1: at output; =2: restart if DE/E > 5*QE).",
     3: "Basic data unit 3 at output time (unformatted, frequency NFIX; =1/2: standard and tail; =3: tail only; >3: cluster + tail).",
@@ -51,9 +51,9 @@ _NBODY6_CONFIG = {
 }
 
 
-_NBODY6GPU_CONFIG = {}
+_NBODY6GPU_KZ = {}
 
-_NBODY4_CONFIG = {
+_NBODY4_KZ = {
     1: "COMMON save on unit 1 at end of run (=2: every 100*NMAX steps).",
     2: "COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).",
     3: "Basic data on unit 3 at output (freq. NFIX; >1: cluster + tail).",
@@ -95,3 +95,46 @@ _NBODY4_CONFIG = {
     39: "Neighbour list (=-1: on host; =0: full list or closest on GRAPE).",
     40: "(not used).",
 }
+
+_NBODY6_PARAMETERS = {
+    "KSTART": "Control index (1: new run; >1: restart; 3, 4, 5: new params).",
+    "TCOMP": "Maximum CPU time in minutes (saved in CPU).",
+    "N": "Number of objects (N_s + 2*N_b; singles + 3*NBIN0 < NMAX).",
+    "NFIX": "Output frequency of data save or binaries (options 3 & 6).",
+    "NCRIT": "Final particle number (alternative termination criterion).",
+    "NRAND": "Random number sequence skip.",
+    "NNBMAX": "Maximum number of neighbours (< LMAX - 5).",
+    "NRUN": "Run identification index.",
+    "ETAI": "Time-step parameter for irregular force polynomial.",
+    "ETAR": "Time-step parameter for regular force polynomial.",
+    "RS0": "Initial radius of neighbour sphere (N-body units).",
+    "DTADJ": "Time interval for parameter adjustment (N-body units).",
+    "DELTAT": "Output time interval (N-body units).",
+    "TCRIT": "Termination time (N-body units).",
+    "QE": "Energy tolerance (restart if DE/E > 5*QE & KZ(2) > 1).",
+    "RBAR": "Virial cluster radius in pc (set = 1 for isolated cluster).",
+    "ZMBAR": "Mean mass in solar units (=1.0 if 0; final depends on #20).",
+    "DTMIN": "Time-step criterion for regularization search.",
+    "RMIN": "Distance criterion for regularization search.",
+    "ETAU": "Regularized time-step parameter (6.28/ETAU steps/orbit).",
+    "ECLOSE": "Binding energy per unit mass for hard binary (positive).",
+    "GMIN": "Relative two-body perturbation for unperturbed motion.",
+    "GMAX": "Secondary termination parameter for soft KS binaries.",
+    "ALPHA": "Power-law index for initial mass function (used if #20 < 2).",
+    "BODY1": "Maximum particle mass before scaling (KZ(20): solar mass).",
+    "BODYN": "Minimum particle mass before scaling.",
+    "NBIN0": "Number of primordial binaries (for IMF2 with KZ(20) > 1).",
+    "NHI0": "Primordial hierarchies (may be needed in IMF if > 0).",
+    "ZMET": "Metal abundance (in range 0.03 - 0.0001).",
+    "EPOCH0": "Evolutionary epoch (in 10**6 yrs; NB! < 0 for PM evolution).",
+    "DTPLOT": "Plotting interval for HRDIAG (N-body units; >= DELTAT).",
+    "Q": "Virial ratio (Q = 0.5 for equilibrium).",
+    "VXROT": "XY-velocity scaling factor (> 0 for solid-body rotation).",
+    "VZROT": "Z-velocity scaling factor (not used if VXROT = 0).",
+    "RTIDE": "Unscaled tidal radius (#14 >= 2; otherwise copied to RSPH2).",
+    "SMAX": "Maximum time-step (factor of 2 commensurate with 1.0).",
+}
+
+_NBODY6GPU_PARAMETERS = {}
+
+_NBODY4_PARAMETERS = {}

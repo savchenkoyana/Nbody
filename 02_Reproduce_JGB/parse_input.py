@@ -5,15 +5,24 @@ Warning, created using vibe-coding!
 
 import argparse
 
-from utils.config import _NBODY4_CONFIG
-from utils.config import _NBODY6_CONFIG
-from utils.config import _NBODY6GPU_CONFIG
+from utils.config import _NBODY4_KZ
+from utils.config import _NBODY4_PARAMETERS
+from utils.config import _NBODY6_KZ
+from utils.config import _NBODY6_PARAMETERS
+from utils.config import _NBODY6GPU_KZ
 
-# Dictionary to store descriptions for different versions
+# Dictionary to store descriptions for different versions (for KZ parameters)
 kz_descriptions = {
-    "nbody4": _NBODY4_CONFIG,
-    "nbody6": _NBODY6_CONFIG,
-    "nbody6++gpu": _NBODY6GPU_CONFIG,
+    "nbody4": _NBODY4_KZ,
+    "nbody6": _NBODY6_KZ,
+    "nbody6++gpu": _NBODY6GPU_KZ,
+}
+
+# Dictionary to store human-readable descriptions for individual parameters.
+parameter_descriptions = {
+    "nbody4": _NBODY4_PARAMETERS,
+    "nbody6": _NBODY6_PARAMETERS,
+    "nbody6++gpu": _NBODY6_PARAMETERS,
 }
 
 
@@ -135,6 +144,7 @@ def parse_input_file(filename, version):
     if version == "nbody6":
         return parse_nbody6(lines)
     elif version == "nbody6++gpu":
+        # Not implemented here.
         pass
     elif version == "nbody4":
         return parse_nbody4(lines)
@@ -149,9 +159,13 @@ def print_results(data, version):
             print(f"  KZ{i}: {value} ({meaning})")
 
     print("\nOther parameters:")
+    # For each parameter (except KZ), print the value along with its description.
+    parameter_dict = parameter_descriptions.get(version, {})
     for key, value in data.items():
-        if key != "KZ":
-            print(f"  {key}: {value}")
+        if key == "KZ":
+            continue
+        desc = parameter_dict.get(key, "No description available.")
+        print(f"  {key}: {value} -- {desc}")
 
 
 if __name__ == "__main__":
