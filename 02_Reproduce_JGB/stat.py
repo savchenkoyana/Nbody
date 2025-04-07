@@ -168,9 +168,7 @@ if __name__ == "__main__":
             binaries = []
 
             for t in timestamps:
-                count = count_binaries(
-                    filename=filename, t=t, r_threshold=100 * args.eps[i]
-                )
+                count = count_binaries(filename=filename, t=t, r_threshold=args.eps[i])
                 binaries.append(count)
 
             ax_binaries.plot(timestamps, binaries, ".", label=plot_label)
