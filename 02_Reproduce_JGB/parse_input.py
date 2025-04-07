@@ -203,6 +203,14 @@ if __name__ == "__main__":
             kz_list = [int(x) for x in args.kz.split(",")]
         except ValueError:
             parser.error("--kz must be a comma-separated list of integers.")
+
+        kz_dict = kz_descriptions.get(args.version, {})
+
+        if len(kz_list) != len(kz_dict):
+            raise RuntimeError(
+                f"KZ length should be {len(kz_dict)}, len={len(kz_list)} is given"
+            )
+
         data = {"KZ": kz_list}
     else:
         # existing file-based parsing
