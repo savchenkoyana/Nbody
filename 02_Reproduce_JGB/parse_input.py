@@ -53,6 +53,10 @@ def parse_nbody6(lines):
 
     kz_flat_list = [list(map(int, line.split())) for line in lines[3:8]]
     data["KZ"] = [kz for sublist in kz_flat_list for kz in sublist]
+    if len(data["KZ"]) != len(_NBODY6_KZ):
+        raise RuntimeError(
+            f"KZ length should be {len(_NBODY6_KZ)}, len={len(data['KZ'])} is given"
+        )
 
     (
         data["DTMIN"],
@@ -106,6 +110,10 @@ def parse_nbody4(lines):
 
     kz_flat_list = [list(map(int, line.split())) for line in lines[3:7]]
     data["KZ"] = [kz for sublist in kz_flat_list for kz in sublist]
+    if len(data["KZ"]) != len(_NBODY4_KZ):
+        raise RuntimeError(
+            f"KZ length should be {len(_NBODY4_KZ)}, len={len(data['KZ'])} is given"
+        )
 
     (
         data["DTMIN"],
@@ -170,9 +178,15 @@ def print_results(data, version):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Parse an input file and extract relevant parameters."
+        description="Parse an input file or a user-supplied KZ line and extract relevant parameters."
     )
-    parser.add_argument("filename", type=str, help="Path to the input file")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--filename", "-f", type=str, help="Path to the input file")
+    group.add_argument(
+        "--kz",
+        type=str,
+        help="Comma-separated KZ values to parse instead of reading from file",
+    )
     parser.add_argument(
         "--version",
         type=str,
@@ -183,8 +197,19 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.version not in ["nbody6", "nbody4"]:
-        raise NotImplementedError(f"Version '{args.version}' is not implemented yet.")
+    # If user provided --kz, parse that instead of reading from file
+    if args.kz:
+        try:
+            kz_list = [int(x) for x in args.kz.split(",")]
+        except ValueError:
+            parser.error("--kz must be a comma-separated list of integers.")
+        data = {"KZ": kz_list}
+    else:
+        # existing file-based parsing
+        if args.version not in ["nbody6", "nbody4"]:
+            raise NotImplementedError(
+                f"Version '{args.version}' is not implemented yet."
+            )
+        data = parse_input_file(args.filename, args.version)
 
-    data = parse_input_file(args.filename, args.version)
     print_results(data, args.version)
