@@ -32,7 +32,7 @@ if __name__ == "__main__":
         "--dens-parameter",
         type=int,
         default=500,
-        help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. Default: 500",
+        help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. If 0, density center is not computed. Default: 500",
     )
     parser.add_argument(
         "--timeUnitGyr",
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     check_parameters(args)  # sanity checks
     if args.n_timestamps <= 0:
         raise RuntimeError("Got negative '--n-timestamps'")
-    if args.dens_parameter <= 0:
+    if args.dens_parameter < 0:
         raise RuntimeError("Got negative '--dens-parameter'")
 
     if len(args.timeUnitGyr) == 1:
