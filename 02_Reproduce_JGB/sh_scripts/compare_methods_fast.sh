@@ -2,7 +2,7 @@
 #
 # Description: This script is used to compare N-body simulation methods on a small dataset.
 #              Based on discussion in https://github.com/teuben/nemo/issues/170
-# Usage: bash sh_scripts/run_fast_check.sh
+# Usage: bash sh_scripts/compare_methods_fast.sh
 
 rm -rf nbody0.in nbody0.out nbody1.out nbody2.out nbody4.out nbody6.out gyrfalcon.out
 # Peter Teuben used N=10, ETA=0.001 for tests

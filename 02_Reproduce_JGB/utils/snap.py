@@ -409,3 +409,24 @@ def count_binaries(
             binary_counts += 1
 
     return binary_counts
+
+
+def parse_fort14(
+    fort14: Union[str, os.PathLike, Path]
+) -> tuple[tuple, np.ndarray[np.float32]]:
+    """Parse fort.14 file with Lagrange radius data from Nbody6.
+    The data has the following structure: LAGR: TTOT, LOG10(RLAGR(K)),K=1,11
+
+    Parameters
+    ----------
+    fort14 : Union[str, os.PathLike, Path]
+        Nbody6 output file (fort.14)
+    Returns
+    -------
+    tuple
+        1st element: Lagrange mass fractions
+        2nd element: Simulation data
+    """
+    F_LAGR = (0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.625, 0.75, 0.9)
+    data = np.loadtxt(fort14, usecols=range(1, 13))
+    return F_LAGR, data

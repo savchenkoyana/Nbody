@@ -27,7 +27,7 @@ pre-commit install  # optional, only if you want to commit to repository
 To install NEMO, follow these steps:
 
 ```bash
-git clone https://github.com/teuben/nemo  # I use commit 8a2cbf4fcd565d7a55403ba135fd64716ef0b812
+git clone https://github.com/teuben/nemo
 cd nemo
 ./configure --with-yapp=pgplot
 make build check bench5
@@ -57,7 +57,7 @@ conda activate agama
 To install Agama, follow these steps:
 
 ```bash
-git clone https://github.com/GalacticDynamics-Oxford/Agama.git  # I use commit acf08a656e2aa67d466cafd7c92ba2cd277ff9e8
+git clone https://github.com/GalacticDynamics-Oxford/Agama.git
 cd Agama
 pip install .
 cd ../  # back to repository root
