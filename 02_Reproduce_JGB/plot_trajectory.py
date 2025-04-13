@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 import agama
 import matplotlib.pyplot as plt
@@ -47,6 +48,8 @@ def main():
     parser.add_argument("--files", nargs="+", help="List of data files to process.")
     args = parser.parse_args()
 
+    save_dir = Path(args.files[0]).parents[0]
+
     plt.figure(figsize=(8, 6))
 
     colors = plt.cm.tab10.colors  # 10 distinct colors
@@ -62,6 +65,7 @@ def main():
     plt.title(f"Trajectories for Particle Key {args.key}")
     plt.legend()
     plt.tight_layout()
+    plt.savefig(save_dir / f"traj_{args.key}.png")
     plt.show()
 
 

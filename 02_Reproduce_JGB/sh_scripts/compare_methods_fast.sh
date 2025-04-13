@@ -5,9 +5,6 @@
 # Usage: bash sh_scripts/compare_methods_fast.sh
 
 rm -rf nbody0.in nbody0.out nbody1.out nbody2.out nbody4.out nbody6.out gyrfalcon.out
-# Peter Teuben used N=10, ETA=0.001 for tests
-# However, I found that even ETA=0.01 is good (tested with N=1000)
-# While default ETA=0.02 gives slightly different trajectories
 ETA=0.001
 EPS=0.05
 N=10
@@ -31,7 +28,7 @@ runbody2 nbody0.in nbody2.out \
   nbody=$N
 u3tos nbody2.out/OUT3 nbody2.out/OUT3.snap mode=2
 
-gyrfalcON nbody0.in gyrfalcon.out kmax=20 eps=$EPS tstop=10 step=0.01 theta=0.0001 Ncrit=1
+gyrfalcON nbody0.in gyrfalcon.out kmax=20 eps=$EPS tstop=10 step=0.01 theta=0.0001
 
 runbody4 nbody0.in nbody4.out \
   tcrit=10 \

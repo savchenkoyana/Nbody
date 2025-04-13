@@ -3,7 +3,6 @@
 echo "This script is used to run full simulation with variuos N-body methods"
 echo "Usage: bash sh_scripts/compare_methods_slow.sh <N> <TASK> <ETA>"
 echo
-echo "<N> should be one of: 1000, 2000, 5000, 10000"
 echo "<TASK> should be:"
 echo "-1 --- to create IC;"
 echo "0 --- to run nbody0;"

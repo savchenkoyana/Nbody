@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "Usage: bash sh_scripts/run_exp.sh <N> <EXP>"
-echo "Choose <N> from: 1000, 2000, 5000, 10000, 20000"
 echo "<EXP> should be:"
 echo "1 --- MU=10, SCALE=1.5, SIGMA=0.954;"
 echo "2 --- MU=0 , SCALE=1  , SIGMA=0.5  ;"
@@ -17,20 +16,21 @@ fi
 N=$1
 EXP=$2
 
-if [[ $N == 1000 ]]; then
-   EPS=1.0
-elif [[ $N == 2000 ]]; then
-   EPS=0.79
-elif [[ $N == 5000 ]]; then
-   EPS=0.58
-elif [[ $N == 10000 ]]; then
-   EPS=0.46
-elif [[ $N == 20000 ]]; then
-   EPS=0.368
-else
-   echo "Invalid N=$N! Choose one of: 1000, 2000, 5000, 10000, 20000"
-   exit 1
-fi
+EPS=0.01  # default
+
+# EPS computed as a_plummer / N^(1/3), see https://td.lpi.ru/~eugvas/nbody/tutor.pdf
+# if [[ $N == 1000 ]]; then
+#   EPS=1
+# elif [[ $N == 2000 ]]; then
+#   EPS=0.79
+# elif [[ $N == 5000 ]]; then
+#   EPS=0.58
+# elif [[ $N == 10000 ]]; then
+#   EPS=0.46
+# else
+#    echo "Invalid N=$N! Choose one of: 1000, 2000, 5000, 10000"
+#    exit 1
+# fi
 
 if [[ $EXP == 1 ]]; then
     MU=10.0
