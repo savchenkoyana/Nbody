@@ -61,7 +61,7 @@ python plot_lagrange_radius.py \
   --scale <SCALE>
 ```
 
-> **For Nbody0, Nbody1, and Nbody2**: Do not forget to use post-processed data (without SMBH at the center) with the command above
+> **For Nbody0, Nbody1, Nbody2, and GyrFalcON**: There is no way to incorporate a potential of SMBH using N-body code (although it is possible for GyrFalcON, I don't do it for the sake of consistency). So to compare Nbody6 with these methods, I manually insert a body representing SMBH, shift the cluster's position and velocity and then run the simulation. After that we need to post-process data (get rid of SMBH and remove shift in distance/velocity for the cluster) to get the result in the same form as Nbody6. Do not forget to use post-processed data (without SMBH at the center) with the command above
 
 It can be useful to plot energy, virial ratio, angular momentum as a function of time for both simulations:
 
@@ -91,3 +91,5 @@ python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --mom
 # About direct methods
 
 The detailed description of different direct methods was [given](https://www.jstor.org/stable/10.1086/316455) by Aarseth.
+
+I use Nbody6 from NEMO (taken from Aarseth's site `ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz`) and [Nbody6PPGPU-beiging](https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing) which is the GPU version supported by developers at the moment.

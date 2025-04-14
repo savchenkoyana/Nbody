@@ -9,21 +9,92 @@ from utils.config import _NBODY4_KZ
 from utils.config import _NBODY4_PARAMETERS
 from utils.config import _NBODY6_KZ
 from utils.config import _NBODY6_PARAMETERS
-from utils.config import _NBODY6GPU_KZ
+from utils.config import _NBODY6PPGPU_KZ
+from utils.config import _NBODY6PPGPU_PARAMETERS
 
 # Dictionary to store descriptions for different versions (for KZ parameters)
 kz_descriptions = {
     "nbody4": _NBODY4_KZ,
     "nbody6": _NBODY6_KZ,
-    "nbody6++gpu": _NBODY6GPU_KZ,
+    "nbody6++gpu": _NBODY6PPGPU_KZ,
 }
 
 # Dictionary to store human-readable descriptions for individual parameters.
 parameter_descriptions = {
     "nbody4": _NBODY4_PARAMETERS,
     "nbody6": _NBODY6_PARAMETERS,
-    "nbody6++gpu": _NBODY6_PARAMETERS,
+    "nbody6++gpu": _NBODY6PPGPU_PARAMETERS,
 }
+
+
+def parse_nbody6ppgpu(lines):
+    data = {}
+
+    (
+        data["KSTART"],
+        data["TCOMP"],
+        data["TCRTP0"],
+        data["isernb"],
+        data["iserreg"],
+        data["iserks"],
+    ) = map(float, lines[0].split())
+
+    (
+        data["N"],
+        data["NFIX"],
+        data["NCRIT"],
+        data["NRAND"],
+        data["NNBOPT"],
+        data["NRUN"],
+        data["NCOMM"],
+    ) = map(int, lines[1].split())
+
+    (
+        data["ETAI"],
+        data["ETAR"],
+        data["RS0"],
+        data["DTADJ"],
+        data["DELTAT"],
+        data["TCRIT"],
+        data["QE"],
+        data["RBAR"],
+        data["ZMBAR"],
+    ) = map(float, lines[2].split())
+
+    kz_flat_list = [list(map(int, line.split())) for line in lines[3:8]]
+    data["KZ"] = [kz for sublist in kz_flat_list for kz in sublist]
+    if len(data["KZ"]) != len(_NBODY6_KZ):
+        raise RuntimeError(
+            f"KZ length should be {len(_NBODY6_KZ)}, len={len(data['KZ'])} is given"
+        )
+
+    (
+        data["DTMIN"],
+        data["RMIN"],
+        data["ETAU"],
+        data["ECLOSE"],
+        data["GMIN"],
+        data["GMAX"],
+        data["SMAX"],
+    ) = map(float, lines[8].split())
+
+    (
+        data["ALPHA"],
+        data["BODY1"],
+        data["BODYN"],
+        data["NBIN0"],
+        data["NHI0"],
+        data["ZMET"],
+        data["EPOCH0"],
+        data["DTPLOT"],
+    ) = map(float, lines[9].split())
+
+    (data["Q"], data["VXROT"], data["VZROT"], data["RTIDE"]) = map(
+        float, lines[10].split()
+    )
+
+    # TODO: parse next lines!
+    return data
 
 
 def parse_nbody6(lines):
@@ -152,8 +223,7 @@ def parse_input_file(filename, version):
     if version == "nbody6":
         return parse_nbody6(lines)
     elif version == "nbody6++gpu":
-        # Not implemented here.
-        pass
+        return parse_nbody6ppgpu(lines)
     elif version == "nbody4":
         return parse_nbody4(lines)
 
@@ -214,10 +284,6 @@ if __name__ == "__main__":
         data = {"KZ": kz_list}
     else:
         # existing file-based parsing
-        if args.version not in ["nbody6", "nbody4"]:
-            raise NotImplementedError(
-                f"Version '{args.version}' is not implemented yet."
-            )
         data = parse_input_file(args.filename, args.version)
 
     print_results(data, args.version)
