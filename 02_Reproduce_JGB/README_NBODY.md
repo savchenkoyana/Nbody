@@ -50,6 +50,8 @@ To reproduce the experiment, follow these steps:
 
 You can compare different integrators visually (by running `animate.py`) or plot all snapshot statistics: density profile, mass spectrum or lagrange radius.
 
+> **For Nbody0, Nbody1, Nbody2, and GyrFalcON**: There is no way to incorporate a potential of SMBH using N-body code (although it is possible for GyrFalcON, I don't do it for the sake of consistency). So to compare Nbody6 with these methods, I manually insert a body representing SMBH, shift the cluster position and velocity and then run the simulation. After that we need to post-process data (get rid of SMBH and remove shift in distance/velocity of the cluster) to get the result in the same form as Nbody6. Do not forget to use post-processed data (without SMBH at the center) when needed
+
 To plot lagrange radii for different methods together, run this command:
 
 ```bash
@@ -60,8 +62,6 @@ python plot_lagrange_radius.py \
   --sigma <SIGMA> \
   --scale <SCALE>
 ```
-
-> **For Nbody0, Nbody1, Nbody2, and GyrFalcON**: There is no way to incorporate a potential of SMBH using N-body code (although it is possible for GyrFalcON, I don't do it for the sake of consistency). So to compare Nbody6 with these methods, I manually insert a body representing SMBH, shift the cluster's position and velocity and then run the simulation. After that we need to post-process data (get rid of SMBH and remove shift in distance/velocity for the cluster) to get the result in the same form as Nbody6. Do not forget to use post-processed data (without SMBH at the center) with the command above
 
 It can be useful to plot energy, virial ratio, angular momentum as a function of time for both simulations:
 
@@ -79,6 +79,11 @@ python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --mom
    ```
    `<NAME>.nemo` is the name of output file of the interrupted run, `out=` is ignored, and `resume=t` indicates that we want to resume simulation. The rest of the command for gyrFalcON (marked here as `...`) should be exactly the same.
 1. If Aarseth's NBODY code does not save a snapshot, use NEMO's `u3tos` with key `mode=X`, where `X` is your algorithm version (`mode=1` for Nbody1, `mode=4` for Nbody4, etc.)
+1. Snapshot data are stored in `conf.3_*` in Nbody6++GPU-version. To transform it into NEMO snapshot, use:
+   ```bash
+   cat `ls -tr conf.3_*` > OUT3; u3tos OUT3 OUT3.snap mode=6 nbody=<N> ; rm OUT3
+   ```
+   where `<N>` is the number of particles in your simulation.
 1. If you forgot how you created your snapshot, just run:
    ```bash
    hisf <NAME>.nemo

@@ -42,9 +42,34 @@ If installation completed successfully, you should get "TESTSUITE: OK" for each 
 > source nemo_start.sh
 > ```
 >
-> Alternatively, you might want to add the command above (with the full path to `nemo_start.sh`) at the end of your `.bashrc` file.
+> Alternatively, you might want to add the command above (with the full path to `nemo_start.sh`) at the end of your `~/.bashrc` file.
 
 For more info about NEMO see [NEMO's official documentation](https://astronemo.readthedocs.io/en/latest/) and [NEMO's github pages](https://teuben.github.io/nemo/)
+
+## Install Nbody6++GPU
+
+Install Nbody6++GPU:
+
+```bash
+git clone git@github.com:nbody6ppgpu/Nbody6PPGPU-beijing
+cd Nbody6PPGPU-beijing
+./configure --enable-mcmodel=large --with-par=b1m --disable-gpu --disable-mpi  # configuration to quick-start on your computer
+make clean
+make -j
+cd -
+```
+
+Add this at the end of your `~/.bashrc` file:
+
+```bash
+export OMP_STACKSIZE=4096M
+ulimit -s unlimited
+export OMP_NUM_THREADS=8  # feel free to change
+```
+
+Feel free to alter `OMP_NUM_THREADS` as you wish.
+
+The resulting binary can be found here: `Nbody6PPGPU-beijing/build/nbody6++.*`
 
 ## Install Agama
 
@@ -75,8 +100,9 @@ After installation, you will have the following repository structure:
 Nbody
 ├── Agama  # Agama repository root
 ├── nemo  # nemo repository root
-├── sandbox
-├── images
+├── Nbody6PPGPU-beijing  # Nbody6++GPU repository root
+├── sandbox  # dir for simple and small experiments
+├── images  # images needed for md-files
 ├── README.md
 ├── requirements.txt
 ├── ...  # other files
