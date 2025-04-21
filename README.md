@@ -48,7 +48,7 @@ For more info about NEMO see [NEMO's official documentation](https://astronemo.r
 
 ## Install Nbody6++GPU
 
-Install Nbody6++GPU:
+### Install Nbody6++GPU (beijing version)
 
 ```bash
 git clone git@github.com:nbody6ppgpu/Nbody6PPGPU-beijing
@@ -59,7 +59,7 @@ make -j
 cd -
 ```
 
-Add this at the end of your `~/.bashrc` file:
+Add this at the end of your `~/.bashrc` file (and then run `source ~/.bashrc` if you need it in the current session):
 
 ```bash
 export OMP_STACKSIZE=4096M
@@ -70,6 +70,23 @@ export OMP_NUM_THREADS=8  # feel free to change
 Feel free to alter `OMP_NUM_THREADS` as you wish.
 
 The resulting binary can be found here: `Nbody6PPGPU-beijing/build/nbody6++.*`
+
+### Install Nbody6++GPU (original version)
+
+The reason why we may need two versions of Nbody6++GPU is that the one ending with `-beijing` is supported at the moment, but the original one has useful features not implemented in the current version.
+
+```bash
+git clone https://github.com/nbodyx/Nbody6ppGPU.git
+cd Nbody6ppGPU
+export FCFLAGS='-fallow-argument-mismatch'
+./configure --enable-mcmodel=large --with-par=b1m --disable-gpu --disable-mpi --enable-tools --prefix=$HOME  # there is also `--enable-tt`, not tested by me yet
+make clean
+make
+make install
+cd -
+```
+
+The resulting binary can be found here: `Nbody6ppGPU/build/nbody6++.*`
 
 ## Install Agama
 
