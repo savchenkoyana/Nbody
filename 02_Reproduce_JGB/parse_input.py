@@ -9,6 +9,7 @@ from utils.config import _NBODY4_KZ
 from utils.config import _NBODY4_PARAMETERS
 from utils.config import _NBODY6_KZ
 from utils.config import _NBODY6_PARAMETERS
+from utils.config import _NBODY6PPGPU_BEIJING_KZ
 from utils.config import _NBODY6PPGPU_KZ
 from utils.config import _NBODY6PPGPU_PARAMETERS
 
@@ -16,6 +17,7 @@ from utils.config import _NBODY6PPGPU_PARAMETERS
 kz_descriptions = {
     "nbody4": _NBODY4_KZ,
     "nbody6": _NBODY6_KZ,
+    "nbody6++gpu-beijing": _NBODY6PPGPU_BEIJING_KZ,
     "nbody6++gpu": _NBODY6PPGPU_KZ,
 }
 
@@ -23,6 +25,7 @@ kz_descriptions = {
 parameter_descriptions = {
     "nbody4": _NBODY4_PARAMETERS,
     "nbody6": _NBODY6_PARAMETERS,
+    "nbody6++gpu-beijing": _NBODY6PPGPU_PARAMETERS,
     "nbody6++gpu": _NBODY6PPGPU_PARAMETERS,
 }
 
@@ -222,10 +225,12 @@ def parse_input_file(filename, version):
 
     if version == "nbody6":
         return parse_nbody6(lines)
-    elif version == "nbody6++gpu":
+    elif version == "nbody6++gpu-beijing" or version == "nbody6++gpu":
         return parse_nbody6ppgpu(lines)
     elif version == "nbody4":
         return parse_nbody4(lines)
+    else:
+        raise NotImplementedError(f"version {version} not implemented")
 
 
 def print_results(data, version):
@@ -260,7 +265,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--version",
         type=str,
-        choices=["nbody6", "nbody6++gpu", "nbody4"],
+        choices=["nbody6", "nbody6++gpu", "nbody6++gpu-beijing", "nbody4"],
         default="nbody6",
         help="Specify the version of the software",
     )
