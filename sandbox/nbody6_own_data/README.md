@@ -13,7 +13,7 @@ Before running the experiments, do this:
 - Go to experiment root:
 
   ```bash
-  cd /path/to/Nbody/03_Globular_cluster/
+  cd /path/to/Nbody/sandbox/nbody6_own_data/
   ```
 
 # Experiments
@@ -98,8 +98,8 @@ Steps to reproduce the experiment:
 1. Compare lagrange radius 50% for all three experiments:
 
    ```bash
-   cd ../02_Reproduce_JGB
-   python plot_lagrange_radius.py --nemo-files ../03_Globular_cluster/nbody6_salpeter/OUT3.snap  ../03_Globular_cluster/nbody6_salpeter/reproduce_astro/OUT3.snap ../03_Globular_cluster/nbody6_salpeter/reproduce_g1/OUT3.snap --remove-outliers
+   cd ../../02_Reproduce_JGB
+   python plot_lagrange_radius.py --nemo-files ../sandbox/nbody6_own_data/nbody6_salpeter/OUT3.snap ../sandbox/nbody6_own_data/nbody6_salpeter/reproduce_astro/OUT3.snap ../sandbox/nbody6_own_data/nbody6_salpeter/reproduce_g1/OUT3.snap --remove-outliers
    cd -
    ```
 
@@ -112,10 +112,10 @@ The next step is to run with your own data:
 1. Create IC:
 
    ```bash
-   cd ../02_Reproduce_JGB
+   cd ../../02_Reproduce_JGB
    python create_ic.py --mu 0 --sigma 1.5 --scale 1 --r 10 --N 500
    snapscale snap_mu0.0_s1.0_sigma1.5_r10.0_N500/IC.nemo snap_mu0.0_s1.0_sigma1.5_r10.0_N5000/IC_g1.nemo mscale=4.300451321727918e-03  # ~232 Msun, km/s and pc, G=1
-   cp snap_mu0.0_s1.0_sigma1.5_r10.0_N500/IC_g1.nemo ../03_Globular_cluster/nbody6_input/
+   cp snap_mu0.0_s1.0_sigma1.5_r10.0_N500/IC_g1.nemo ../sandbox/nbody6_own_data/nbody6_input/
    ```
 
 1. Check parameters of your snapshot:
@@ -129,7 +129,7 @@ The next step is to run with your own data:
 1. Prepare `fort.10` for the experiment:
 
    ```bash
-   cd ../03_Globular_cluster/nbody6_input
+   cd ../sandbox/nbody6_own_data/nbody6_input
    runbody6 IC_g1.nemo outdir tcrit=0 nbody6=1 exe=nbody6
    ```
 
@@ -137,7 +137,7 @@ The next step is to run with your own data:
 
    ```bash
    cd -
-   python parse_config.py --filename ../03_Globular_cluster/nbody6_input/input --version nbody6
+   python parse_config.py --filename ../sandbox/nbody6_own_data/nbody6_input/input --version nbody6
    cd -
    ```
 

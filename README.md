@@ -136,7 +136,3 @@ For more info see [README](01_Custom_Density_Model_Evolution/README.md)
 This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/pdf/2405.06391v1) by Juan Garcia-Bellido.
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
 For more info see [README](02_Reproduce_JGB/README.md)
-
-### 3. Globular cluster
-
-The goal of this experiment is to reproduce a motion of globular cluster in Galaxy's tidal field using existing N-body codes. For more info see [README](03_Globular_cluster/README.md)
