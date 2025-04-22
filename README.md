@@ -71,9 +71,7 @@ Feel free to alter `OMP_NUM_THREADS` as you wish.
 
 The resulting binary can be found here: `Nbody6PPGPU-beijing/build/nbody6++.*`
 
-### Install Nbody6++GPU (original version)
-
-The reason why we may need two versions of Nbody6++GPU is that the one ending with `-beijing` is supported at the moment, but the original one has useful features not implemented in the current version.
+### Install Nbody6++GPU (original version, optional)
 
 ```bash
 git clone https://github.com/nbodyx/Nbody6ppGPU.git

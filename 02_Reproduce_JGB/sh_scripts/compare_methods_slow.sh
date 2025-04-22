@@ -8,8 +8,6 @@ echo "-1 --- to create IC;"
 echo "0 --- to run nbody0;"
 echo "1 --- to run runbody1;"
 echo "2 --- to run runbody2;"
-echo "4 --- to run runbody4 (SMBH as external potential);"
-echo "6 --- to run runbody6 (SMBH as external potential);"
 echo "Choose <ETA> carefully (default value is 0.02)"
 echo
 
@@ -17,6 +15,8 @@ if [ $# -lt 2 ] || [ $# -gt 3 ]; then
     echo "Wrong number of arguments!"
     exit 1
 fi
+
+echo "Careful! This script is not completed at the moment and may have mistakes!"
 
 N=$1
 TASK=$2
@@ -126,6 +126,7 @@ elif [[ $TASK -eq 2 ]]; then
   OUTDIR="${DIR}/runbody2_ETA${ETA}_ETAR${ETAR}_EPS${EPS}"
 
   # Nbody2
+  # TODO: increase NNBMAX, increase RS0, right now it's not correct at all
   time nice -n 20 runbody2 \
     in=$IC_PREPROCESSED_G1 \
     tcrit=14000 \
@@ -148,55 +149,4 @@ elif [[ $TASK -eq 2 ]]; then
     --length 0.001 \
     --mass 232.5337331 \
     --velocity 1.0
-
-elif [[ $TASK -eq 4 ]]; then
-  echo "Running runbody4 with SMBH as external potential"
-
-  if [[ $N -ne 1000 ]]; then
-    echo "Not implemented for N=$N! Please use 1000 or modify code"
-    exit 1
-  fi
-
-  OUTDIR="${DIR}/runbody4_ETA${ETA}"
-  mkdir $OUTDIR
-
-  cp sh_scripts/nbodyx_inputs/nbody4.in $OUTDIR
-  cd $OUTDIR
-
-#  # create fort.10
-#  runbody6 "../IC_g1.nemo" "outdir" tcrit=0 nbody=$N nbody6=1 exe=nbody6 kz=1,2,1 KZ22=3
-#  cp "outdir/fort.10" .  # fort.10 in arbitrary units with G=1
-
-  # create fort.10
-  runbody4 "../IC_g1.nemo" "outdir" tcrit=0 nbody=$N KZ22=2 body1=1.0 bodyn=1.0
-  cp "outdir/fort.10" .  # fort.10 in arbitrary units with G=1
-
-  time nice -n 20 nbody4 < nbody4.in 2>&1 | tee -a log.out
-
-  u3tos "OUT3" "OUT3.snap" mode=4
-  cd ..
-
-elif [[ $TASK -eq 6 ]]; then
-  echo "Running runbody6 with SMBH as external potential"
-
-  OUTDIR="${DIR}/runbody6_ETA${ETA}_ETAR${ETAR}"
-  mkdir $OUTDIR
-
-  if [[ $N -eq 5000 ]]; then
-    cp sh_scripts/nbodyx_inputs/nbody6.in "${OUTDIR}/nbody6.in"
-  elif  [[ $N -eq 1000 ]]; then
-    cp sh_scripts/nbodyx_inputs/nbody6_1000.in "${OUTDIR}/nbody6.in"
-  fi
-
-  cd $OUTDIR
-
-  # create fort.10
-  runbody6 "../IC_g1.nemo" "outdir" tcrit=0 nbody=$N nbody6=1 exe=nbody6
-  cp "outdir/fort.10" .  # fort.10 in arbitrary units with G=1
-
-  time nice -n 20 nbody6 < nbody6.in 2>&1 | tee -a log.out
-
-  u3tos "OUT3" "OUT3.snap" mode=6
-  cd ..
-
 fi

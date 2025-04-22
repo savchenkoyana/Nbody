@@ -1,6 +1,6 @@
 # About
 
-These experiments reproduce a motion of stellar cluster in a tidal field.
+These experiments reproduce a motion of stellar cluster in a tidal field. We use Nbody6 (without GPU and MPI, single-thread version introduced by Aarseth).
 
 Before running the experiments, do this:
 
@@ -46,7 +46,8 @@ Steps to reproduce the experiment:
    1. Scale snapshot using `M*, R*, V*` from `exp.out`:
 
       ```bash
-      snaptrim OUT3.snap - times=0 | snapscale - OUT3_scaled.snap rscale=<R*> vscale=<V*> mscale=<M*>
+      snapscale OUT3.snap OUT3_scaled.snap rscale=<R*> vscale=<V*> mscale=<M*>
+      snaptrim OUT3_scaled.snap OUT3_scaled_t0.snap times=0
       cd ..
       ```
 
@@ -58,7 +59,7 @@ Steps to reproduce the experiment:
 
       ```bash
       cd nbody6_salpeter
-      runbody6 OUT3_scaled.snap outdir tcrit=0 nbody6=1 exe=nbody6
+      runbody6 OUT3_scaled_t0.snap outdir tcrit=0 nbody6=1 exe=nbody6
       ```
 
    1. Use the generated file for nbody6:
@@ -102,101 +103,56 @@ Steps to reproduce the experiment:
    cd -
    ```
 
-## Lognormal IMF
+## Use your own data
 
-This experiment shows an evolution of cluster with lognormal IMF.
+This experiment shows evolution of cluster with lognormal IMF. I took `Docs/input` as an example and slightly modified it to reach the end of the simulation (see `input`).
 
-1. Create IC for lognormal spectra:
+The next step is to run with your own data:
+
+1. Create IC:
 
    ```bash
    cd ../02_Reproduce_JGB
-   python create_ic.py --mu 0 --sigma 1.5 --scale 1 --r 10 --N 5000
-   snapscale snap_mu0.0_s1.0_sigma1.5_r10.0_N5000/IC.nemo snap_mu0.0_s1.0_sigma1.5_r10.0_N5000/IC_g1.nemo mscale=4.300451321727918e-03  # ~232 Msun, km/s and pc, G=1
-   cp snap_mu0.0_s1.0_sigma1.5_r10.0_N5000/IC_g1.nemo ../03_Globular_cluster/nbody6_lognormal/
+   python create_ic.py --mu 0 --sigma 1.5 --scale 1 --r 10 --N 500
+   snapscale snap_mu0.0_s1.0_sigma1.5_r10.0_N500/IC.nemo snap_mu0.0_s1.0_sigma1.5_r10.0_N5000/IC_g1.nemo mscale=4.300451321727918e-03  # ~232 Msun, km/s and pc, G=1
+   cp snap_mu0.0_s1.0_sigma1.5_r10.0_N500/IC_g1.nemo ../03_Globular_cluster/nbody6_input/
    ```
+
+1. Check parameters of your snapshot:
+
+   ```bash
+   python scale.py --nemo-files snap_mu0.0_s1.0_sigma1.5_r10.0_N500/IC_g1.nemo --length 0.001 --mass 1 --velosity 1  # these are snapshot units in Agama notation
+   ```
+
+   There will be `Rbar`, `Zmbar` and `Q` shown in the script output.
 
 1. Prepare `fort.10` for the experiment:
 
    ```bash
-   cd ../03_Globular_cluster/nbody6_lognormal
+   cd ../03_Globular_cluster/nbody6_input
    runbody6 IC_g1.nemo outdir tcrit=0 nbody6=1 exe=nbody6
    ```
 
-1. Run simulation in a standard tidal field:
+1. Modify parameters for `Rbar`, `Zmbar` and `Q` from `input`. You can check yourself by running:
 
    ```bash
-   cp outdir/fort.10 standard/
-   cd standard
+   cd -
+   python parse_config.py --filename ../03_Globular_cluster/nbody6_input/input --version nbody6
+   cd -
+   ```
+
+1. Run simulation:
+
+   ```bash
    nbody6 < input 1> exp.out 2> exp.err
    u3tos OUT3 OUT3.snap mode=6
    cd ..
-   ```
-
-1. Run simulation in a point-mass field of SMBH (compare with JGB):
-
-   ```bash
-   cp outdir/fort.10 point_mass/
-   cd point_mass
-   nbody6 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap mode=6
-   cd ..
-   ```
-
-1. Try the same with `Nbody4`:
-
-   ```bash
-   cd ../nbody4_lognormal
-   cp ../nbody6_lognormal/outdir/fort.10 standard/
-   cd standard
-   nbody4 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap mode=4
-   cd ..
-   ```
-
-   and
-
-   ```bash
-   cp ../nbody6_lognormal/outdir/fort.10 point_mass/
-   cd point_mass
-   nbody4 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap mode=4
-   cd ..
-   ```
-
-1. Run these experiments with other IMFs (for example, with Salpeter IMF) and compare results:
-
-   ```bash
-   cd ../nbody4_salpeter
-   cp ../nbody6_salpeter/outdir/fort.10 standard/
-   cd standard
-   nbody4 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap mode=4
-   cd ..
-   ```
-
-   and
-
-   ```bash
-   cp ../nbody6_salpeter/outdir/fort.10 point_mass/
-   cd point_mass
-   nbody4 < input 1> exp.out 2> exp.err
-   u3tos OUT3 OUT3.snap mode=4
-   cd ..
-   ```
-
-1. Plot the results:
-
-   ```bash
-   cd ../../02_Reproduce_JGB
-   python plot_lagrange_radius.py --nemo-files ../03_Globular_cluster/nbody4_lognormal/standard/OUT3.snap  ../03_Globular_cluster/nbody4_lognormal/point_mass/OUT3.snap ../03_Globular_cluster/nbody6_lognormal/standard/OUT3.snap ../03_Globular_cluster/nbody6_lognormal/point_mass/OUT3.snap  --remove-outliers --sigma 1.5 --dens-par 500
    ```
 
 # Useful links
 
 - Repositories:
   - https://github.com/nbodyx/Nbody6 (note NEMO uses the official version from `ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz` by Sverre Aarseth)
-  - https://github.com/nbodyx/Nbody6ppGPU (version used in NEMO, but not supported by developers now)
-  - https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing (supported by developers at the moment)
 
 # Other
 
