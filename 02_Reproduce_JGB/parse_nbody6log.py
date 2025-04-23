@@ -117,7 +117,7 @@ def parse_output_data(logfile: str):
 # region Plotting data
 
 
-def plot_adjust_data(df, plot_values):
+def plot_adjust_data(df, plot_values, logscale):
     fig = plt.figure(figsize=(9, 6))
     ax = fig.gca()
 
@@ -129,7 +129,8 @@ def plot_adjust_data(df, plot_values):
     ax.set_xlabel(r"Time t [nbody units]")
     ax.set_ylabel(r"Energy E [nbody units]")
     ax.grid()
-    ax.set_yscale("log")
+    if logscale:
+        ax.set_yscale("log")
     plt.show()
     return fig, ax
 
@@ -169,7 +170,9 @@ def plot_output_data(data, plot_values):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description=f"Parses log file created by Nbody6++GPU-beijing and plots some stats."
+    )
     parser.add_argument(
         "--log-file",
         type=str,
@@ -181,17 +184,28 @@ if __name__ == "__main__":
         type=str,
         help=f"Comma-separated column values to plot. Choose one of {(*_OUTPUT_DATA, *_ADJUST_DATA)}",
     )
+    parser.add_argument(
+        "--logscale",
+        action="store_true",
+        help="Whether to use logscale for Y axis for 'adjust' plots",
+    )
     args = parser.parse_args()
 
     values = {x for x in args.values.split(",")}
-    values_adjust = values.intersection(_ADJUST_DATA)
-    values_output = values.intersection(_OUTPUT_DATA)
+    values_adjust = list(values.intersection(_ADJUST_DATA))
+    values_output = list(values.intersection(_OUTPUT_DATA))
 
+    unknow_values = values.difference(_ADJUST_DATA, _OUTPUT_DATA)
+    if unknow_values:
+        raise ValueError(f"Unknown columns {unknow_values}")
+
+    # Plot
     if values_adjust:
         df = parse_adjust_data(args.log_file)
-        plot_adjust_data(df, list(values_adjust))
+        plot_adjust_data(df, values_adjust, logscale=args.logscale)
+        print(df[values_adjust])
+
     if values_output:
         data = parse_output_data(args.log_file)
-        plot_output_data(data, list(values_output))
-
-    # print(f"User asked to plot values from 'Adjust' set: {values_adjust} and from 'Output' set: {values_output}")
+        plot_output_data(data, values_output)
+        print(data[values_output])
