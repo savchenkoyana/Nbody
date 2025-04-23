@@ -26,6 +26,37 @@ _ADJUST_DATA = {
     "ECDOT",
 }
 
+_FULL_COLS = [
+    0.001,
+    0.003,
+    0.005,
+    0.01,
+    0.03,
+    0.05,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    0.95,
+    0.99,
+    1.0,
+    "<RC",
+]
+_COLS = [0.1, 0.3, 0.5, 0.9, 1.0]
+
+
+def pandas_setup():
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.width", 2000)
+    pd.set_option("display.float_format", "{:20,.2f}".format)
+    pd.set_option("display.max_colwidth", None)
+
 
 # region Data Parsing
 
@@ -57,37 +88,13 @@ def parse_adjust_data(logfile: str):
     return df
 
 
-def parse_output_data(logfile: str):
+def parse_output_data(logfile):
     """Parse lines produced at output stage."""
     # set lines to analyze
     LINES_TO_READ = _OUTPUT_DATA
 
-    # this time, just set the columns manually instead of letting
-    # the program figure it out for itself.
-    COLS = [
-        0.001,
-        0.003,
-        0.005,
-        0.01,
-        0.03,
-        0.05,
-        0.1,
-        0.2,
-        0.3,
-        0.4,
-        0.5,
-        0.6,
-        0.7,
-        0.8,
-        0.9,
-        0.95,
-        0.99,
-        1.0,
-        "<RC",
-    ]
-
     # initialize dataframes to store results in
-    data = {data_type: pd.DataFrame(columns=COLS) for data_type in LINES_TO_READ}
+    data = {data_type: pd.DataFrame(columns=_FULL_COLS) for data_type in LINES_TO_READ}
 
     # work through the file
     with open(logfile) as nb_stdout:
@@ -136,9 +143,6 @@ def plot_adjust_data(df, plot_values, logscale):
 
 
 def plot_output_data(data, plot_values):
-    # just plot the following fewer cols
-    COLS = [0.1, 0.3, 0.5, 0.9, 1.0]
-
     # initialize matplotlib figure
     N = len(plot_values)
     # choose columns close to square
@@ -146,10 +150,10 @@ def plot_output_data(data, plot_values):
     n_rows = np.ceil(N / n_cols).astype(np.int32)
 
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(12, 4 * n_rows))
-    axes = axes.flatten()
+    axes = np.atleast_1d(axes).flatten()
 
     for ax, pdata in zip(axes, plot_values):
-        data[pdata][COLS].plot(ax=ax)
+        data[pdata][_COLS].plot(ax=ax)
 
         ax.set_title(f"{pdata} time evolution")
         ax.set_xlabel(r"Time t [nbody units]")
@@ -189,6 +193,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Whether to use logscale for Y axis for 'adjust' plots",
     )
+    parser.add_argument(
+        "--full-output",
+        action="store_true",
+        help="Whether to print rows/columns at full",
+    )
     args = parser.parse_args()
 
     values = {x for x in args.values.split(",")}
@@ -199,6 +208,9 @@ if __name__ == "__main__":
     if unknow_values:
         raise ValueError(f"Unknown columns {unknow_values}")
 
+    if args.full_output:
+        pandas_setup()
+
     # Plot
     if values_adjust:
         df = parse_adjust_data(args.log_file)
@@ -208,4 +220,6 @@ if __name__ == "__main__":
     if values_output:
         data = parse_output_data(args.log_file)
         plot_output_data(data, values_output)
-        print(data[values_output])
+        for value in values_output:
+            print("=" * 15, value, "=" * 15)
+            print(data[value][_COLS])
