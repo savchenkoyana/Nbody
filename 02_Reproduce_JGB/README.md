@@ -30,32 +30,6 @@ To reproduce the experiment, follow these steps:
   cd /path/to/Nbody/02_Reproduce_JGB/
   ```
 
-- To reproduce any experiment from the original article, run the corresponding sh-script. For example:
-
-  ```bash
-  bash sh_scripts/run_exp_MA.sh
-  ```
-
-  You can also choose your own parameters for distributions and run the commands from sh-script one-by-one (see next section).
-
-  > Note that all scripts in this experiment overwrite the existing files.
-  > Don't forget to backup your experiments before trying to reproduce them!
-
-  > Running Nbody0 simulation takes about 3 days depending on task you choose. Running M & A experiment with `N = 20000` was not reasonable because it would take us more than two weeks, so it is recommended to use `N = 10000` for this experiment.
-
-The combinations of parameters from the original article and corresponding sh-scripts are listed below:
-
-| Experiment name | $\\mu$, $M\_{☉}$ | s, $M\_{☉}$ | $\\sigma$ | Plummer radius, pc | Number of particles | Command to reproduce evolution     |
-| --------------- | ---------------- | ----------- | --------- | ------------------ | ------------------- | ---------------------------------- |
-| M & A           | 10               | 1.5         | 0.954     | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 1 |
-| $\\sigma$ = 0.5 | 0                | 1           | 0.5       | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 2 |
-| $\\sigma$ = 1   | 0                | 1           | 1         | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 3 |
-| $\\sigma$ = 1.5 | 0                | 1           | 1.5       | 10                 | $2 \\times 10^4$    | bash sh_scripts/run_exp.sh 20000 4 |
-
-## More detailed overview
-
-This section desctibes how to perform the evolution of PBH cluster in an external potential of SMBH.
-
 - Create initial coordinates of cluster:
 
   ```bash
