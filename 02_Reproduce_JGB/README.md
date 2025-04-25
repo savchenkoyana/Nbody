@@ -30,6 +30,15 @@ To reproduce the experiment, follow these steps:
   cd /path/to/Nbody/02_Reproduce_JGB/
   ```
 
+- Prepare binaries (only once):
+
+  ```bash
+  ln -s ~/work/Nbody/Nbody6ppGPU/build/nbody6++.avx nbody6pp
+  ln -s ~/work/Nbody/Nbody6PPGPU-beijing/build/nbody6++.avx nbody6pp-beijing
+  ```
+
+  Note that the name of binaries may differ if you used other options to build them. We will use `nbody6pp-beijing` binary for evolution and `nbody6pp` binary simply to convert data to the right format.
+
 - Create initial coordinates of cluster:
 
   ```bash
@@ -40,7 +49,7 @@ To reproduce the experiment, follow these steps:
 
   The above command will automatically create (or re-create) a directory with name `snap_mu<MU>_s<SCALE>_sigma<SIGMA>_r<PLUMMER_RADIUS>_N<N>` containing file `IC.nemo` with initial coordinates for evolution.
 
-- Preprocess data
+- Prepare the input:
 
   To convert data to units with `G=1` (pc, km/s and $\\sim 232.5337 \\times M\_{☉}$), run:
 
@@ -52,7 +61,41 @@ To reproduce the experiment, follow these steps:
 
   For more details see section [Units](#Units).
 
-- Run evolution (TODO)
+  Then transform data into Nbody6pp-format:
+
+  ```bash
+  runbody6 in=`DIRNAME`/IC_g1.nemo out=`DIRNAME`/outdir tcrit=0 nbody6=0 exe=nbody6pp
+  cp `DIRNAME`/outdir/dat.10 `DIRNAME`/
+  ```
+
+  Then change `Rbar`, `Zmbar` and `Q` fields in your Fortran namelist input file (`DIRNAME`/input) according to this output:
+
+  ```bash
+  python scale.py --length 0.001 --mass 1 --velocity 1 --nemo-file `DIRNAME`/IC.nemo
+  ```
+
+  > Use absolute value of `Q`
+
+  Also you may need to alter time in input file (`TCRIT`)
+
+- Run evolution
+
+  ```bash
+  cd `OUTDIR`
+  /path/to/nbody6pp-beijing< `input_name` 1>exp.out 2>exp.err
+  ```
+
+  You may track intermediate results by running (from exp root):
+
+  ```bash
+  bash sh_scripts/grep_on_update.sh `OUTDIR`/exp.out
+  ```
+
+  or
+
+  ```bash
+  tail -f `OUTDIR`/exp.out
+  ```
 
 - Postprocess your data to plot profiles, spectras, etc. (TODO)
 
