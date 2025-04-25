@@ -1,6 +1,6 @@
 # About
 
-This document shows how to compare our results with other direct N-body methods as well as GyrFalcON.
+This document shows how to run simulation with older direct N-body methods as well as GyrFalcON.
 
 # How to reproduce
 
@@ -18,13 +18,26 @@ To reproduce the experiment, follow these steps:
   source start_nemo.sh
   ```
 
-  Note that you neeed custom NEMO version from https://github.com/savchenkoyana/nemo.git (branch nbodyx). To check your current branch, run:
+  Note that you may neeed to rebuild some binaries if you want to run simulation with large number of particles. For that, use custom NEMO version from https://github.com/savchenkoyana/nemo.git (branch nbodyx):
 
   ```bash
-  git status
+  cd $NEMO
+  git remote add custom https://github.com/savchenkoyana/nemo.git
+  git checkout nbodyx
+  cd $NEMO/src/nbody/evolve/aarseth/nbody0
+  make nmax
+  cd $NEMO/src/nbody/evolve/aarseth/nbody1/source
+  make nmax
+  cd $NEMO/src/nbody/evolve/aarseth/nbody2/source
+  make nmax
+  cd $NEMO/src/nbody/reduc/Makefile
+  make snapbinary
+  cp snapbinary $NEMOLIB/
+  cd $NEMO
+  make rebuild
   ```
 
-  If your version differs, use installation instruction from [README.md](README.md).
+  If you run simulation with ~1000 particles you don't need to do anything other than default installation.
 
 - Go to the experiment root directory:
 
@@ -41,7 +54,7 @@ To reproduce the experiment, follow these steps:
 - To start full simulation with different N-body methods, run:
 
   ```bash
-  bash sh_scripts/compare_methods_slow.sh <N> <TASK> <ETA>
+  bash sh_scripts/run_othermethods.sh <N> <TASK> <ETA>
   ```
 
   At first I recommend to choose `N=1000` (you can set a higher `N` later). Use options `1000 -1` to create coordinates and then `1000 0`, `1000 1`, `1000 2`, etc. to run all N-body methods.
@@ -50,7 +63,7 @@ To reproduce the experiment, follow these steps:
 
 You can compare different integrators visually (by running `animate.py`) or plot all snapshot statistics: density profile, mass spectrum or lagrange radius.
 
-> **For Nbody0, Nbody1, Nbody2, and GyrFalcON**: There is no way to incorporate a potential of SMBH using N-body code (although it is possible for GyrFalcON, I don't do it for the sake of consistency). So to compare Nbody6 with these methods, I manually insert a body representing SMBH, shift the cluster position and velocity and then run the simulation. After that we need to post-process data (get rid of SMBH and remove shift in distance/velocity of the cluster) to get the result in the same form as Nbody6. Do not forget to use post-processed data (without SMBH at the center) when needed
+> There is no way to incorporate a potential of SMBH for **Nbody0, Nbody1, and Nbody2** (although it is possible for **GyrFalcON**, I don't do it for the sake of consistency). So to compare Nbody6 with these methods, I manually insert a body representing SMBH, shift the cluster position and velocity and then run the simulation. After that we need to post-process data (get rid of SMBH and remove shift in distance/velocity of the cluster) to get the result in the same form as Nbody6. Do not forget to use post-processed data (without SMBH at the center) for analysis when needed (see `sh_scripts/run_nbody0.sh` for details)
 
 To plot lagrange radii for different methods together, run this command:
 
@@ -63,7 +76,7 @@ python plot_lagrange_radius.py \
   --scale <SCALE>
 ```
 
-It can be useful to plot energy, virial ratio, angular momentum as a function of time for both simulations:
+Plot energy, virial ratio, angular momentum as a function of time:
 
 ```bash
 python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --momentum --binaries
