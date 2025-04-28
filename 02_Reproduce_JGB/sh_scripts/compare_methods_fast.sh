@@ -6,12 +6,13 @@
 
 rm -rf nbody0.in nbody0.out nbody1.out nbody2.out nbody4.out nbody6.out gyrfalcon.out
 ETA=0.001
-EPS=0.05
+EPS=0.01
 N=10
 
 mkplummer nbody0.in $N seed=123
 
 nbody0 nbody0.in nbody0.out tcrit=10 deltat=0.01 eta=$ETA eps=$EPS
+
 runbody1 nbody0.in nbody1.out \
   tcrit=10 \
   deltat=0.01 \

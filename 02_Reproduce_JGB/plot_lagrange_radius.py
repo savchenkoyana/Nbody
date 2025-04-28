@@ -42,6 +42,12 @@ if __name__ == "__main__":
         help="Time unit in Myr. Default: 0.97779",
     )
     parser.add_argument(
+        "--timeUnitGyr",
+        type=float,
+        default=9.7779e-4,
+        help="Time unit in Gyr. Default: 9.7779e-4",
+    )
+    parser.add_argument(
         "--store-artifacts",
         action="store_true",
         help="Whether to store NEMO artifacts for debug",
