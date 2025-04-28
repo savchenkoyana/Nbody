@@ -134,6 +134,6 @@ For more info see [README](01_Custom_Density_Model_Evolution/README.md)
 
 ### 2. Reproduce JGB
 
-This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/pdf/2405.06391v1) by Juan Garcia-Bellido.
+This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/pdf/2405.06391v1).
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
 For more info see [README](02_Reproduce_JGB/README.md)

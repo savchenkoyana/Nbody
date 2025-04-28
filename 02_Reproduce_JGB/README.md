@@ -180,7 +180,8 @@ The comparison with other methods is descriped in details in [README_NBODY.md](R
 We use non-usual units in our experiments:
 
 - We use pc (length), km/s (velocity) and $M\_{☉}$ (mass) units for creating a cluster model because of convenience
-- We use units with `G=1` for evolution: pc for lenght, km/s for velocity and $\\sim 232.5337 \\times M\_{☉}$ for mass
+- We use units with `G=1` to feed into N-body code: pc for lenght, km/s for velocity and $\\sim 232.5337 \\times M\_{☉}$ for mass
+- Nbody6++GPU uses N-body units, other codes here compute the evolution as is (see `sh_scripts/run_othermethods.sh`
 
 # Checklist
 
