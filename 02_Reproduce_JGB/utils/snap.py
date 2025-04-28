@@ -156,7 +156,11 @@ def lagrange_radius_by_snap(
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
+        if dens_par:
+            command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
+        else:
+            command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="{fraction}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
+
         print(command)
 
         subprocess.check_call(command, shell=True)
@@ -232,16 +236,19 @@ def masses_in_lagrange_radius(
     snap = parse_nemo(filename=filename, t=t)  # m, x, y, z, vx, vy, vz
     masses = snap[0]
 
-    # calculate density center
-    center = center_of_snap(
-        filename=filename,
-        t=t,
-        density_center=True,
-        remove_artifacts=remove_artifacts,
-        dens_par=dens_par,
-    )  # center_coords : snap_t, x, y, z, vx, vy, vz
-    if center.size == 0:
-        raise RuntimeError(f"'dens_centre' didn't converge for t={t}")
+    if dens_par:
+        # calculate density center
+        center = center_of_snap(
+            filename=filename,
+            t=t,
+            density_center=True,
+            remove_artifacts=remove_artifacts,
+            dens_par=dens_par,
+        )  # center_coords : snap_t, x, y, z, vx, vy, vz
+        if center.size == 0:
+            raise RuntimeError(f"'dens_centre' didn't converge for t={t}")
+    else:
+        center = np.array([0, 0, 0, 0], dtype=np.float32)
 
     # calculate lagrange radius
     snap_t, lagrange_r = lagrange_radius_by_snap(
@@ -277,6 +284,10 @@ def get_timestamps(
 
     timestamps = [_ for _ in generate_timestamps(filename)]
 
+    if len(timestamps) < n_timestamps:
+        return timestamps
+
+    # else filter
     indices = [_ * len(timestamps) // n_timestamps for _ in range(n_timestamps)]
     return np.array(timestamps)[indices]
 
@@ -366,7 +377,10 @@ def count_binaries(
     t: Union[float, str],
     r_threshold: float,
 ):
-    """Count the number of binaries in snapshot (G=1 is assumed)."""
+    """Count the number of binaries in snapshot (G=1 is assumed).
+
+    Based on $NEMO/src/nbody/reduc/snapbinary.c
+    """
     snap = parse_nemo(filename=filename, t=t)  # m, x, y, z, vx, vy, vz
     N = snap.shape[1]
 
@@ -395,3 +409,24 @@ def count_binaries(
             binary_counts += 1
 
     return binary_counts
+
+
+def parse_fort14(
+    fort14: Union[str, os.PathLike, Path]
+) -> tuple[tuple, np.ndarray[np.float32]]:
+    """Parse fort.14 file with Lagrange radius data from Nbody6.
+    The data has the following structure: LAGR: TTOT, LOG10(RLAGR(K)),K=1,11
+
+    Parameters
+    ----------
+    fort14 : Union[str, os.PathLike, Path]
+        Nbody6 output file (fort.14)
+    Returns
+    -------
+    tuple
+        1st element: Lagrange mass fractions
+        2nd element: Simulation data
+    """
+    F_LAGR = (0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.625, 0.75, 0.9)
+    data = np.loadtxt(fort14, usecols=range(1, 13))
+    return F_LAGR, data

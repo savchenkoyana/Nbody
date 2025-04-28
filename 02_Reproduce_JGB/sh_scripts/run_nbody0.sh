@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "Usage: bash sh_scripts/run_exp.sh <N> <EXP>"
-echo "Choose <N> from: 1000, 2000, 5000, 10000, 20000"
 echo "<EXP> should be:"
 echo "1 --- MU=10, SCALE=1.5, SIGMA=0.954;"
 echo "2 --- MU=0 , SCALE=1  , SIGMA=0.5  ;"
@@ -17,20 +16,21 @@ fi
 N=$1
 EXP=$2
 
-if [[ $N == 1000 ]]; then
-   EPS=1.0
-elif [[ $N == 2000 ]]; then
-   EPS=0.79
-elif [[ $N == 5000 ]]; then
-   EPS=0.58
-elif [[ $N == 10000 ]]; then
-   EPS=0.46
-elif [[ $N == 20000 ]]; then
-   EPS=0.368
-else
-   echo "Invalid N=$N! Choose one of: 1000, 2000, 5000, 10000, 20000"
-   exit 1
-fi
+EPS=0.01  # default
+
+# EPS computed as a_plummer / N^(1/3), see https://td.lpi.ru/~eugvas/nbody/tutor.pdf
+# if [[ $N == 1000 ]]; then
+#   EPS=1
+# elif [[ $N == 2000 ]]; then
+#   EPS=0.79
+# elif [[ $N == 5000 ]]; then
+#   EPS=0.58
+# elif [[ $N == 10000 ]]; then
+#   EPS=0.46
+# else
+#    echo "Invalid N=$N! Choose one of: 1000, 2000, 5000, 10000"
+#    exit 1
+# fi
 
 if [[ $EXP == 1 ]]; then
     MU=10.0
@@ -79,13 +79,13 @@ python preprocess_snap.py \
 echo
 echo "Preprocess data..."
 snapscale in=$ROOT_DIR/IC_preprocessed.nemo \
-  out=$ROOT_DIR/IC_preprocessed_nbody.nemo \
+  out=$ROOT_DIR/IC_preprocessed_g1.nemo \
   mscale=4.300451321727918e-03 \
   rscale=1000
 
 echo
 echo "Start evolution with NBODY0 for 13.7 Gyr for: M & A"
-nice -n 20 nbody0 $ROOT_DIR/IC_preprocessed_nbody.nemo \
+nice -n 20 nbody0 $ROOT_DIR/IC_preprocessed_g1.nemo \
   $ROOT_DIR/out_nbody.nemo \
   tcrit=14000 \
   deltat=100 \

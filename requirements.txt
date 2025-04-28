@@ -3,6 +3,7 @@ matplotlib
 mgefit>=6.0.3
 notebook
 numpy==1.26
+pandas
 pre-commit==3.8.0
 python-unsio
 python-unsiotools
