@@ -8,13 +8,13 @@ This repository contains astrophysical N-body simulation experiments.
 
 First prepare an environment. I used conda environment with Python 3.9:
 
-```shell
+```bash
 conda create -n agama python=3.9
 ```
 
 Clone this repository and install all required packages in the environment:
 
-```shell
+```bash
 git clone https://github.com/savchenkoyana/Nbody.git
 cd Nbody
 conda activate agama
@@ -26,8 +26,8 @@ pre-commit install  # optional, only if you want to commit to repository
 
 To install NEMO, follow these steps:
 
-```shell
-git clone https://github.com/teuben/nemo  # I use commit 8a2cbf4fcd565d7a55403ba135fd64716ef0b812
+```bash
+git clone https://github.com/teuben/nemo
 cd nemo
 ./configure --with-yapp=pgplot
 make build check bench5
@@ -38,26 +38,66 @@ If installation completed successfully, you should get "TESTSUITE: OK" for each 
 
 > **Note:** Everytime you want to use NEMO, you first need to execute this from `nemo` repository root:
 >
-> ```shell
+> ```bash
 > source nemo_start.sh
 > ```
 >
-> Alternatively, you might want to add the command above (with the full path to `nemo_start.sh`) at the end of your `.bashrc` file.
+> Alternatively, you might want to add the command above (with the full path to `nemo_start.sh`) at the end of your `~/.bashrc` file.
 
 For more info about NEMO see [NEMO's official documentation](https://astronemo.readthedocs.io/en/latest/) and [NEMO's github pages](https://teuben.github.io/nemo/)
+
+## Install Nbody6++GPU
+
+### Install Beijing version (supported now)
+
+```bash
+git clone git@github.com:nbody6ppgpu/Nbody6PPGPU-beijing
+cd Nbody6PPGPU-beijing
+./configure --enable-mcmodel=large --with-par=b1m --disable-gpu --disable-mpi  # configuration to quick-start on your computer
+make clean
+make -j
+cd -
+```
+
+Add this at the end of your `~/.bashrc` file (and then run `source ~/.bashrc` if you need it in the current terminal session):
+
+```bash
+export OMP_STACKSIZE=4096M
+ulimit -s unlimited
+export OMP_NUM_THREADS=8  # feel free to change
+```
+
+Feel free to alter `OMP_NUM_THREADS` as you wish.
+
+The resulting binary can be found here: `Nbody6PPGPU-beijing/build/nbody6++.*`
+
+### Install original version
+
+```bash
+git clone https://github.com/nbodyx/Nbody6ppGPU.git
+cd Nbody6ppGPU
+export FCFLAGS='-fallow-argument-mismatch'
+./configure --enable-mcmodel=large --with-par=b1m --disable-gpu --disable-mpi --enable-tools --prefix=$HOME  # there is also `--enable-tt`, not tested by me yet
+make clean
+make
+make install
+cd -
+```
+
+The resulting binary can be found here: `Nbody6ppGPU/build/nbody6++.*`
 
 ## Install Agama
 
 Activate conda environment, if it is not activated:
 
-```shell
+```bash
 conda activate agama
 ```
 
 To install Agama, follow these steps:
 
-```shell
-git clone https://github.com/GalacticDynamics-Oxford/Agama.git  # I use commit acf08a656e2aa67d466cafd7c92ba2cd277ff9e8
+```bash
+git clone https://github.com/GalacticDynamics-Oxford/Agama.git
 cd Agama
 pip install .
 cd ../  # back to repository root
@@ -71,15 +111,17 @@ To install `glnemo2` for snapshot visualization, follow the instructions at [the
 
 After installation, you will have the following repository structure:
 
-```shell
+```bash
 Nbody
-├── Agama  # Agama repository root
-├── nemo  # nemo repository root
-├── sandbox
-├── images
+├── Agama                # Agama repository root
+├── nemo                 # nemo repository root
+├── Nbody6PPGPU-beijing  # Nbody6++GPU (Beijing version) repository root
+├── Nbody6ppGPU          # Nbody6++GPU (original version) repository root
+├── sandbox              # dir for simple and small experiments
+├── images               # images needed for md-files
 ├── README.md
 ├── requirements.txt
-├── ...  # other files
+├── ...                  # other files
 ```
 
 # Experiments

@@ -29,10 +29,10 @@ if __name__ == "__main__":
         help="Which times to use. Example: '--times 0.0 0.5 1.0'",
     )
     parser.add_argument(
-        "--timeUnitGyr",
+        "--timeUnitMyr",
         type=float,
-        default=9.7779e-4,
-        help="Time unit in Gyr. Default: 9.7779e-4",
+        default=0.97779,
+        help="Time unit in Myr. Default: 0.97779",
     )
     parser.add_argument(
         "--store-artifacts",
@@ -53,14 +53,14 @@ if __name__ == "__main__":
         "--dens-parameter",
         type=int,
         default=500,
-        help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. Default: 500",
+        help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. If 0, density center is not computed. Default: 500.",
     )
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
-    if args.n_timestamps <= 0:
-        raise RuntimeError("Got negative '--n-timestamps'")
-    if args.dens_parameter <= 0:
+    if not args.times:
+        raise RuntimeError("Empty '--times'")
+    if args.dens_parameter < 0:
         raise RuntimeError("Got negative '--dens-parameter'")
 
     filename = Path(args.nemo_file)
@@ -102,7 +102,7 @@ if __name__ == "__main__":
             bins[:-1],
             bins,
             weights=counts,
-            label=f"$t$={t * args.timeUnitGyr:.2f}",
+            label=f"$t$={t * 1e-3 * args.timeUnitMyr:.2f}",
             histtype="step",
         )
 

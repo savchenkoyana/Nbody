@@ -32,7 +32,14 @@ if __name__ == "__main__":
         "--dens-parameter",
         type=int,
         default=500,
-        help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. Default: 500",
+        help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. If 0, density center is not computed. Default: 500",
+    )
+    parser.add_argument(
+        "--timeUnitMyr",
+        nargs="+",
+        type=float,
+        default=[0.97779],
+        help="Time unit in Myr. Default: 0.97779",
     )
     parser.add_argument(
         "--timeUnitGyr",
@@ -55,8 +62,15 @@ if __name__ == "__main__":
     check_parameters(args)  # sanity checks
     if args.n_timestamps <= 0:
         raise RuntimeError("Got negative '--n-timestamps'")
-    if args.dens_parameter <= 0:
+    if args.dens_parameter < 0:
         raise RuntimeError("Got negative '--dens-parameter'")
+
+    if len(args.timeUnitMyr) == 1:
+        args.timeUnitMyr = args.timeUnitMyr * len(args.nemo_files)
+    elif len(args.timeUnitMyr) != len(args.nemo_files):
+        raise RuntimeError(
+            f"--timeUnitMyr should have the same length as --nemo-files (or 1), got len={len(args.timeUnitMyr)}"
+        )
 
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
@@ -80,7 +94,7 @@ if __name__ == "__main__":
     ax_mt.set_ylabel(r"$M(t)$, $M_\odot$")
     ax_mt.set_title("Mean mass of particles in cluster")
 
-    for filename in args.nemo_files:
+    for i, filename in enumerate(args.nemo_files):
         if not Path(filename).exists():
             raise RuntimeError(f"filename {filename} does not exist")
 
@@ -110,7 +124,7 @@ if __name__ == "__main__":
             m_tot = np.sum(masses)
             m_filtered = masses[mask]
 
-            times = np.append(times, t * args.timeUnitGyr)
+            times = np.append(times, t * 1e-3 * args.timeUnitMyr[i])
             lagrange_radii = np.append(lagrange_radii, lagrange_r)
             n_particles = np.append(n_particles, m_filtered.size)
             mean_mass = np.append(mean_mass, np.mean(m_filtered))
