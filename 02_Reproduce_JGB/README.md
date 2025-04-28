@@ -149,11 +149,19 @@ TODO
 
 ## Plot Lagrange radii
 
-The easiest way to plot lagrange radii is to use data stored in log file (in Nbody units):
+The easiest way to plot lagrange radii is to use data stored in log file:
 
-```bash
-python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR
-```
+- In Nbody units:
+
+  ```bash
+  python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR
+  ```
+
+- In astro units (pc, km/s (velocity), $M\_{☉}$ and Myr)"
+
+  ```bash
+  python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR --astro-units
+  ```
 
 You can compare your results with plots from the article:
 
@@ -165,11 +173,19 @@ Note that Lagrange radius at $t=0$ should be approximately 13 pc according to [a
 
 ## Plot mass spectrum $$f(M)$$
 
-Plot how mass changes with distance from center (in Nbody units):
+Plot how mass changes with distance from center:
 
-```bash
-python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS
-```
+- In Nbody units:
+
+  ```bash
+  python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS
+  ```
+
+- In astro units (pc, km/s (velocity), $M\_{☉}$ and Myr)
+
+  ```bash
+  python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS --astro-units
+  ```
 
 # Compare with other N-body methods
 

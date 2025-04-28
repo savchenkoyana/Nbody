@@ -88,17 +88,40 @@ def parse_adjust_data(logfile: str):
     return df
 
 
-def parse_output_data(logfile):
+def parse_output_data(logfile: str, astro_units: bool):
     """Parse lines produced at output stage."""
     # set lines to analyze
     LINES_TO_READ = _OUTPUT_DATA
 
+    # compile one regex that matches the four starred quantities
+    pat = re.compile(
+        r"""PHYSICAL\ SCALING:      # literal header
+            \s*R\*\s*=\s*([0-9E+.\-]+)   # capture R*
+            \s*M\*\s*=\s*([0-9E+.\-]+)   # capture M*
+            \s*V\*\s*=\s*([0-9E+.\-]+)   # capture V*
+            \s*T\*\s*=\s*([0-9E+.\-]+)   # capture T*
+        """,
+        re.VERBOSE,
+    )
+
     # initialize dataframes to store results in
     data = {data_type: pd.DataFrame(columns=_FULL_COLS) for data_type in LINES_TO_READ}
+
+    need_scale = True
 
     # work through the file
     with open(logfile) as nb_stdout:
         for line in nb_stdout:
+            if need_scale:
+                m = re.search(pat, line)
+                if m:
+                    # convert to float and store
+                    keys = ["R*", "M*", "V*", "T*"]
+                    vals = map(float, m.groups())
+                    results = dict(zip(keys, vals))
+                    data = {**data, **results}
+                    need_scale = False
+
             # work through all lines that should be read
             for data_type in LINES_TO_READ:
                 # match lines with data type
@@ -115,6 +138,13 @@ def parse_output_data(logfile):
                     # stop loop cause each line can only have one data type
                     break
 
+    if astro_units:
+        data["RLAGR"] *= data["R*"]
+        data["AVMASS"] *= data["M*"]
+        data["SIGR2"] *= data["V*"]
+        data["SIGT2"] *= data["V*"]
+        data["VROT"] *= data["V*"]
+
     return data
 
 
@@ -124,7 +154,7 @@ def parse_output_data(logfile):
 # region Plotting data
 
 
-def plot_adjust_data(df, plot_values, logscale):
+def plot_adjust_data(df: pd.DataFrame, plot_values: list, logscale: bool):
     fig = plt.figure(figsize=(9, 6))
     ax = fig.gca()
 
@@ -142,7 +172,7 @@ def plot_adjust_data(df, plot_values, logscale):
     return fig, ax
 
 
-def plot_output_data(data, plot_values):
+def plot_output_data(data: dict, plot_values: list, astro_units: bool):
     # initialize matplotlib figure
     N = len(plot_values)
     # choose columns close to square
@@ -153,12 +183,23 @@ def plot_output_data(data, plot_values):
     axes = np.atleast_1d(axes).flatten()
 
     for ax, pdata in zip(axes, plot_values):
-        data[pdata][_COLS].plot(ax=ax)
-
         ax.set_title(f"{pdata} time evolution")
-        ax.set_xlabel(r"Time t [nbody units]")
-        ax.set_ylabel(f"{pdata}")
+        for col in _COLS:
+            y = data[pdata][col]
+            x = np.arange(y.size)
+            if astro_units:
+                x = x * data["T*"]
+            ax.plot(x, y)
+
+        if astro_units:
+            ax.set_xlabel(r"Time t [Myr]")
+            ax.set_ylabel(rf"{pdata} [astro units]")
+        else:
+            ax.set_xlabel(r"Time t [nbody units]")
+            ax.set_ylabel(rf"{pdata} [nbody units]")
+
         ax.grid()
+
         if pdata != "VROT":
             ax.set_yscale("log")
 
@@ -198,6 +239,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Whether to print rows/columns at full",
     )
+    parser.add_argument(
+        "--astro-units",
+        action="store_true",
+        help=f"Whether to plot values in astrophysical units (only for {_OUTPUT_DATA})",
+    )
     args = parser.parse_args()
 
     values = {x for x in args.values.split(",")}
@@ -218,8 +264,12 @@ if __name__ == "__main__":
         print(df[values_adjust])
 
     if values_output:
-        data = parse_output_data(args.log_file)
-        plot_output_data(data, values_output)
+        data = parse_output_data(args.log_file, args.astro_units)
+        print(
+            f"Scale coefficients: R*={data['R*']}[pc], V*={data['V*']}[km/s], T*={data['T*']}[Myr], M*={data['M*']}[Msun]"
+        )
+
+        plot_output_data(data, values_output, args.astro_units)
         for value in values_output:
             print("=" * 15, value, "=" * 15)
             print(data[value][_COLS])
