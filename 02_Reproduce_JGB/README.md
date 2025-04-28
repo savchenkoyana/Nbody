@@ -59,7 +59,7 @@ To reproduce the experiment, follow these steps:
     mscale=4.300451321727918e-03
   ```
 
-  For more details see section [Units](#Units).
+  > For more details about units see section [Units](#Units).
 
   Then transform data into Nbody6pp-format:
 
@@ -97,7 +97,27 @@ To reproduce the experiment, follow these steps:
   tail -f `OUTDIR`/exp.out
   ```
 
-- Postprocess your data to plot profiles, spectras, etc. (TODO)
+- Postprocess your data to plot profiles, spectras, etc.
+
+  Snapshot data are stored in `conf.3_*` in Nbody6++GPU-version. To transform it into NEMO snapshot, use:
+
+  ```bash
+  cat `ls -tr conf.3_*` > OUT3; u3tos OUT3 out.nemo mode=6 nbody=<N> ; rm OUT3
+  ```
+
+  where `<N>` is the number of particles in your simulation.
+
+  Then to transform to astrophysical units:
+
+  ```bash
+  snapscale in=`DIRNAME`/out.nemo \
+    out=`DIRNAME`/out_scaled.nemo \
+    mscale=<mscale> \
+    rscale=<rscale> \
+    vscale=<vscale>
+  ```
+
+  These coefficients are automatically computed in Nbody6++GPU and are listed in log file (see `R*`, `V*`, `T*`, and `M*`)
 
 # Explore results
 
@@ -120,7 +140,7 @@ To reproduce the experiment, follow these steps:
 - Another option is to use custom visualization script from this repository:
 
   ```bash
-  python animate.py --nemo-file <DIRNAME>/out_postprocessed.nemo --add-point-source
+  python animate.py --nemo-file <DIRNAME>/out.nemo
   ```
 
 ## Plot density profile $$\\rho(r)$$
@@ -129,7 +149,11 @@ TODO
 
 ## Plot Lagrange radii
 
-TODO
+The easiest way to plot lagrange radii is to use data stored in log file (in Nbody units):
+
+```bash
+python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR
+```
 
 You can compare your results with plots from the article:
 
@@ -141,7 +165,11 @@ Note that Lagrange radius at $t=0$ should be approximately 13 pc according to [a
 
 ## Plot mass spectrum $$f(M)$$
 
-TODO
+Plot how mass changes with distance from center (in Nbody units):
+
+```bash
+python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS
+```
 
 # Compare with other N-body methods
 
@@ -159,5 +187,5 @@ We use non-usual units in our experiments:
 Here is a list of what we need to fully reproduce the article:
 
 - [x] Comparison with other methods
-- [ ] Nbody6 (simple run)
+- [x] Nbody6 (simple run)
 - [ ] Gravitational waves + Black hole mergers

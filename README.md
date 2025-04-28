@@ -48,7 +48,7 @@ For more info about NEMO see [NEMO's official documentation](https://astronemo.r
 
 ## Install Nbody6++GPU
 
-### Install Nbody6++GPU (beijing version)
+### Install Beijing version (supported now)
 
 ```bash
 git clone git@github.com:nbody6ppgpu/Nbody6PPGPU-beijing
@@ -59,7 +59,7 @@ make -j
 cd -
 ```
 
-Add this at the end of your `~/.bashrc` file (and then run `source ~/.bashrc` if you need it in the current session):
+Add this at the end of your `~/.bashrc` file (and then run `source ~/.bashrc` if you need it in the current terminal session):
 
 ```bash
 export OMP_STACKSIZE=4096M
@@ -71,7 +71,7 @@ Feel free to alter `OMP_NUM_THREADS` as you wish.
 
 The resulting binary can be found here: `Nbody6PPGPU-beijing/build/nbody6++.*`
 
-### Install Nbody6++GPU (original version, optional)
+### Install original version
 
 ```bash
 git clone https://github.com/nbodyx/Nbody6ppGPU.git
@@ -113,14 +113,15 @@ After installation, you will have the following repository structure:
 
 ```bash
 Nbody
-├── Agama  # Agama repository root
-├── nemo  # nemo repository root
-├── Nbody6PPGPU-beijing  # Nbody6++GPU repository root
-├── sandbox  # dir for simple and small experiments
-├── images  # images needed for md-files
+├── Agama                # Agama repository root
+├── nemo                 # nemo repository root
+├── Nbody6PPGPU-beijing  # Nbody6++GPU (Beijing version) repository root
+├── Nbody6ppGPU          # Nbody6++GPU (original version) repository root
+├── sandbox              # dir for simple and small experiments
+├── images               # images needed for md-files
 ├── README.md
 ├── requirements.txt
-├── ...  # other files
+├── ...                  # other files
 ```
 
 # Experiments

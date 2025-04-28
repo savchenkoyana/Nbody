@@ -18,7 +18,7 @@ To reproduce the experiment, follow these steps:
   source start_nemo.sh
   ```
 
-  Note that you may neeed to rebuild some binaries if you want to run simulation with large number of particles. For that, use custom NEMO version from https://github.com/savchenkoyana/nemo.git (branch nbodyx):
+  Note that you may neeed to rebuild some binaries if you want to run simulation with large number of particles. For that, use custom NEMO version from https://github.com/savchenkoyana/nemo.git (branch `nbodyx`):
 
   ```bash
   cd $NEMO
@@ -76,6 +76,8 @@ python plot_lagrange_radius.py \
   --scale <SCALE>
 ```
 
+> Use `plot_lagrange_radius.py`, `plot_mass_spectrum.py` and `plot_density_profile.py` with post-processed data (without central BH).
+
 Plot energy, virial ratio, angular momentum as a function of time:
 
 ```bash
@@ -92,11 +94,6 @@ python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --mom
    ```
    `<NAME>.nemo` is the name of output file of the interrupted run, `out=` is ignored, and `resume=t` indicates that we want to resume simulation. The rest of the command for gyrFalcON (marked here as `...`) should be exactly the same.
 1. If Aarseth's NBODY code does not save a snapshot, use NEMO's `u3tos` with key `mode=X`, where `X` is your algorithm version (`mode=1` for Nbody1, `mode=4` for Nbody4, etc.)
-1. Snapshot data are stored in `conf.3_*` in Nbody6++GPU-version. To transform it into NEMO snapshot, use:
-   ```bash
-   cat `ls -tr conf.3_*` > OUT3; u3tos OUT3 OUT3.snap mode=6 nbody=<N> ; rm OUT3
-   ```
-   where `<N>` is the number of particles in your simulation.
 1. If you forgot how you created your snapshot, just run:
    ```bash
    hisf <NAME>.nemo

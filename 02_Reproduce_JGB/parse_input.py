@@ -4,6 +4,7 @@ Warning, created using vibe-coding!
 """
 
 import argparse
+import re
 
 from utils.config import _NBODY4_KZ
 from utils.config import _NBODY4_PARAMETERS
@@ -30,8 +31,84 @@ parameter_descriptions = {
 }
 
 
-def parse_nbody6ppgpu(lines):
+def parse_namelist(filename):
+    """Parse aFortran‐style namelist file."""
     data = {}
+    data["KZ"] = []
+
+    # regex to match KEY=VALUE, possibly repeated on one line
+    scalar_re = re.compile(r"([A-Za-z]\w*)\s*=\s*([^,/\s]+)")
+    # regex to match KZ(start:end)= followed by whitespace-separated values
+    kz_re = re.compile(r"KZ\(\s*(\d+)\s*:\s*(\d+)\s*\)\s*=\s*(.*)")
+
+    with open(filename) as f:
+        for raw in f:
+            line = raw.strip()
+            # skip blank and comment lines and lines starting with "&"
+            if not line or line.startswith("&") or line.startswith("/"):
+                continue
+
+            # First, handle any KZ(...) lines
+            m = kz_re.match(line)
+            if m:
+                i0, i1, rest = m.group(1), m.group(2), m.group(3)
+                i0, i1 = int(i0), int(i1)
+                # split the rest on whitespace
+                vals = rest.strip().split()
+
+                # if a trailing comma, drop it
+                if vals[-1].endswith(","):
+                    vals[-1] = vals[-1].rstrip(",")
+                if vals[-1] == "":
+                    vals = vals[:-1]
+                # map each position
+                expected = i1 - i0 + 1
+
+                if len(vals) != expected:
+                    raise ValueError(
+                        f"KZ indices {i0}:{i1} expect {expected} values but got {len(vals)}"
+                    )
+                for offset, v in enumerate(vals):
+                    idx = i0 + offset
+                    data["KZ"].append(int(v))
+                continue
+
+            # Otherwise, pick up all simple KEY=VALUE pairs on the line
+            for key, rawval in scalar_re.findall(line):
+                # skip KZ here (we already processed them)
+                if key.upper().startswith("KZ"):
+                    continue
+                data[key] = _cast_value(rawval)
+
+    return data
+
+
+def _cast_value(s):
+    """Convert a Fortran‐style literal into Python int/float/string."""
+    # strip any trailing commas
+    s = s.rstrip(",")
+    # string literal?
+    if s.startswith("'") and s.endswith("'"):
+        return s.strip("'")
+    # try int
+    try:
+        return int(s)
+    except ValueError:
+        pass
+    # try float (including scientific ‘E’)
+    try:
+        return float(s)
+    except ValueError:
+        pass
+    # fallback to raw string
+    return s
+
+
+def parse_nbody6ppgpu(filename):
+    data = {}
+    with open(filename) as file:
+        lines = [line.strip() for line in file if line.strip()]
+    lines = [line.replace("D", "E") for line in lines]
 
     (
         data["KSTART"],
@@ -100,8 +177,11 @@ def parse_nbody6ppgpu(lines):
     return data
 
 
-def parse_nbody6(lines):
+def parse_nbody6(filename):
     data = {}
+    with open(filename) as file:
+        lines = [line.strip() for line in file if line.strip()]
+    lines = [line.replace("D", "E") for line in lines]
 
     data["KSTART"], data["TCOMP"] = map(float, lines[0].split())
     (
@@ -160,8 +240,11 @@ def parse_nbody6(lines):
     return data
 
 
-def parse_nbody4(lines):
+def parse_nbody4(filename):
     data = {}
+    with open(filename) as file:
+        lines = [line.strip() for line in file if line.strip()]
+    lines = [line.replace("D", "E") for line in lines]
 
     data["KSTART"], data["TCOMP"], data["GPID"] = map(float, lines[0].split())
     (
@@ -218,15 +301,16 @@ def parse_nbody4(lines):
 
 
 def parse_input_file(filename, version):
-    with open(filename) as file:
-        lines = [line.strip() for line in file if line.strip()]
-
-    lines = [line.replace("D", "E") for line in lines]
-
     if version == "nbody6":
-        return parse_nbody6(lines)
-    elif version == "nbody6++gpu-beijing" or version == "nbody6++gpu":
-        return parse_nbody6ppgpu(lines)
+        return parse_nbody6(filename)
+    elif version == "nbody6++gpu":
+        return parse_nbody6ppgpu(filename)
+    elif version == "nbody6++gpu-beijing":
+        try:
+            data = parse_nbody6ppgpu(filename)
+        except:
+            data = parse_namelist(filename)
+        return data
     elif version == "nbody4":
         return parse_nbody4(lines)
     else:
