@@ -157,7 +157,7 @@ The easiest way to plot lagrange radii is to use data stored in log file:
   python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR
   ```
 
-- In astro units (pc, km/s (velocity), $M\_{☉}$ and Myr)"
+- In astro units:
 
   ```bash
   python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR --astro-units
@@ -181,7 +181,7 @@ Plot how mass changes with distance from center:
   python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS
   ```
 
-- In astro units (pc, km/s (velocity), $M\_{☉}$ and Myr)
+- In astro units:
 
   ```bash
   python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS --astro-units
@@ -195,8 +195,14 @@ The comparison with other methods is descriped in details in [README_NBODY.md](R
 
 We use non-usual units in our experiments:
 
-- We use pc (length), km/s (velocity) and $M\_{☉}$ (mass) units for creating a cluster model because of convenience
-- We use units with `G=1` to feed into N-body code: pc for lenght, km/s for velocity and $\\sim 232.5337 \\times M\_{☉}$ for mass
+- We use astrophysical units for creating a cluster model because of convenience:
+  - pc (length)
+  - km/s (velocity)
+  - $M\_{☉}$ (mass)
+- We use units with `G=1` to feed data into N-body code:
+  - pc (lenght)
+  - km/s (velocity)
+  - $\\sim 232.5337 \\times M\_{☉}$ (mass)
 - Nbody6++GPU uses N-body units, other codes here compute the evolution as is (see `sh_scripts/run_othermethods.sh`
 
 # Checklist
