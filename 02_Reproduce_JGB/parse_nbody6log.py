@@ -1,6 +1,7 @@
 """Based on this jupyter-notebook: https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing/blob/stable/examples/01_Basics.ipynb"""
 import argparse
 import re
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -51,6 +52,7 @@ _COLS = [0.01, 0.1, 0.3, 0.5, 0.9, 1.0, "<RC"]
 
 
 def pandas_setup():
+    """Setup pandas to display a full dataframe."""
     pd.set_option("display.max_rows", None)
     pd.set_option("display.max_columns", None)
     pd.set_option("display.width", 2000)
@@ -88,40 +90,17 @@ def parse_adjust_data(logfile: str):
     return df
 
 
-def parse_output_data(logfile: str, astro_units: bool):
+def parse_output_data(logfile: str):
     """Parse lines produced at output stage."""
     # set lines to analyze
     LINES_TO_READ = _OUTPUT_DATA
 
-    # compile one regex that matches the four starred quantities
-    pat = re.compile(
-        r"""PHYSICAL\ SCALING:      # literal header
-            \s*R\*\s*=\s*([0-9E+.\-]+)   # capture R*
-            \s*M\*\s*=\s*([0-9E+.\-]+)   # capture M*
-            \s*V\*\s*=\s*([0-9E+.\-]+)   # capture V*
-            \s*T\*\s*=\s*([0-9E+.\-]+)   # capture T*
-        """,
-        re.VERBOSE,
-    )
-
     # initialize dataframes to store results in
     data = {data_type: pd.DataFrame(columns=_FULL_COLS) for data_type in LINES_TO_READ}
-
-    need_scale = True
 
     # work through the file
     with open(logfile) as nb_stdout:
         for line in nb_stdout:
-            if need_scale:
-                m = re.search(pat, line)
-                if m:
-                    # convert to float and store
-                    keys = ["R*", "M*", "V*", "T*"]
-                    vals = map(float, m.groups())
-                    results = dict(zip(keys, vals))
-                    data = {**data, **results}
-                    need_scale = False
-
             # work through all lines that should be read
             for data_type in LINES_TO_READ:
                 # match lines with data type
@@ -138,14 +117,32 @@ def parse_output_data(logfile: str, astro_units: bool):
                     # stop loop cause each line can only have one data type
                     break
 
-    if astro_units:
-        data["RLAGR"] *= data["R*"]
-        data["AVMASS"] *= data["M*"]
-        data["SIGR2"] *= data["V*"]
-        data["SIGT2"] *= data["V*"]
-        data["VROT"] *= data["V*"]
-
     return data
+
+
+def get_scaling(logfile: str):
+    """Get scale coefficient from log file."""
+    # compile one regex that matches the four starred quantities
+    pat = re.compile(
+        r"""PHYSICAL\ SCALING:      # literal header
+            \s*R\*\s*=\s*([0-9E+.\-]+)   # capture R*
+            \s*M\*\s*=\s*([0-9E+.\-]+)   # capture M*
+            \s*V\*\s*=\s*([0-9E+.\-]+)   # capture V*
+            \s*T\*\s*=\s*([0-9E+.\-]+)   # capture T*
+        """,
+        re.VERBOSE,
+    )
+
+    # work through the file
+    with open(logfile) as nb_stdout:
+        for line in nb_stdout:
+            m = re.search(pat, line)
+            if m:
+                # convert to float and store
+                keys = ["R*", "M*", "V*", "T*"]
+                vals = map(float, m.groups())
+                results = dict(zip(keys, vals))
+                return results
 
 
 # endregion
@@ -155,6 +152,11 @@ def parse_output_data(logfile: str, astro_units: bool):
 
 
 def plot_adjust_data(df: pd.DataFrame, plot_values: list, logscale: bool):
+    """Plot data produced at 'adjust' stage.
+
+    Y axis can be in default scale or logscale. Only N-body units are
+    supported.
+    """
     fig = plt.figure(figsize=(9, 6))
     ax = fig.gca()
 
@@ -173,6 +175,17 @@ def plot_adjust_data(df: pd.DataFrame, plot_values: list, logscale: bool):
 
 
 def plot_output_data(data: dict, plot_values: list, astro_units: bool):
+    """Plot data produced at 'output' stage.
+
+    Both N-body units and astro units are supported.
+    """
+    if astro_units:
+        data["RLAGR"] *= data["R*"]
+        data["AVMASS"] *= data["M*"]
+        data["SIGR2"] *= data["V*"]
+        data["SIGT2"] *= data["V*"]
+        data["VROT"] *= data["V*"]
+
     # initialize matplotlib figure
     N = len(plot_values)
     # choose columns close to square
@@ -245,6 +258,7 @@ if __name__ == "__main__":
         help=f"Whether to plot values in astrophysical units (only for {_OUTPUT_DATA})",
     )
     args = parser.parse_args()
+    save_dir = Path(args.log_file).parent
 
     values = {x for x in args.values.split(",")}
     values_adjust = list(values.intersection(_ADJUST_DATA))
@@ -257,18 +271,26 @@ if __name__ == "__main__":
     if args.full_output:
         pandas_setup()
 
+    df = parse_adjust_data(args.log_file)
+    data = parse_output_data(args.log_file)
+    scalings = get_scaling(args.log_file)
+    print(
+        f"Scale coefficients: R*={scalings['R*']}[pc], V*={scalings['V*']}[km/s], T*={scalings['T*']}[Myr], M*={scalings['M*']}[Msun]"
+    )
+
+    # save data
+    df.to_csv(save_dir / "adjust_data.csv", index=False)
+    for key in data:
+        data[key].to_csv(save_dir / f"{key}.csv", index=False)
+
+    data = {**data, **scalings}
+
     # Plot
     if values_adjust:
-        df = parse_adjust_data(args.log_file)
         plot_adjust_data(df, values_adjust, logscale=args.logscale)
         print(df[values_adjust])
 
     if values_output:
-        data = parse_output_data(args.log_file, args.astro_units)
-        print(
-            f"Scale coefficients: R*={data['R*']}[pc], V*={data['V*']}[km/s], T*={data['T*']}[Myr], M*={data['M*']}[Msun]"
-        )
-
         plot_output_data(data, values_output, args.astro_units)
         for value in values_output:
             print("=" * 15, value, "=" * 15)
