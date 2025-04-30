@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 
+import pandas as pd
 from utils.nbody6_log import _ADJUST_DATA
 from utils.nbody6_log import _COLS
 from utils.nbody6_log import _OUTPUT_DATA

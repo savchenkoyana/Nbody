@@ -154,13 +154,13 @@ The easiest way to plot lagrange radii is to use data stored in log file:
 - In Nbody units:
 
   ```bash
-  python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR
   ```
 
 - In astro units:
 
   ```bash
-  python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR --astro-units
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR --astro-units
   ```
 
 You can compare your results with plots from the article:
@@ -178,13 +178,13 @@ Plot how mass changes with distance from center:
 - In Nbody units:
 
   ```bash
-  python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values AVMASS
   ```
 
 - In astro units:
 
   ```bash
-  python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS --astro-units
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values AVMASS --astro-units
   ```
 
 # Compare with other N-body methods

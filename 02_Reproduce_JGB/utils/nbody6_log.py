@@ -8,23 +8,24 @@ import numpy as np
 import pandas as pd
 
 _OUTPUT_DATA = {"RLAGR", "AVMASS", "NPARTC", "SIGR2", "SIGT2", "VROT"}
+
 _ADJUST_DATA = {
     "T[Myr]",
     "Q",
-    "DE",
-    "DELTA",
+    "DE",  # relative energy error
+    "DELTA",  # absolute energy error
     "DETOT",
-    "E",
+    "E",  # Mechanical energy: ZKIN - POT + ETIDE (E(3))
     "EKIN",
     "POT",
-    "ETIDE",
-    "ETOT",
-    "EBIN",
-    "EMERGE",
-    "ESUB",
-    "ECOLL",
-    "EMDOT",
-    "ECDOT",
+    "ETIDE",  # Tidal energy
+    "ETOT",  # Total energy
+    "EBIN",  # Binding energy of KS binaries
+    "EMERGE",  # Binding energy of mergers (E(9))
+    "ESUB",  # Binding energy of unperturbed triples and quadruples
+    "ECOLL",  # The difference of binding energy of inner binary at the end and begin of hierarchical systems (E(10))
+    "EMDOT",  # Mechanical energy of mass loss due to stellar evolution (E(12))
+    "ECDOT",  # Energy of velocity kick due to stellar evolution
 }
 
 _FULL_COLS = [
