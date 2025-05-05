@@ -143,6 +143,8 @@ To reproduce the experiment, follow these steps:
   python animate.py --nemo-file <DIRNAME>/out.nemo
   ```
 
+  Use `--xlim` and `--ylim` to set your own limits.
+
 ## Plot density profile $$\\rho(r)$$
 
 TODO
@@ -190,6 +192,24 @@ Plot how mass changes with distance from center:
 # Compare with other N-body methods
 
 The comparison with other methods is descriped in details in [README_NBODY.md](README_NBODY.md).
+
+# Explore mergers and GW radiation
+
+Use:
+
+```bash
+grep "NMERGE" nbody6++jgb_exp/N5000_MA/exp.out
+```
+
+```bash
+grep "NEW MERGER" nbody6++jgb_exp/N5000_MA/exp.out
+```
+
+and
+
+```bash
+grep "NBH" -A 1 nbody6++jgb_exp/N5000_MA/exp.out
+```
 
 # Units
 
