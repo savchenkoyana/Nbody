@@ -143,17 +143,27 @@ To reproduce the experiment, follow these steps:
   python animate.py --nemo-file <DIRNAME>/out.nemo
   ```
 
+  Use `--xlim` and `--ylim` to set your own limits.
+
 ## Plot density profile $$\\rho(r)$$
 
 TODO
 
 ## Plot Lagrange radii
 
-The easiest way to plot lagrange radii is to use data stored in log file (in Nbody units):
+The easiest way to plot lagrange radii is to use data stored in log file:
 
-```bash
-python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR
-```
+- In Nbody units:
+
+  ```bash
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR
+  ```
+
+- In astro units:
+
+  ```bash
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR --astro-units
+  ```
 
 You can compare your results with plots from the article:
 
@@ -165,22 +175,55 @@ Note that Lagrange radius at $t=0$ should be approximately 13 pc according to [a
 
 ## Plot mass spectrum $$f(M)$$
 
-Plot how mass changes with distance from center (in Nbody units):
+Plot how mass changes with distance from center:
 
-```bash
-python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS
-```
+- In Nbody units:
+
+  ```bash
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values AVMASS
+  ```
+
+- In astro units:
+
+  ```bash
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values AVMASS --astro-units
+  ```
 
 # Compare with other N-body methods
 
 The comparison with other methods is descriped in details in [README_NBODY.md](README_NBODY.md).
 
+# Explore mergers and GW radiation
+
+Use:
+
+```bash
+grep "NMERGE" nbody6++jgb_exp/N5000_MA/exp.out
+```
+
+```bash
+grep "NEW MERGER" nbody6++jgb_exp/N5000_MA/exp.out
+```
+
+and
+
+```bash
+grep "NBH" -A 1 nbody6++jgb_exp/N5000_MA/exp.out
+```
+
 # Units
 
 We use non-usual units in our experiments:
 
-- We use pc (length), km/s (velocity) and $M\_{☉}$ (mass) units for creating a cluster model because of convenience
-- We use units with `G=1` for evolution: pc for lenght, km/s for velocity and $\\sim 232.5337 \\times M\_{☉}$ for mass
+- We use astrophysical units for creating a cluster model because of convenience:
+  - pc (length)
+  - km/s (velocity)
+  - $M\_{☉}$ (mass)
+- We use units with `G=1` to feed data into N-body code:
+  - pc (lenght)
+  - km/s (velocity)
+  - $\\sim 232.5337 \\times M\_{☉}$ (mass)
+- Nbody6++GPU uses N-body units, other codes here compute the evolution as is (see `sh_scripts/run_othermethods.sh`
 
 # Checklist
 
