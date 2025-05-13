@@ -198,6 +198,10 @@ The comparison with other methods is descriped in details in [README_NBODY.md](R
 Use:
 
 ```bash
+grep "GR " -A 2 -B 2 nbody6++jgb_exp/N5000_MA/exp.out
+```
+
+```bash
 grep "NMERGE" nbody6++jgb_exp/N5000_MA/exp.out
 ```
 
@@ -205,10 +209,14 @@ grep "NMERGE" nbody6++jgb_exp/N5000_MA/exp.out
 grep "NEW MERGER" nbody6++jgb_exp/N5000_MA/exp.out
 ```
 
+```bash
+grep "NBH" -A 1 nbody6++jgb_exp/N5000_MA/exp.out
+```
+
 and
 
 ```bash
-grep "NBH" -A 1 nbody6++jgb_exp/N5000_MA/exp.out
+grep "NS/BH BINARY" nbody6++jgb_exp/N5000_MA/exp.out
 ```
 
 # Units
@@ -223,7 +231,7 @@ We use non-usual units in our experiments:
   - pc (lenght)
   - km/s (velocity)
   - $\\sim 232.5337 \\times M\_{☉}$ (mass)
-- Nbody6++GPU uses N-body units, other codes here compute the evolution as is (see `sh_scripts/run_othermethods.sh`
+- Nbody6++GPU uses N-body units (and produces output in N-body units), other codes here compute the evolution as is (see `sh_scripts/run_othermethods.sh`)
 
 # Checklist
 
@@ -232,3 +240,4 @@ Here is a list of what we need to fully reproduce the article:
 - [x] Comparison with other methods
 - [x] Nbody6 (simple run)
 - [ ] Gravitational waves + Black hole mergers
+- [ ] Natal spins = 0

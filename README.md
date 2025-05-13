@@ -20,6 +20,7 @@ cd Nbody
 conda activate agama
 pip install -r requirements.txt
 pre-commit install  # optional, only if you want to commit to repository
+python -m pip install --only-binary galpy galpy  # install galpy
 ```
 
 ## Install NEMO
@@ -137,3 +138,8 @@ For more info see [README](01_Custom_Density_Model_Evolution/README.md)
 This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/pdf/2405.06391v1).
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
 For more info see [README](02_Reproduce_JGB/README.md)
+
+### 3. PBH cluster in Milky Way potential
+
+The goal of this experiment is to simulate a PBH cluster with different IC.
+See [README](03_MW_PBH_cluster/README.md) for more details.
