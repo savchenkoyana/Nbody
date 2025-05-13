@@ -165,9 +165,11 @@ The easiest way to plot lagrange radii is to use data stored in log file:
   python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR --astro-units
   ```
 
-You can compare your results with plots from the article:
+There is also an option to use `plot_lagrange_radius.py`. Use `out_scaled.nemo` with `--timeUnitMyr` and `T*` from log to get data in astrophysical units.
 
-![](../images/cluster_stat.png)
+> Note that `plot_lagrange_radius` also plots masses and N in lagrange radius, while JGB plots the same for the full clusters with removed escapers. It is not the same!
+
+You can compare your results with plots from the article:
 
 ![](../images/lagrange_radii.png)
 
