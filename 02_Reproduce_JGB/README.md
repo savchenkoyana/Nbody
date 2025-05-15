@@ -165,13 +165,17 @@ The easiest way to plot lagrange radii is to use data stored in log file:
   python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR --astro-units
   ```
 
-There is also an option to use `plot_lagrange_radius.py`. Use `out_scaled.nemo` with `--timeUnitMyr` and `T*` from log to get data in astrophysical units.
+Note that you can also use `plot_lagrange_radius.py`. Use `out_scaled.nemo` with `--timeUnitMyr` and `T*` from log to get data in astrophysical units.
 
-> Note that `plot_lagrange_radius` also plots masses and N in lagrange radius, while JGB plots the same for the full clusters with removed escapers. It is not the same!
+> Note that if you don't remove escapers, the results may differ! You can remove escapers at post-processing using `remove_escapers.py` and re-run `plot_lagrange_radius.py` with post-processed data
+
+Use `plot_stats.py` to plot $N(t)$ and $M(t)$ (these should be constant if you don't remove escapers)
 
 You can compare your results with plots from the article:
 
 ![](../images/lagrange_radii.png)
+
+![](../images/cluster_stat.png)
 
 Note that Lagrange radius at $t=0$ should be approximately 13 pc according to [analytical expression](https://en.wikipedia.org/wiki/Plummer_model) for Plummer with size 10 pc.
 
@@ -242,4 +246,4 @@ Here is a list of what we need to fully reproduce the article:
 - [x] Comparison with other methods
 - [x] Nbody6 (simple run)
 - [ ] Gravitational waves + Black hole mergers
-- [ ] Natal spins = 0
+- [ ] Natal spins = 0 (random with `KZ(24)=2`)
