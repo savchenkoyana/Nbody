@@ -29,12 +29,6 @@ if __name__ == "__main__":
         help="Which times to use. Example: '--times 0.0 0.5 1.0'",
     )
     parser.add_argument(
-        "--timeUnitMyr",
-        type=float,
-        default=0.97779,
-        help="Time unit in Myr. Default: 0.97779",
-    )
-    parser.add_argument(
         "--store-artifacts",
         action="store_true",
         help="Whether to store NEMO artifacts for debug",
@@ -102,7 +96,7 @@ if __name__ == "__main__":
             bins[:-1],
             bins,
             weights=counts,
-            label=f"$t$={t * 1e-3 * args.timeUnitMyr:.2f}",
+            label=f"$t$={t * 1e-3:.2f} Gyr",
             histtype="step",
         )
 

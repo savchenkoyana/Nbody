@@ -110,14 +110,14 @@ To reproduce the experiment, follow these steps:
   Then to transform to astrophysical units:
 
   ```bash
-  snapscale in=`DIRNAME`/out.nemo \
-    out=`DIRNAME`/out_scaled.nemo \
-    mscale=<mscale> \
-    rscale=<rscale> \
-    vscale=<vscale>
+  python snapscale.py --exp `DIRNAME`
   ```
 
-  These coefficients are automatically computed in Nbody6++GPU and are listed in log file (see `R*`, `V*`, `T*`, and `M*`)
+  and finally:
+
+  ```bash
+  rm `DIRNAME`/out.nemo  # for saving space
+  ```
 
 # Explore results
 
@@ -143,44 +143,101 @@ To reproduce the experiment, follow these steps:
   python animate.py --nemo-file <DIRNAME>/out.nemo
   ```
 
+  Use `--xlim` and `--ylim` to set your own limits.
+
 ## Plot density profile $$\\rho(r)$$
 
 TODO
 
 ## Plot Lagrange radii
 
-The easiest way to plot lagrange radii is to use data stored in log file (in Nbody units):
+The easiest way to plot lagrange radii is to use data stored in log file:
 
-```bash
-python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values RLAGR
-```
+- In Nbody units:
+
+  ```bash
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR
+  ```
+
+- In astro units:
+
+  ```bash
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR --astro-units
+  ```
+
+Note that you can also use `plot_lagrange_radius.py`. Use `out_scaled.nemo` with `--timeUnitMyr` and `T*` from log to get data in astrophysical units.
+
+> Note that if you don't remove escapers, the results may differ! You can remove escapers at post-processing using `remove_escapers.py` and re-run `plot_lagrange_radius.py` with post-processed data
+
+Use `plot_stats.py` to plot $N(t)$ and $M(t)$ (these should be constant if you don't remove escapers)
 
 You can compare your results with plots from the article:
 
-![](../images/cluster_stat.png)
-
 ![](../images/lagrange_radii.png)
+
+![](../images/cluster_stat.png)
 
 Note that Lagrange radius at $t=0$ should be approximately 13 pc according to [analytical expression](https://en.wikipedia.org/wiki/Plummer_model) for Plummer with size 10 pc.
 
 ## Plot mass spectrum $$f(M)$$
 
-Plot how mass changes with distance from center (in Nbody units):
+Plot how mass changes with distance from center:
 
-```bash
-python parse_nbody6log.py --log-file `OUTDIR`/exp.out --values AVMASS
-```
+- In Nbody units:
+
+  ```bash
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values AVMASS
+  ```
+
+- In astro units:
+
+  ```bash
+  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values AVMASS --astro-units
+  ```
 
 # Compare with other N-body methods
 
 The comparison with other methods is descriped in details in [README_NBODY.md](README_NBODY.md).
 
+# Explore mergers and GW radiation
+
+Use:
+
+```bash
+grep "GR " -A 2 -B 2 nbody6++jgb_exp/N5000_MA/exp.out
+```
+
+```bash
+grep "NMERGE" nbody6++jgb_exp/N5000_MA/exp.out
+```
+
+```bash
+grep "NEW MERGER" nbody6++jgb_exp/N5000_MA/exp.out
+```
+
+```bash
+grep "NBH" -A 1 nbody6++jgb_exp/N5000_MA/exp.out
+```
+
+and
+
+```bash
+grep "NS/BH BINARY" nbody6++jgb_exp/N5000_MA/exp.out
+```
+
 # Units
 
 We use non-usual units in our experiments:
 
-- We use pc (length), km/s (velocity) and $M\_{☉}$ (mass) units for creating a cluster model because of convenience
-- We use units with `G=1` for evolution: pc for lenght, km/s for velocity and $\\sim 232.5337 \\times M\_{☉}$ for mass
+- We use astrophysical units for creating a cluster model because of convenience:
+  - pc (length)
+  - km/s (velocity)
+  - $M\_{☉}$ (mass)
+- We use units with `G=1` to feed data into N-body code:
+  - pc (lenght)
+  - km/s (velocity)
+  - $\\sim 232.5337 \\times M\_{☉}$ (mass)
+- Nbody6++GPU uses N-body units (and produces output in N-body units), other codes here compute the evolution as is (see `sh_scripts/run_othermethods.sh`)
 
 # Checklist
 
@@ -189,3 +246,4 @@ Here is a list of what we need to fully reproduce the article:
 - [x] Comparison with other methods
 - [x] Nbody6 (simple run)
 - [ ] Gravitational waves + Black hole mergers
+- [ ] Natal spins = 0 (random with `KZ(24)=2`)

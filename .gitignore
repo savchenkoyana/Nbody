@@ -6,3 +6,4 @@ Nbody6PPGPU-beijing/
 .ipynb_checkpoints/
 */*.nemo
 */snap_*/
+02_Reproduce_JGB/nbody6++jgb_exp/

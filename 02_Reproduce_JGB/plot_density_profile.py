@@ -9,7 +9,7 @@ from utils.general import check_parameters
 from utils.general import compute_mean_mass
 from utils.general import create_argparse
 from utils.general import set_units
-from utils.plot import create_label
+from utils.snap import get_timestamps
 from utils.snap import profile_by_snap
 
 if __name__ == "__main__":
@@ -35,17 +35,10 @@ if __name__ == "__main__":
         help="Vector for density profile calculations when using '--projprof'.",
     )
     parser.add_argument(
-        "--times",
-        nargs="+",
-        type=float,
-        required=True,
-        help="Which times to use. Example: '--times 0.0 0.5 1.0'",
-    )
-    parser.add_argument(
-        "--timeUnitMyr",
-        type=float,
-        default=0.97779,
-        help="Time unit in Myr. Default: 0.97779",
+        "--n-timestamps",
+        type=int,
+        default=10,
+        help="The number of timestamps to use for plot. Default: 10",
     )
     parser.add_argument(
         "--store-artifacts",
@@ -94,6 +87,7 @@ if __name__ == "__main__":
     plt.xlabel("$r, pc$")
 
     if args.projprof:
+        # TODO: implement
         plt.ylabel(r"$\rho, M_\odot / pc^2$")
     else:
         plt.plot(
@@ -101,9 +95,15 @@ if __name__ == "__main__":
         )
         plt.ylabel(r"$\rho, M_\odot / pc^3$")
 
-    label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
+    # label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
+    label = filename
 
-    for t in args.times:
+    times_list = get_timestamps(
+        filename=filename,
+        n_timestamps=args.n_timestamps,
+    )
+
+    for t in times_list:
         prof = profile_by_snap(
             filename=filename,
             t=t,
@@ -117,7 +117,7 @@ if __name__ == "__main__":
                 continue
             raise
 
-        plt.plot(r_prof, rho_prof, label=f"$t$={t * 1e-3 * args.timeUnitMyr:.2f}")
+        plt.plot(r_prof, rho_prof, label=f"$t$={t * 1e-3:.2f} Gyr")
 
     plt.legend(title=label)
     if args.projprof:
