@@ -110,14 +110,14 @@ To reproduce the experiment, follow these steps:
   Then to transform to astrophysical units:
 
   ```bash
-  snapscale in=`DIRNAME`/out.nemo \
-    out=`DIRNAME`/out_scaled.nemo \
-    mscale=<mscale> \
-    rscale=<rscale> \
-    vscale=<vscale>
+  python snapscale.py --exp `DIRNAME`
   ```
 
-  These coefficients are automatically computed in Nbody6++GPU and are listed in log file (see `R*`, `V*`, `T*`, and `M*`)
+  and finally:
+
+  ```bash
+  rm `DIRNAME`/out.nemo  # for saving space
+  ```
 
 # Explore results
 

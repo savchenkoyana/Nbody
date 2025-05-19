@@ -27,25 +27,11 @@ if __name__ == "__main__":
         default=100,
         help="The number of timestamps to use for plot. Default: 100",
     )
-    parser.add_argument(
-        "--timeUnitMyr",
-        nargs="+",
-        type=float,
-        default=[0.97779],
-        help="Time unit in Myr. Default: 0.97779",
-    )
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
     if args.n_timestamps <= 0:
         raise RuntimeError("Got negative '--n-timestamps'")
-
-    if len(args.timeUnitMyr) == 1:
-        args.timeUnitMyr = args.timeUnitMyr * len(args.nemo_files)
-    elif len(args.timeUnitMyr) != len(args.nemo_files):
-        raise RuntimeError(
-            f"--timeUnitMyr should have the same length as --nemo-files (or 1), got len={len(args.timeUnitMyr)}"
-        )
 
     label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
 
@@ -84,7 +70,7 @@ if __name__ == "__main__":
             if t in times_list:
                 masses = snap["Mass"]
 
-                times = np.append(times, t * 1e-3 * args.timeUnitMyr[i])
+                times = np.append(times, t * 1e-3)
                 n_particles = np.append(n_particles, masses.size)
                 mean_mass = np.append(mean_mass, np.mean(masses))
 

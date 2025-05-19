@@ -13,6 +13,8 @@ from typing import Union
 import numpy as np
 import unsio.input as uns_in
 
+_TIMEFUZZ = 1e-3  # use 1e-6 for snapshots with too frequent outputs (https://github.com/teuben/nemo/issues/162)
+
 _PROJ_VECTOR_TYPE = Union[
     tuple[float, float, float],
     Annotated[list[float], 3],
@@ -74,7 +76,7 @@ def parse_nemo(
     snapfile = filename.replace(".nemo", "") + f"{t}.txt"
 
     with RemoveFileOnEnterExit(snapfile, remove_artifacts):
-        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | s2a in=- out={snapfile}"
+        command = f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | s2a in=- out={snapfile}"
         subprocess.check_call(command, shell=True)
         return np.loadtxt(snapfile).T if transpose else np.loadtxt(snapfile)
 
@@ -112,8 +114,14 @@ def profile_by_snap(
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        manippars = "" if not projvector else ",".join([str(_) for _ in projvector])
-        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
+        if projvector:
+            manippars = ",".join([str(_) for _ in projvector])
+        else:
+            manippars = (
+                "100,0.05"  # minimum bodies in radial bin, minimum bin size in log(r)
+            )
+
+        command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname=dens_centre+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
@@ -157,9 +165,9 @@ def lagrange_radius_by_snap(
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
         if dens_par:
-            command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
+            command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
         else:
-            command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="{fraction}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
+            command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname={manipname} manippars="{fraction}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
 
         print(command)
 
@@ -201,7 +209,7 @@ def center_of_snap(
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="{dens_par}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
+        command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname={manipname} manippars="{dens_par}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
@@ -319,7 +327,7 @@ def get_virial(
     virfile = filename.replace(".nemo", "") + f"{t}_vir.txt"
 
     with RemoveFileOnEnterExit(virfile, remove_artifacts):
-        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | snapvratio - wmode=exact eps={eps} newton=t | tee {virfile}"
+        command = f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | snapvratio - wmode=exact eps={eps} newton=t | tee {virfile}"
         print(command)
         subprocess.check_call(command, shell=True)
 
@@ -350,7 +358,7 @@ def get_momentum(
     momentum_file = filename.replace(".nemo", "") + f"{t}_momentum.txt"
 
     with RemoveFileOnEnterExit(momentum_file, remove_artifacts):
-        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | snapkinem - weight=m | tee {momentum_file}"
+        command = f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | snapkinem - weight=m | tee {momentum_file}"
         print(command)
         subprocess.check_call(command, shell=True)
 
