@@ -1,5 +1,3 @@
-# About
-
 This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/pdf/2405.06391v1) by Juan Garcia-Bellido (shortly: JGB).
 
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
@@ -54,8 +52,8 @@ To reproduce the experiment, follow these steps:
   To convert data to units with `G=1` (pc, km/s and $\\sim 232.5337 \\times M\_{☉}$), run:
 
   ```bash
-  snapscale in=`DIRNAME`/IC.nemo \
-    out=`DIRNAME`/IC_g1.nemo \
+  snapscale in=<OUTDIR>/IC.nemo \
+    out=<OUTDIR>/IC_g1.nemo \
     mscale=4.300451321727918e-03
   ```
 
@@ -64,14 +62,14 @@ To reproduce the experiment, follow these steps:
   Then transform data into Nbody6pp-format:
 
   ```bash
-  runbody6 in=`DIRNAME`/IC_g1.nemo out=`DIRNAME`/outdir tcrit=0 nbody6=0 exe=nbody6pp
-  cp `DIRNAME`/outdir/dat.10 `DIRNAME`/
+  runbody6 in=<OUTDIR>/IC_g1.nemo out=<OUTDIR>/outdir tcrit=0 nbody6=0 exe=nbody6pp
+  cp <OUTDIR>/outdir/dat.10 <OUTDIR>/
   ```
 
-  Then change `Rbar`, `Zmbar` and `Q` fields in your Fortran namelist input file (`DIRNAME`/input) according to this output:
+  Then change `Rbar`, `Zmbar` and `Q` fields in your Fortran namelist input file (<OUTDIR>/input) according to this output:
 
   ```bash
-  python scale.py --length 0.001 --mass 1 --velocity 1 --nemo-file `DIRNAME`/IC.nemo
+  python scale.py --length 0.001 --mass 1 --velocity 1 --nemo-file <OUTDIR>/IC.nemo
   ```
 
   > Use absolute value of `Q`
@@ -81,20 +79,20 @@ To reproduce the experiment, follow these steps:
 - Run evolution
 
   ```bash
-  cd `OUTDIR`
-  /path/to/nbody6pp-beijing< `input_name` 1>exp.out 2>exp.err
+  cd <OUTDIR>
+  /path/to/nbody6pp-beijing< <input_name> 1>exp.out 2>exp.err
   ```
 
   You may track intermediate results by running (from exp root):
 
   ```bash
-  bash sh_scripts/grep_on_update.sh `OUTDIR`/exp.out
+  bash sh_scripts/grep_on_update.sh <OUTDIR>/exp.out
   ```
 
   or
 
   ```bash
-  tail -f `OUTDIR`/exp.out
+  tail -f <OUTDIR>/exp.out
   ```
 
 - Postprocess your data to plot profiles, spectras, etc.
@@ -110,14 +108,16 @@ To reproduce the experiment, follow these steps:
   Then to transform to astrophysical units:
 
   ```bash
-  python snapscale.py --exp `DIRNAME`
+  python snapscale.py --exp <OUTDIR>
   ```
 
   and finally:
 
   ```bash
-  rm `DIRNAME`/out.nemo  # for saving space
+  rm <OUTDIR>/out.nemo  # for saving space
   ```
+
+  The resulting file will be `<OUTDIR>/out_scaled.nemo`
 
 # Explore results
 
@@ -126,13 +126,13 @@ To reproduce the experiment, follow these steps:
 - To visualize cluster evolution, run:
 
   ```bash
-  snapplot <DIRNAME>/out.nemo
+  snapplot <OUTDIR>/out.nemo
   ```
 
   Use these options for customization:
 
   ```bash
-  snapplot <DIRNAME>/out.nemo xrange=<xmin>:<xmax> yrange=<ymin>:<ymax> times=<tmin>:<tmax>
+  snapplot <OUTDIR>/out.nemo xrange=<xmin>:<xmax> yrange=<ymin>:<ymax> times=<tmin>:<tmax>
   ```
 
 - There is also a possibility to visulaize the evolution using [glnemo2](https://projets.lam.fr/projects/glnemo2/wiki/download).
@@ -140,14 +140,18 @@ To reproduce the experiment, follow these steps:
 - Another option is to use custom visualization script from this repository:
 
   ```bash
-  python animate.py --nemo-file <DIRNAME>/out.nemo
+  python animate.py --nemo-file <OUTDIR>/out.nemo
   ```
 
   Use `--xlim` and `--ylim` to set your own limits.
 
 ## Plot density profile $$\\rho(r)$$
 
-TODO
+Run:
+
+```bash
+python plot_density_profile.py --N 5000 --mu 10 --scale 1.5 --sigma 0.954 --nemo-file <OUTDIR>/out_scaled.nemo --n-timestamps 5
+```
 
 ## Plot Lagrange radii
 
@@ -156,16 +160,16 @@ The easiest way to plot lagrange radii is to use data stored in log file:
 - In Nbody units:
 
   ```bash
-  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR
+  python plot_nbody6_logdata.py --log-file <OUTDIR>/exp.out --values RLAGR
   ```
 
 - In astro units:
 
   ```bash
-  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values RLAGR --astro-units
+  python plot_nbody6_logdata.py --log-file <OUTDIR>/exp.out --values RLAGR --astro-units
   ```
 
-Note that you can also use `plot_lagrange_radius.py`. Use `out_scaled.nemo` with `--timeUnitMyr` and `T*` from log to get data in astrophysical units.
+Note that you can also use `plot_lagrange_radius.py`. Use `out_scaled.nemo` to plot in astrophysical units.
 
 > Note that if you don't remove escapers, the results may differ! You can remove escapers at post-processing using `remove_escapers.py` and re-run `plot_lagrange_radius.py` with post-processed data
 
@@ -186,13 +190,13 @@ Plot how mass changes with distance from center:
 - In Nbody units:
 
   ```bash
-  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values AVMASS
+  python plot_nbody6_logdata.py --log-file <OUTDIR>/exp.out --values AVMASS
   ```
 
 - In astro units:
 
   ```bash
-  python plot_nbody6_logdata.py --log-file `OUTDIR`/exp.out --values AVMASS --astro-units
+  python plot_nbody6_logdata.py --log-file <OUTDIR>/exp.out --values AVMASS --astro-units
   ```
 
 # Compare with other N-body methods
