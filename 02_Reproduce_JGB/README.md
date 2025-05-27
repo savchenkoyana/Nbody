@@ -119,6 +119,10 @@ To reproduce the experiment, follow these steps:
 
   The resulting file will be `<OUTDIR>/out_scaled.nemo`
 
+# Simulation output
+
+In previous versions of direct N-body codes, the evolving algorithm produced many text outputs as well as simulation file `out.nemo`. Later Nbody6++GPU switched to hdf5 data format where everything is stored in a single file. A part of the next scripts uses nemo file and other part uses hdf5 file for historical reasons. But it is essential to build Nbody6++GPU-beijing with hdf5 support as there is no other easy ways to get access to spin data other that use hdf5.
+
 # Explore results
 
 ## Visualize cluster evolution
@@ -205,17 +209,52 @@ The comparison with other methods is descriped in details in [README_NBODY.md](R
 
 # Explore mergers and GW radiation
 
+First check if you got any events related to stellar evolution:
+
+```bash
+python parse_events.py --exp <OUTDIR>
+```
+
+As a result, you would get something like this:
+
+```text
+NTIDE: 0 (Tidal captures from hyperbolic motion (#27 > 0))
+NCIRC: 0 (Circularized bianries (#27 > 0))
+NRO: 0 (Roche binary events)
+NCE: 0 (Common envelope binaries)
+NSYNC: 0 (Number of synchronous binaries (#27 > 0))
+NDISS: 1 (Tidal dissipations at pericentre (#27 > 0))
+         Event 1 happened at T[NB]=807
+NCOAL: 0 (Stellar coalescence)
+NCOLL: 1 (Stellar collisions)
+         Event 1 happened at T[NB]=807
+NROCHE: 0 (Roche stage triggered times)
+NHYPC: 0 (Hyperbolic common envelope binaries)
+NDD: 0 (Double WD/NS/BH binaries)
+NKICK: 1 (WD/NS/BH kick)
+         Event 1 happened at T[NB]=807
+NHYP: 0 (Hyperbolic collision)
+```
+
+<!-- For `WD/NS/BH kick`:
+
+```bash
+grep " SPIN" <OUTDIR>/exp.out
+```
+
+
 Use:
 
 ```bash
 grep "GR " -A 2 -B 2 nbody6++jgb_exp/N5000_MA/exp.out
-```
+``` -->
 
+<!--
 ```bash
 grep "NMERGE" nbody6++jgb_exp/N5000_MA/exp.out
-```
+``` -->
 
-```bash
+<!-- ```bash
 grep "NEW MERGER" nbody6++jgb_exp/N5000_MA/exp.out
 ```
 
@@ -228,6 +267,7 @@ and
 ```bash
 grep "NS/BH BINARY" nbody6++jgb_exp/N5000_MA/exp.out
 ```
+ -->
 
 # Units
 
@@ -241,7 +281,9 @@ We use non-usual units in our experiments:
   - pc (lenght)
   - km/s (velocity)
   - $\\sim 232.5337 \\times M\_{☉}$ (mass)
-- Nbody6++GPU uses N-body units (and produces output in N-body units), other codes here compute the evolution as is (see `sh_scripts/run_othermethods.sh`)
+- Codes from `sh_scripts/run_othermethods.sh` compute the evolution in the units with `G=1` mentioned above
+- Nbody6++GPU uses N-body units for computations. It also produces `conf.3_*` (and, as a result, `out.nemo`) in N-body units.
+- The units of hdf5 output produced by Nbody6++GPU depend on whether stellar evolution is switched on. If enabled, all quantities in hdf5 file are in units of `RBAR[pc]`, `ZMBAR[solar masses]`, `TSCALE[Myr]`, `VSTAR[km/s]`, and gravitational constant is `G=4.302E-3`. Otherwise N-body units are used (?)
 
 # Checklist
 
