@@ -4,23 +4,26 @@ This repository contains astrophysical N-body simulation experiments.
 
 # Installation
 
-## Create Conda environment
-
-First prepare an environment. I used conda environment with Python 3.9:
-
-```bash
-conda create -n agama python=3.9
-```
-
-Clone this repository and install all required packages in the environment:
+Clone this repository and `cd` to its root:
 
 ```bash
 git clone https://github.com/savchenkoyana/Nbody.git
 cd Nbody
-conda activate agama
-pip install -r requirements.txt
-pre-commit install  # optional, only if you want to commit to repository
-python -m pip install --only-binary galpy galpy  # install galpy
+```
+
+At the end of the Installation step you will get the following repository structure:
+
+```bash
+Nbody
+├── Agama                # Agama repository root
+├── nemo                 # nemo repository root
+├── Nbody6PPGPU-beijing  # Nbody6++GPU (Beijing version) repository root
+├── Nbody6ppGPU          # Nbody6++GPU (original version) repository root
+├── sandbox              # dir for simple and small experiments
+├── images               # images needed for md-files
+├── README.md
+├── requirements.txt
+├── ...                  # other files
 ```
 
 ## Install NEMO
@@ -57,7 +60,7 @@ cd Nbody6PPGPU-beijing
 ./configure --enable-mcmodel=large --with-par=b1m --disable-gpu --disable-mpi  # configuration to quick-start on your computer
 make clean
 make -j
-cd -
+cd ../  # back to repository root
 ```
 
 Add this at the end of your `~/.bashrc` file (and then run `source ~/.bashrc` if you need it in the current terminal session):
@@ -82,20 +85,29 @@ export FCFLAGS='-fallow-argument-mismatch'
 make clean
 make
 make install
-cd -
+cd ../  # back to repository root
 ```
 
 The resulting binary can be found here: `Nbody6ppGPU/build/nbody6++.*`
 
-## Install Agama
+## Create Conda environment for Agama
 
-Activate conda environment, if it is not activated:
+I used conda environment with Python 3.9:
+
+```bash
+conda create -n agama python=3.9
+```
+
+Install all required packages into the environment:
 
 ```bash
 conda activate agama
+pip install -r requirements.txt
+pre-commit install  # optional, only if you want to commit to repository
+python -m pip install --only-binary galpy galpy  # install galpy
 ```
 
-To install Agama, follow these steps:
+To install Agama, follow these steps (with activated `agama` environment!):
 
 ```bash
 git clone https://github.com/GalacticDynamics-Oxford/Agama.git
@@ -109,21 +121,6 @@ For more info about Agama see https://arxiv.org/pdf/1802.08239 and official [AGA
 ## Install glnemo2 (optional)
 
 To install `glnemo2` for snapshot visualization, follow the instructions at [the official site](https://projets.lam.fr/projects/glnemo2/wiki/download).
-
-After installation, you will have the following repository structure:
-
-```bash
-Nbody
-├── Agama                # Agama repository root
-├── nemo                 # nemo repository root
-├── Nbody6PPGPU-beijing  # Nbody6++GPU (Beijing version) repository root
-├── Nbody6ppGPU          # Nbody6++GPU (original version) repository root
-├── sandbox              # dir for simple and small experiments
-├── images               # images needed for md-files
-├── README.md
-├── requirements.txt
-├── ...                  # other files
-```
 
 # Experiments
 
