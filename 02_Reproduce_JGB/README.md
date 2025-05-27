@@ -32,7 +32,7 @@ To reproduce the experiment, follow these steps:
 
   ```bash
   ln -s ~/work/Nbody/Nbody6ppGPU/build/nbody6++.avx nbody6pp
-  ln -s ~/work/Nbody/Nbody6PPGPU-beijing/build/nbody6++.avx nbody6pp-beijing
+  ln -s ~/work/Nbody/Nbody6PPGPU-beijing/build/nbody6++.avx.mpi nbody6pp-beijing
   ```
 
   Note that the name of binaries may differ if you used other options to build them. We will use `nbody6pp-beijing` binary for evolution and `nbody6pp` binary simply to convert data to the right format.
@@ -121,7 +121,7 @@ To reproduce the experiment, follow these steps:
 
 # Simulation output
 
-In previous versions of direct N-body codes, the evolving algorithm produced many text outputs as well as simulation file `out.nemo`. Later Nbody6++GPU switched to hdf5 data format where everything is stored in a single file. A part of the next scripts uses nemo file and other part uses hdf5 file for historical reasons. But it is essential to build Nbody6++GPU-beijing with hdf5 support as there is no other easy ways to get access to spin data other that use hdf5.
+In previous versions of direct N-body codes, the evolving algorithm produced many text outputs as well as simulation file `out.nemo`. Later Nbody6++GPU-beijing switched to hdf5 data format where everything is stored in a single file. A part of the next scripts uses nemo file and other part uses hdf5 file for historical reasons. But it is essential to build Nbody6++GPU-beijing with hdf5 support as there is no other easy way to get access to spin data other that use hdf5.
 
 # Explore results
 
@@ -154,7 +154,9 @@ In previous versions of direct N-body codes, the evolving algorithm produced man
 Run:
 
 ```bash
-python plot_density_profile.py --N 5000 --mu 10 --scale 1.5 --sigma 0.954 --nemo-file <OUTDIR>/out_scaled.nemo --n-timestamps 5
+python plot_density_profile.py --N 5000 \
+  --mu 10 --scale 1.5 --sigma 0.954 \
+  --nemo-file <OUTDIR>/out_scaled.nemo --n-timestamps 5
 ```
 
 ## Plot Lagrange radii
@@ -175,7 +177,7 @@ The easiest way to plot lagrange radii is to use data stored in log file:
 
 Note that you can also use `plot_lagrange_radius.py`. Use `out_scaled.nemo` to plot in astrophysical units.
 
-> Note that if you don't remove escapers, the results may differ! You can remove escapers at post-processing using `remove_escapers.py` and re-run `plot_lagrange_radius.py` with post-processed data
+> Note that if you don't remove escapers, the results may differ! You can remove escapers at post-processing using `remove_escapers.py` and re-run `plot_lagrange_radius.py` with post-processed data for checks (without any guarantees). The preferable way, however, is to remove escapers during cluster evolution.
 
 Use `plot_stats.py` to plot $N(t)$ and $M(t)$ (these should be constant if you don't remove escapers)
 
@@ -282,8 +284,8 @@ We use non-usual units in our experiments:
   - km/s (velocity)
   - $\\sim 232.5337 \\times M\_{☉}$ (mass)
 - Codes from `sh_scripts/run_othermethods.sh` compute the evolution in the units with `G=1` mentioned above
-- Nbody6++GPU uses N-body units for computations. It also produces `conf.3_*` (and, as a result, `out.nemo`) in N-body units.
-- The units of hdf5 output produced by Nbody6++GPU depend on whether stellar evolution is switched on. If enabled, all quantities in hdf5 file are in units of `RBAR[pc]`, `ZMBAR[solar masses]`, `TSCALE[Myr]`, `VSTAR[km/s]`, and gravitational constant is `G=4.302E-3`. Otherwise N-body units are used (?)
+- Nbody6++GPU-beijing uses N-body units for computations. It also produces `conf.3_*` (and, as a result, `out.nemo`) in N-body units.
+- The units of hdf5 output produced by Nbody6++GPU-beijing depend on whether stellar evolution is switched on. If enabled, all quantities in hdf5 file are in units of `RBAR[pc]`, `ZMBAR[solar masses]`, `TSCALE[Myr]`, `VSTAR[km/s]`, and gravitational constant is `G=4.302E-3`. Otherwise N-body units are used (?)
 
 # Checklist
 
