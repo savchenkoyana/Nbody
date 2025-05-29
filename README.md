@@ -116,10 +116,11 @@ The installation of Nbody6++GPU-beijing is a little bit tricky. The reason is th
   ```bash
   export OMP_STACKSIZE=4096M
   ulimit -s unlimited
-  export OMP_NUM_THREADS=8  # feel free to change
+  ulimit -n 65535
+  export OMP_NUM_THREADS=8
   ```
 
-  Feel free to alter `OMP_NUM_THREADS` as you wish.
+  Feel free to alter `OMP_NUM_THREADS` as you wish (in `~/.bashrc` file or even adjust it every terminal session)
 
 - Run in current terminal session:
 

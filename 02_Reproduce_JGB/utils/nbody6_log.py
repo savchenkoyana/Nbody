@@ -173,7 +173,7 @@ def plot_output_data(data: dict, plot_values: list, astro_units: bool):
             x = np.arange(y.size)
             if astro_units:
                 x = x * data["T*"]  # here we assume that deltat=1.0, TODO: rewrite
-            ax.plot(x, y)
+            ax.plot(x, y, label=col)
 
         if astro_units:
             ax.set_xlabel(r"Time t [Myr]")
@@ -191,5 +191,6 @@ def plot_output_data(data: dict, plot_values: list, astro_units: bool):
         ax.set_visible(False)
 
     fig.tight_layout()
+    plt.legend()
     plt.show()
     return fig, ax

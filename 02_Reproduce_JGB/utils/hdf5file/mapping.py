@@ -75,3 +75,21 @@ _SINGLE_PARTICLE_HR_MAP = {
     "030": "MC*",
     "031": "KW",
 }
+
+_BINARY_PARTICLE_MAP = {
+    "123": "Bin M1*",
+    "124": "Bin M2*",
+    "154": "Bin A[au]",
+    "155": "Bin ECC",
+    "156": "Bin P[d]",
+    "157": "Bin G",
+    "161": "Bin Name1",
+    "162": "Bin Name2",
+    "164": "ASPN1",
+    "165": "ASPN2",
+}
+
+_BINARY_PARTICLE_HR_MAP = {
+    "158": "Bin KW1",
+    "159": "Bin KW2",
+}
