@@ -32,7 +32,7 @@ To reproduce the experiment, follow these steps:
 
   ```bash
   ln -s ~/work/Nbody/Nbody6ppGPU/build/nbody6++.avx nbody6pp
-  ln -s ~/work/Nbody/Nbody6PPGPU-beijing/build/nbody6++.avx.mpi nbody6pp-beijing
+  ln -s ~/work/Nbody/Nbody6PPGPU-beijing/build/nbody6++.avx nbody6pp-beijing
   ```
 
   Note that the name of binaries may differ if you used other options to build them. We will use `nbody6pp-beijing` binary for evolution and `nbody6pp` binary simply to convert data to the right format.
@@ -238,6 +238,8 @@ NKICK: 1 (WD/NS/BH kick)
 NHYP: 0 (Hyperbolic collision)
 ```
 
+To get plots and analysis relared to post-Newtonian corrections to Newtonian motion, run this Jupyter notebook with your data: [FullAnalysis.ipynb](FullAnalysis.ipynb%5D).
+
 <!-- For `WD/NS/BH kick`:
 
 ```bash
@@ -293,5 +295,5 @@ Here is a list of what we need to fully reproduce the article:
 
 - [x] Comparison with other methods
 - [x] Nbody6 (simple run)
-- [ ] Gravitational waves + Black hole mergers
+- [x] Gravitational waves + Black hole mergers
 - [ ] Natal spins = 0 (random with `KZ(24)=2`)

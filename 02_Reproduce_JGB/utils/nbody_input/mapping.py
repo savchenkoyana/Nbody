@@ -350,3 +350,19 @@ _NBODY4_PARAMETERS = {
     "VZROT": "Z-velocity scaling factor (not used if VXROT = 0).",
     "RTIDE": "Unscaled tidal radius (#14 >= 2; otherwise copied to RSPH2).",
 }
+
+# Dictionary to store descriptions for different versions (for KZ parameters)
+kz = {
+    "nbody4": _NBODY4_KZ,
+    "nbody6": _NBODY6_KZ,
+    "nbody6++gpu-beijing": _NBODY6PPGPU_BEIJING_KZ,
+    "nbody6++gpu": _NBODY6PPGPU_KZ,
+}
+
+# Dictionary to store human-readable descriptions for individual parameters.
+parameters = {
+    "nbody4": _NBODY4_PARAMETERS,
+    "nbody6": _NBODY6_PARAMETERS,
+    "nbody6++gpu-beijing": _NBODY6PPGPU_PARAMETERS,
+    "nbody6++gpu": _NBODY6PPGPU_PARAMETERS,
+}

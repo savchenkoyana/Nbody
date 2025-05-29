@@ -85,14 +85,14 @@ Nbody6++GPU is state-of-the-art method for cluster simulations.
 
 ### Install Beijing version (supported now)
 
-The installation of Nbody6++GPU is a little bit tricky. The reason is that we need hdf5 files as outputs as they are easily parsed with python, but the automatic makefile with `--enable-hdf5` option is broken at the moment. So you first need to configure `Makefile` _without_ hdf5 and then edit it.
+The installation of Nbody6++GPU-beijing is a little bit tricky. The reason is that we need hdf5 files as outputs as they are easily parsed with python, but the automatic makefile generation with `--enable-hdf5` option is broken at the moment. So you first need to configure `Makefile` _without_ hdf5 and then edit it.
 
 - First configure Makefile without hdf5:
 
   ```bash
   git clone git@github.com:nbody6ppgpu/Nbody6PPGPU-beijing
   cd Nbody6PPGPU-beijing
-  ./configure --enable-mcmodel=large --with-par=b1m --disable-gpu
+  ./configure --enable-mcmodel=large --with-par=b1m --disable-gpu --disable-mpi  # configuration to quick-start on your computer
   ```
 
 - Edit `build/Makefile` (lines 25-30):
