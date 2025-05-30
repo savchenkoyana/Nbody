@@ -5,6 +5,8 @@ Warning, created using vibe-coding!
 
 import re
 
+from . import mapping
+
 
 def parse_namelist(filename):
     """Parse a Fortran‐style namelist file."""
@@ -118,9 +120,9 @@ def parse_nbody6ppgpu(filename):
 
     kz_flat_list = [list(map(int, line.split())) for line in lines[3:8]]
     data["KZ"] = [kz for sublist in kz_flat_list for kz in sublist]
-    if len(data["KZ"]) != len(mappings._NBODY6_KZ):
+    if len(data["KZ"]) != len(mapping._NBODY6_KZ):
         raise RuntimeError(
-            f"KZ length should be {len(mappings._NBODY6_KZ)}, len={len(data['KZ'])} is given"
+            f"KZ length should be {len(mapping._NBODY6_KZ)}, len={len(data['KZ'])} is given"
         )
 
     (
@@ -182,9 +184,9 @@ def parse_nbody6(filename):
 
     kz_flat_list = [list(map(int, line.split())) for line in lines[3:8]]
     data["KZ"] = [kz for sublist in kz_flat_list for kz in sublist]
-    if len(data["KZ"]) != len(mappings._NBODY6_KZ):
+    if len(data["KZ"]) != len(mapping._NBODY6_KZ):
         raise RuntimeError(
-            f"KZ length should be {len(mappings._NBODY6_KZ)}, len={len(data['KZ'])} is given"
+            f"KZ length should be {len(mapping._NBODY6_KZ)}, len={len(data['KZ'])} is given"
         )
 
     (
@@ -242,9 +244,9 @@ def parse_nbody4(filename):
 
     kz_flat_list = [list(map(int, line.split())) for line in lines[3:7]]
     data["KZ"] = [kz for sublist in kz_flat_list for kz in sublist]
-    if len(data["KZ"]) != len(mappings._NBODY4_KZ):
+    if len(data["KZ"]) != len(mapping._NBODY4_KZ):
         raise RuntimeError(
-            f"KZ length should be {len(mappings._NBODY4_KZ)}, len={len(data['KZ'])} is given"
+            f"KZ length should be {len(mapping._NBODY4_KZ)}, len={len(data['KZ'])} is given"
         )
 
     (
