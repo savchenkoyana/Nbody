@@ -76,6 +76,8 @@ To reproduce the experiment, follow these steps:
 
   Also you may need to alter time in input file (`TCRIT`)
 
+  Don't forget to change `N`! Also consider changing `NNBOPT` (the number of neighbors in Ahmad-Cohen scheme). I typically use $2\\times\\sqrt{N}$. If you use primordial binaries, you may also need to change config as well.
+
 - Run evolution
 
   ```bash
@@ -240,7 +242,7 @@ NKICK: 1 (WD/NS/BH kick)
 NHYP: 0 (Hyperbolic collision)
 ```
 
-To get plots and analysis relared to post-Newtonian corrections to Newtonian motion, run this Jupyter notebook with your data: [FullAnalysis.ipynb](FullAnalysis.ipynb%5D).
+To get plots and analysis relared to post-Newtonian corrections to Newtonian motion, run this Jupyter notebook with your data: [CoalescenceAnalysis.ipynb](CoalescenceAnalysis.ipynb%5D).
 
 <!-- For `WD/NS/BH kick`:
 
@@ -297,5 +299,5 @@ Here is a list of what we need to fully reproduce the article:
 
 - [x] Comparison with other methods
 - [x] Nbody6 (simple run)
-- [x] Gravitational waves + Black hole mergers
-- [ ] Natal spins = 0 (random with `KZ(24)=2`)
+- [x] Enable gravitational waves and black hole coalescence
+- [ ] Set natal spins = 0 (random with `KZ(24)=2`)
