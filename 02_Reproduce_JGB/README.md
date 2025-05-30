@@ -2,7 +2,7 @@ This experiment is based on article [Primordial Black Hole clusters, phenomenolo
 
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
 
-![](../images/log_normal_mass.png)
+![](../images/02/log_normal_mass.png)
 
 Mass spectra used in the article.
 
@@ -187,9 +187,9 @@ Use `plot_stats.py` to plot $N(t)$ and $M(t)$ (these should be constant if you d
 
 You can compare your results with plots from the article:
 
-![](../images/lagrange_radii.png)
+![](../images/02/lagrange_radii.png)
 
-![](../images/cluster_stat.png)
+![](../images/02/cluster_stat.png)
 
 Note that Lagrange radius at $t=0$ should be approximately 13 pc according to [analytical expression](https://en.wikipedia.org/wiki/Plummer_model) for Plummer with size 10 pc.
 
@@ -239,6 +239,12 @@ NHYP: 0 (Hyperbolic collision)
 ```
 
 To get plots and analysis relared to post-Newtonian corrections to Newtonian motion, run this Jupyter notebook with your data: [CoalescenceAnalysis.ipynb](CoalescenceAnalysis.ipynb).
+
+Compare your results with plots from the article:
+
+![](../images/02/number_of_mergers.png)
+
+![](../images/02/mergers_mass.png)
 
 <!-- For `WD/NS/BH kick`:
 
