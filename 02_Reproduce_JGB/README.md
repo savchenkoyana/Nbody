@@ -209,11 +209,7 @@ Plot how mass changes with distance from center:
   python plot_nbody6_logdata.py --log-file <OUTDIR>/exp.out --values AVMASS --astro-units
   ```
 
-# Compare with other N-body methods
-
-The comparison with other methods is descriped in details in [README_NBODY.md](README_NBODY.md).
-
-# Explore mergers and GW radiation
+## Explore mergers and GW radiation
 
 First check if you got any events related to stellar evolution:
 
@@ -242,7 +238,7 @@ NKICK: 1 (WD/NS/BH kick)
 NHYP: 0 (Hyperbolic collision)
 ```
 
-To get plots and analysis relared to post-Newtonian corrections to Newtonian motion, run this Jupyter notebook with your data: [CoalescenceAnalysis.ipynb](CoalescenceAnalysis.ipynb%5D).
+To get plots and analysis relared to post-Newtonian corrections to Newtonian motion, run this Jupyter notebook with your data: [CoalescenceAnalysis.ipynb](CoalescenceAnalysis.ipynb).
 
 <!-- For `WD/NS/BH kick`:
 
@@ -276,6 +272,10 @@ and
 grep "NS/BH BINARY" nbody6++jgb_exp/N5000_MA/exp.out
 ```
  -->
+
+# Compare with other N-body methods
+
+The comparison with other methods is descriped in details in [README_NBODY.md](README_NBODY.md).
 
 # Units
 
