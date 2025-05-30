@@ -93,3 +93,20 @@ _BINARY_PARTICLE_HR_MAP = {
     "158": "Bin KW1",
     "159": "Bin KW2",
 }
+
+_MERGER_PARTICLE_MAP = {
+    "207": "Mer M1",
+    "208": "Mer M2",
+    "209": "Mer M3",
+    "238": "Mer A0[au]",
+    "239": "Mer ECC0",
+    "240": "Mer P0[d]",
+    "241": "Mer A1[au]",
+    "242": "Mer ECC1",
+    "243": "Mer P1[d]",
+    "247": "Mer KWC",
+    "248": "Mer NAM1",
+    "249": "Mer NAM2",
+    "250": "Mer NAM3",
+    "251": "Mer NAMC",
+}
