@@ -13,21 +13,28 @@ from .mapping import _SINGLE_PARTICLE_MAP
 
 
 class NBodySnapshot:
-    """Convenience class to load and access Nbody6++GPU HDF5 snapshot data.
+    """Iterator to load and access Nbody6++GPU HDF5 snapshot data.
 
     Parses scalar parameters and particle data (singles and binaries).
     """
 
     def __init__(self, filepath):
         self.filepath = filepath
+
+    def __iter__(self):
         self._load_file()
-        self._parse_scalars()
-        self._parse_particles()
+        self._key_iter = iter(self._f.keys())
+        return self
 
     def _load_file(self):
         self._f = h5py.File(self.filepath, "r")
-        self.step = next(iter(self._f.keys()))
-        self.group = self._f[self.step]
+
+    def __next__(self):
+        key = next(self._key_iter)
+        self.group = self._f[key]
+        self._parse_scalars()
+        self._parse_particles()
+        return self
 
     def _read(self, id_str, name):
         return self.group[f"{id_str} {name}"][:]
@@ -37,11 +44,8 @@ class NBodySnapshot:
             setattr(self, label, self._read(code, label))
 
     def _parse_scalars(self):
-        raw = self.group["000 Scalars"][:]
-        S = np.zeros(len(raw) + 1)
-        S[1:] = raw
-
-        self.scalars = {name: S[idx] for idx, name in _SCALAR_MAP.items()}
+        S = self.group["000 Scalars"][:]
+        self.scalars = {name: S[idx - 1] for idx, name in _SCALAR_MAP.items()}
         self.TTOT = self.scalars["TTOT"]
         self.NPAIRS = int(self.scalars["NPAIRS"])
         self.N = int(self.scalars["N"])
