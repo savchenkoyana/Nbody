@@ -7,6 +7,7 @@ import numpy as np
 
 from .mapping import _BINARY_PARTICLE_HR_MAP
 from .mapping import _BINARY_PARTICLE_MAP
+from .mapping import _MERGER_PARTICLE_HR_MAP
 from .mapping import _MERGER_PARTICLE_MAP
 from .mapping import _SCALAR_MAP
 from .mapping import _SINGLE_PARTICLE_HR_MAP
@@ -74,6 +75,8 @@ class NBodySnapshot:
         # Load mergers
         if self.scalars["N_MERGER"]:
             self._load_mapping(_MERGER_PARTICLE_MAP)
+            if not self._hr_empty:
+                self._load_mapping(_MERGER_PARTICLE_HR_MAP)
 
         self.X = np.stack([self.X1, self.X2, self.X3], axis=1) - self.RDENS
         self.V = np.stack([self.V1, self.V2, self.V3], axis=1)

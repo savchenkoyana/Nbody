@@ -110,3 +110,9 @@ _MERGER_PARTICLE_MAP = {
     "250": "Mer NAM3",
     "251": "Mer NAMC",
 }
+
+_MERGER_PARTICLE_HR_MAP = {
+    "244": "Mer KW1",
+    "245": "Mer KW2",
+    "246": "Mer KW3",
+}

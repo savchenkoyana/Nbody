@@ -3,25 +3,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import yaml
 
-_EVENT_TYPE = {
-    "NDISS": "Tidal dissipations at pericentre (#27 > 0)",
-    "NTIDE": "Tidal captures from hyperbolic motion (#27 > 0)",
-    "NSYNC": "Number of synchronous binaries (#27 > 0)",
-    "NCOLL": "Stellar collisions",
-    "NCOAL": "Stellar coalescence",
-    "NDD": "Double WD/NS/BH binaries",
-    "NCIRC": "Circularized bianries (#27 > 0)",
-    "NROCHE": "Roche stage triggered times",
-    "NRO": "Roche binary events",
-    "NCE": "Common envelope binaries",
-    "NHYP": "Hyperbolic collision",
-    "NHYPC": "Hyperbolic common envelope binaries",
-    "NKICK": "WD/NS/BH kick",
-    "NSESC": "Escaped single particles (#23 > 0)",
-    "NBESC": "Escaped binaries (#23 > 0)",
-    "NMESC": "Escaped mergers (#15 > 0&&#23 > 0)",
-}
+_EVENT_TYPE = yaml.safe_load(open("utils/nbody6_events.yaml"))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
