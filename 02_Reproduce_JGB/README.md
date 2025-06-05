@@ -181,7 +181,7 @@ The easiest way to plot lagrange radii is to use data stored in log file:
 
 Note that you can also use `plot_lagrange_radius.py`. Use `out_scaled.nemo` to plot in astrophysical units.
 
-> Note that if you don't remove escapers, the results may differ! You can remove escapers at post-processing using `remove_escapers.py` and re-run `plot_lagrange_radius.py` with post-processed data for checks (without any guarantees). The preferable way, however, is to remove escapers during cluster evolution.
+> Note that if you don't remove escapers, the results may differ! You can remove escapers at post-processing and re-run `plot_lagrange_radius.py` with post-processed data for checks. The preferable way, however, is to remove escapers during cluster evolution.
 
 Use `plot_stats.py` to plot $N(t)$ and $M(t)$ (these should be constant if you don't remove escapers)
 
@@ -209,7 +209,7 @@ Plot how mass changes with distance from center:
   python plot_nbody6_logdata.py --log-file <OUTDIR>/exp.out --values AVMASS --astro-units
   ```
 
-## Explore mergers and GW radiation
+## Explore mergers
 
 First check if you got any events related to stellar evolution:
 
@@ -238,46 +238,25 @@ NKICK: 1 (WD/NS/BH kick)
 NHYP: 0 (Hyperbolic collision)
 ```
 
-To get plots and analysis relared to post-Newtonian corrections to Newtonian motion, run this Jupyter notebook with your data: [CoalescenceAnalysis.ipynb](CoalescenceAnalysis.ipynb).
+Note that term "mergers" in the context of globular cluster simulation means any set of particles that merge into one. In our case, mergers are dominated by collisions, whereas binary inspiral is much much rare.
+
+To get stats on number of mergers, run:
+
+```bash
+python plot_mergers.py --exp <OUTDIR1> <OUTDIR2>
+```
+
+To get plots related to mass or spin distributions, add these options to the command:
+
+```bash
+python plot_mergers.py --exp <OUTDIR1> <OUTDIR2> --mass --spin
+```
 
 Compare your results with plots from the article:
 
 ![](../images/02/number_of_mergers.png)
 
 ![](../images/02/mergers_mass.png)
-
-<!-- For `WD/NS/BH kick`:
-
-```bash
-grep " SPIN" <OUTDIR>/exp.out
-```
-
-
-Use:
-
-```bash
-grep "GR " -A 2 -B 2 nbody6++jgb_exp/N5000_MA/exp.out
-``` -->
-
-<!--
-```bash
-grep "NMERGE" nbody6++jgb_exp/N5000_MA/exp.out
-``` -->
-
-<!-- ```bash
-grep "NEW MERGER" nbody6++jgb_exp/N5000_MA/exp.out
-```
-
-```bash
-grep "NBH" -A 1 nbody6++jgb_exp/N5000_MA/exp.out
-```
-
-and
-
-```bash
-grep "NS/BH BINARY" nbody6++jgb_exp/N5000_MA/exp.out
-```
- -->
 
 # Compare with other N-body methods
 
