@@ -2,13 +2,13 @@
 
 from pathlib import Path
 
-import agama
 import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
 from utils.plot import create_label
 from utils.snap import get_timestamps
+from utils.snap import parse_nemo
 
 if __name__ == "__main__":
     parser = create_argparse(
@@ -65,14 +65,16 @@ if __name__ == "__main__":
             n_timestamps=args.n_timestamps,
         )
 
-        for snap in agama.NemoFile(filename):
-            t = snap["Time"]
-            if t in times_list:
-                masses = snap["Mass"]
+        for t in times_list:
+            snap = parse_nemo(
+                filename=filename, t=t
+            )  # m, x, y, z, vx, vy, vzMore actions
 
-                times = np.append(times, t * 1e-3)
-                n_particles = np.append(n_particles, masses.size)
-                mean_mass = np.append(mean_mass, np.mean(masses))
+            masses = snap[0]
+
+            times = np.append(times, t * 1e-3)
+            n_particles = np.append(n_particles, masses.size)
+            mean_mass = np.append(mean_mass, np.mean(masses))
 
         plot_label = (
             filename if len(args.nemo_files) > 1 else None
