@@ -1,5 +1,6 @@
 """Configs for NbodyX codes."""
 
+# ——— KZ options ———
 _NBODY6_KZ = {
     1: "COMMON save unit 1 (=1: 'touch STOP'; =2: every 100*NMAX steps).",
     2: "COMMON save unit 2 (=1: at output; =2: restart if DE/E > 5*QE).",
@@ -202,6 +203,7 @@ _NBODY4_KZ = {
     40: "(not used).",
 }
 
+# ——— Parameters ———
 _NBODY6_PARAMETERS = {
     "KSTART": "Control index (1: new run; >1: restart; 3, 4, 5: new params).",
     "TCOMP": "Maximum CPU time in minutes (saved in CPU).",
@@ -272,6 +274,7 @@ _NBODY6PPGPU_PARAMETERS = {
     "GMAX": "Secondary termination parameter for soft KS binaries.",
     "SMAX": "Maximum time-step (factor of 2 commensurate with 1.0).",
     "LEVEL": "Stellar Evolution Level (see Kamlah et al. 2022), new input element &INSSE, &INBSE, &INCOLL: new NAMELIST blocks read after LEVEL by subroutine READSE, called from input.F; if blocks are empty in input, defaults according to LEVEL taken.",
+    "Level": "Stellar Evolution Level (see Kamlah et al. 2022), new input element &INSSE, &INBSE, &INCOLL: new NAMELIST blocks read after LEVEL by subroutine READSE, called from input.F; if blocks are empty in input, defaults according to LEVEL taken.",
     "ALPHAS": "Power-law index for initial mass function, routine data.F",
     "BODY1": "Maximum particle mass before scaling (KZ(20): solar mass).",
     "BODYN": "Minimum particle mass before scaling.",
@@ -284,6 +287,33 @@ _NBODY6PPGPU_PARAMETERS = {
     "VXROT": "XY-velocity scaling factor (> 0 for solid-body rotation).",
     "VZROT": "Z-velocity scaling factor (not used if VXROT = 0).",
     "RTIDE": "Unscaled tidal radius for KZ(14)=2 and KZ(22)≥2. If not zero, RBAR = RT/RTIDE where RT[pc] is tidal radius calculated from input GMG and RG0",
+    "GMG": "Point-mass galaxy (solar masses, linearized tidel field in circular orbit)",
+    "RG0": "Central distance (in kpc)",
+    "GMG": "Point-mass galaxy (solar masses)",
+    "DISK": "Mass of Miyamoto disk (solar masses)",
+    "A": "Softening length in Miyamoto potential (in kpc)",
+    "B": "Vertical softening length (kpc)",
+    "VCIRC": "Galactic circular velocity (km/sec) at RCIRC (=0: no halo)",
+    "RCIRC": "Central distance for VCIRC with logarithmic potential (kpc)",
+    "GMB": "Dehnen model budge mass (solar masses)",
+    "AR": "Dehnen model budge scaling radius (kpc)",
+    "GAM": "Dehnen model budge profile power index gamma",
+    "RG": "Initial cluster position vector (kpc); DISK+VCIRC=0, VG(3)=0: A(1+E)=RG(1),E=RG(2). Note that upon restart, RG is not read from input; saved value is used instead.",
+    "VG": "Initial cluster velocity vector (km/s). Note that upon restart, VG is not read from input; saved value is used instead",
+    "MP": "Total mass of Plummer sphere (in scaled units)",
+    "AP": "Plummer scale factor (N-body units; square saved in AP2)",
+    "MPDOT": "Decay time for gas expulsion (MP = MP0/(1 + MPDOT*(T-TD))",
+    "TDELAY": "Delay time for starting gas expulsion (T > TDELAY)",
+    "SEMI0": "Initial semi-major axis limit",
+    "ECC0": "Initial eccentricity; < 0: thermal distribution, f(e) = 2e; ≥ 0 and ≤ 1: fixed value of eccentricity; = 20: uniform distribution; = 30: distribution with f (e) = 0.1765/(e2); = 40: general f (e) = a ∗ eb, e0 <= e <= 1 with a = (1 + b)/(1 − e0(1+b)), current values: e0 = 0 and b = 1 (thermal distribution)",
+    "RATIO": "KZ(42)≤ 1: Binary mass ratio M1/(M1 + M2); KZ(42)= 1.0: M1 = M2 = ⟨M⟩",
+    "RANGE": "KZ(42)= 0: semi-major axis range for uniform logarithmic distribution; not used for other KZ(42)",
+    "NSKIP": "Binary frequency of mass spectrum (starting from body #1)",
+    "IDORM": "Indicator for dormant binaries (> 0: merged components)",
+    "SEMI": "Max semi-major axis in model units (all equal if RANGE = 0)",
+    "ECC": "Initial eccentricity (< 0 for thermal distribution)",
+    "RATIO": "Mass ratio (= 1.0: M1 = M2; random in [0.5 ∼ 0.9])",
+    "RANGE": "Range in SEMI for uniform logarithmic distribution (> 0)",
 }
 
 _NBODY4_PARAMETERS = {
@@ -319,4 +349,20 @@ _NBODY4_PARAMETERS = {
     "VXROT": "XY-velocity scaling factor (> 0 for solid-body rotation).",
     "VZROT": "Z-velocity scaling factor (not used if VXROT = 0).",
     "RTIDE": "Unscaled tidal radius (#14 >= 2; otherwise copied to RSPH2).",
+}
+
+# Dictionary to store descriptions for different versions (for KZ parameters)
+kz = {
+    "nbody4": _NBODY4_KZ,
+    "nbody6": _NBODY6_KZ,
+    "nbody6++gpu-beijing": _NBODY6PPGPU_BEIJING_KZ,
+    "nbody6++gpu": _NBODY6PPGPU_KZ,
+}
+
+# Dictionary to store human-readable descriptions for individual parameters.
+parameters = {
+    "nbody4": _NBODY4_PARAMETERS,
+    "nbody6": _NBODY6_PARAMETERS,
+    "nbody6++gpu-beijing": _NBODY6PPGPU_PARAMETERS,
+    "nbody6++gpu": _NBODY6PPGPU_PARAMETERS,
 }

@@ -39,6 +39,7 @@ def postprocess(
     (N,) = masses.shape
 
     # Remove source mass (optional)
+    # TODO: rewrite with `scale_snapshot` for time scaling!
     if remove_point_source:
         if not np.allclose(xv[-1], np.zeros((1, 6)), atol=1e-7):
             warnings.warn(f"Source coordinates diverge from zero: {xv[-1]}")
