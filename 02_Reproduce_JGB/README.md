@@ -240,16 +240,10 @@ NHYP: 0 (Hyperbolic collision)
 
 Note that term "mergers" in the context of globular cluster simulation means any set of particles that merge into one. In our case, mergers are dominated by collisions, whereas binary inspiral is much much rare.
 
-To get stats on number of mergers, run:
+To get plots related to mergers, run:
 
 ```bash
 python plot_mergers.py --exp <OUTDIR1> <OUTDIR2>
-```
-
-To get plots related to mass or spin distributions, add these options to the command:
-
-```bash
-python plot_mergers.py --exp <OUTDIR1> <OUTDIR2> --mass --spin
 ```
 
 Compare your results with plots from the article:
