@@ -1,4 +1,5 @@
 """Based on this jupyter-notebook: https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing/blob/stable/examples/01_Basics.ipynb"""
+
 import argparse
 import re
 
@@ -109,9 +110,9 @@ def parse_output_data(logfile):
 
                     # We need to replace D by E, since python can not handle D as exponential,
                     # after that we set the row at time t by the following values
-                    (data[data_type]).loc[
-                        np.float64(line[0].replace("D", "E"))
-                    ] = np.float64(line[2:])
+                    (data[data_type]).loc[np.float64(line[0].replace("D", "E"))] = (
+                        np.float64(line[2:])
+                    )
                     # stop loop cause each line can only have one data type
                     break
 
