@@ -1,6 +1,6 @@
 # About
 
-This repository contains astrophysical N-body simulation experiments.
+This repository contains my public astrophysical N-body simulation experiments.
 
 # Installation
 

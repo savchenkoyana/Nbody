@@ -76,9 +76,7 @@ if __name__ == "__main__":
             n_particles = np.append(n_particles, masses.size)
             mean_mass = np.append(mean_mass, np.mean(masses))
 
-        plot_label = (
-            filename if len(args.nemo_files) > 1 else None
-        )  # label as filename if there are many files
+        plot_label = filename
         # plot_label = (
         #     create_file_label(filename) if len(args.nemo_files) > 1 else None
         # )  # label as filename if there are many files
