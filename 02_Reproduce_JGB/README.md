@@ -1,4 +1,4 @@
-This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/pdf/2405.06391v1) by Juan Garcia-Bellido (shortly: JGB).
+This experiment is based on article [Primordial Black Hole clusters, phenomenology & implications](https://arxiv.org/abs/2405.06391v1) by José Francisco Nuño Siles and Juan Garcia-Bellido. We will refer to this experiment and article shortly as: JGB.
 
 The goal of this experiment is to create a self-consistent model with Plummer density profile and log-normal mass spectrum, and then evolve it for Hubble time.
 

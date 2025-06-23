@@ -4,6 +4,7 @@ snapshots."""
 import math
 import os
 import subprocess
+import warnings
 from pathlib import Path
 from typing import Annotated
 from typing import Literal
@@ -13,7 +14,13 @@ from typing import Union
 import numpy as np
 import unsio.input as uns_in
 
-_TIMEFUZZ = 1e-3  # use 1e-6 for snapshots with too frequent outputs (https://github.com/teuben/nemo/issues/162)
+# use TIMEFUZZ 1e-6 for snapshots with too frequent outputs (https://github.com/teuben/nemo/issues/162)
+_TIMEFUZZ = os.environ.get("TIMEFUZZ")
+if _TIMEFUZZ:
+    _TIMEFUZZ = float(_TIMEFUZZ)
+else:
+    warnings.warn("environment variable TIMEFUZZ is not set, using default value 1e-3")
+    _TIMEFUZZ = 1e-3
 
 _PROJ_VECTOR_TYPE = Union[
     tuple[float, float, float],
@@ -420,7 +427,7 @@ def count_binaries(
 
 
 def parse_fort14(
-    fort14: Union[str, os.PathLike, Path]
+    fort14: Union[str, os.PathLike, Path],
 ) -> tuple[tuple, np.ndarray[np.float32]]:
     """Parse fort.14 file with Lagrange radius data from Nbody6.
     The data has the following structure: LAGR: TTOT, LOG10(RLAGR(K)),K=1,11

@@ -18,7 +18,7 @@ To reproduce the experiment, follow these steps:
   source start_nemo.sh
   ```
 
-  Note that you may neeed to rebuild some binaries if you want to run simulation with large number of particles. For that, use custom NEMO version from https://github.com/savchenkoyana/nemo.git (branch `nbodyx`):
+  Note that you may neeed to rebuild some binaries if you want to run simulation with large number of particles. For example, you can use custom NEMO version from https://github.com/savchenkoyana/nemo.git (branch `nbodyx`):
 
   ```bash
   cd $NEMO
@@ -37,7 +37,7 @@ To reproduce the experiment, follow these steps:
   make rebuild
   ```
 
-  If you run simulation with ~1000 particles you don't need to do anything other than default installation.
+  Alternatively, you can alter the parameters `NMAX`, `LMAX`, etc. in NEMO yourself and don't use my fork at all. If you want only to run simulation with ~1000 particles you don't need to do anything other than using default installation.
 
 - Go to the experiment root directory:
 
@@ -98,10 +98,11 @@ python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --mom
    ```bash
    hisf <NAME>.nemo
    ```
-1. A list of hacks on how to check N-body simulation results is given [here](https://arxiv.org/pdf/1105.1082).
+1. A list of hacks on how to check N-body simulation results is given [here](https://arxiv.org/abs/1105.1082).
 1. There is another way to start an Aarseth simulation, e.g. use [`nbody1`](https://teuben.github.io/nemo/man_html/nbody1.1.html) instead of its NEMO wrapper [`runbody1`](https://teuben.github.io/nemo/man_html/runbody1.1.html). For more details see `$NEMO/src/nbody/evolve/aarseth/tools/`
 1. Some useful info about run options can be found in file `define.f` (see either `$NEMO/src/nbody/evolve/aarseth/nbody*` or nbody6 source code from `ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz`, depending on your NbodyX version)
 1. Nbody codes save data in N-body units by default. To transform your data into astrophysical units (pc, km/s, $M\_{☉}$), use coefficients from simulation log. You can also perfrom scaling to N-body units yourself and compute coefficients using [scale.py](scale.py)
+1. If you choose too low output timestep or non-standard units with `s2a` (NEMO's tool for reading snapshots), it can sometimes give you several outputs. Consider using `TIMEFUZZ` environment variable (see [snap.py](utils/snap.py) for details).
 
 # About direct methods
 
