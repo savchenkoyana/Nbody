@@ -266,13 +266,15 @@ We use non-usual units in our experiments:
   - pc (length)
   - km/s (velocity)
   - $M\_{☉}$ (mass)
-- We use units with `G=1` to feed data into N-body code:
+- We use units with `G=1` to feed data into N-body codes such as Nbody0, Nbody1, Nbody2 and gyrFalcON:
   - pc (lenght)
   - km/s (velocity)
   - $\\sim 232.5337 \\times M\_{☉}$ (mass)
-- Codes from `sh_scripts/run_othermethods.sh` compute the evolution in the units with `G=1` mentioned above
-- Nbody6++GPU-beijing uses N-body units for computations. It also produces `conf.3_*` (and, as a result, `out.nemo`) in N-body units.
-- The units of hdf5 output produced by Nbody6++GPU-beijing depend on whether stellar evolution is switched on. If enabled, all quantities in hdf5 file are in units of `RBAR[pc]`, `ZMBAR[solar masses]`, `TSCALE[Myr]`, `VSTAR[km/s]`, and gravitational constant is `G=4.302E-3`. Otherwise N-body units are used (?)
+    This is demonstrated in `sh_scripts/run_othermethods.sh`.
+- Nbody6++GPU-beijing uses different units:
+  - N-body units are used for computations. The resulting `conf.3_*` (and, as a result, `out.nemo`) is stored in N-body units.
+  - `out.nemo` can be scaled to astrophysical units using `R*`, `V*`, `T*`, `M*` from logs (or `RBAR[pc]`, `ZMBAR[solar masses]`, `TSCALE[Myr]` and `VSTAR[km/s]`, which is the same).
+  - The units of hdf5 output produced by Nbody6++GPU-beijing depend on whether stellar evolution is switched on. If enabled, all quantities in hdf5 file are in units of `RBAR[pc]`, `ZMBAR[solar masses]`, `TSCALE[Myr]`, `VSTAR[km/s]`, and gravitational constant is `G=4.302E-3`. Otherwise N-body units are used (?)
 
 # Checklist
 

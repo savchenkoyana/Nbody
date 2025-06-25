@@ -119,14 +119,15 @@ def profile_by_snap(
 
     filename = str(filename)
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
+    manippars_binning = (
+        "100,0.05"  # minimum bodies in radial bin, minimum bin size in log(r)
+    )
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
         if projvector:
-            manippars = ",".join([str(_) for _ in projvector])
+            manippars = ",".join([str(_) for _ in projvector]) + "," + manippars_binning
         else:
-            manippars = (
-                "100,0.05"  # minimum bodies in radial bin, minimum bin size in log(r)
-            )
+            manippars = manippars_binning
 
         command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname=dens_centre+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
