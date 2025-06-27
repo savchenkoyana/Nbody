@@ -90,6 +90,7 @@ if __name__ == "__main__":
             filename=filename,
             n_timestamps=args.n_timestamps,
         )
+        print("times list", times_list)
 
         for t in times_list:
             # Lagrange radius and related stats

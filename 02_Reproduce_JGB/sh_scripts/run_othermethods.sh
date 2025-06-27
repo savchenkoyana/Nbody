@@ -42,7 +42,6 @@ EPS=0.01  # default
 
 NPART=$N+1
 DIR="snap_mu0.0_s1.0_sigma1.5_r10.0_N${N}"
-IC_G1="${DIR}/IC_g1.nemo"
 IC_PREPROCESSED_G1="${DIR}/IC_preprocessed_g1.nemo"
 
 if [[ $TASK -eq -1 ]]; then
@@ -70,11 +69,6 @@ if [[ $TASK -eq -1 ]]; then
     mscale=4.300451321727918e-03 \
     rscale=1000
 
-  # This part is for Nbody4 and Nbody6
-  snapscale in=$DIR/IC.nemo \
-    out=$IC_G1 \
-    mscale=4.300451321727918e-03
-
 elif [[ $TASK -eq 0 ]]; then
   echo "Running nbody0"
 
@@ -90,11 +84,8 @@ elif [[ $TASK -eq 0 ]]; then
     eta=$ETA
 
   python postprocess_snap.py \
-    --snap-file $OUTFILE \
-    --remove-point-source \
-    --length 0.001 \
-    --mass 232.5337331 \
-    --velocity 1.0
+    --exp $OUTFILE \
+    --version nbody0
 
 elif [[ $TASK -eq 1 ]]; then
   echo "Running runbody1"
@@ -114,11 +105,8 @@ elif [[ $TASK -eq 1 ]]; then
     outdir=$OUTDIR
 
   python postprocess_snap.py \
-    --snap-file "${OUTDIR}/OUT3.snap" \
-    --remove-point-source \
-    --length 0.001 \
-    --mass 232.5337331 \
-    --velocity 1.0
+    --exp "${OUTDIR}/OUT3.snap" \
+    --version nbody1
 
 elif [[ $TASK -eq 2 ]]; then
   echo "Running runbody2"
@@ -144,9 +132,6 @@ elif [[ $TASK -eq 2 ]]; then
     mode=2
 
   python postprocess_snap.py \
-    --snap-file "${OUTDIR}/OUT3.snap" \
-    --remove-point-source \
-    --length 0.001 \
-    --mass 232.5337331 \
-    --velocity 1.0
+    --exp "${OUTDIR}/OUT3.snap" \
+    --version nbody2
 fi

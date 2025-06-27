@@ -50,6 +50,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Whether to remove outliers from non-converged dense_cluster",
     )
+    parser.add_argument(
+        "--dens-parameter",
+        type=int,
+        default=500,
+        help="The number of neighbours in SPH-like estimation for 'dens_centre' manipulator. If 0, density center is not computed. Default: 500",
+    )
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
@@ -109,6 +115,7 @@ if __name__ == "__main__":
             t=t,
             projvector=proj_vector,
             remove_artifacts=not args.store_artifacts,
+            dens_par=args.dens_parameter,
         )
         try:
             r_prof, rho_prof = prof[0], prof[1]

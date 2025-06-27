@@ -110,7 +110,7 @@ To reproduce the experiment, follow these steps:
   Then to transform to astrophysical units:
 
   ```bash
-  python snapscale.py --exp <OUTDIR>
+  python postprocess_snap.py --exp <OUTDIR>
   ```
 
   and finally:
@@ -249,7 +249,6 @@ python plot_mergers.py --exp <OUTDIR1> <OUTDIR2>
 ```
 
 Compare your results with plots from the article:
-
 ![](../images/02/number_of_mergers.png)
 
 ![](../images/02/mergers_mass.png)
@@ -274,7 +273,7 @@ We use non-usual units in our experiments:
 - Nbody6++GPU-beijing uses different units:
   - N-body units are used for computations. The resulting `conf.3_*` (and, as a result, `out.nemo`) is stored in N-body units.
   - `out.nemo` can be scaled to astrophysical units using `R*`, `V*`, `T*`, `M*` from logs (or `RBAR[pc]`, `ZMBAR[solar masses]`, `TSCALE[Myr]` and `VSTAR[km/s]`, which is the same).
-  - The units of hdf5 output produced by Nbody6++GPU-beijing depend on whether stellar evolution is switched on. If enabled, all quantities in hdf5 file are in units of `RBAR[pc]`, `ZMBAR[solar masses]`, `TSCALE[Myr]`, `VSTAR[km/s]`, and gravitational constant is `G=4.302E-3`. Otherwise N-body units are used (?)
+  - The units of hdf5 output produced by Nbody6++GPU-beijing depend on whether stellar evolution is switched on. If enabled, all quantities in hdf5 file are in units of `RBAR[pc]`, `ZMBAR[solar masses]`, `TSCALE[Myr]`, `VSTAR[km/s]`, and gravitational constant is `G=4.302E-3`. Otherwise N-body units are used.
 
 # Checklist
 

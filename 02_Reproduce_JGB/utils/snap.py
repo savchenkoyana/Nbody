@@ -93,6 +93,7 @@ def profile_by_snap(
     t: Union[float, str],
     projvector: Optional[_PROJ_VECTOR_TYPE] = None,
     remove_artifacts: bool = True,
+    dens_par: int = 500,
 ) -> np.ndarray:
     """Get a np.ndarray with density profile for a given snapshot and time.
 
@@ -129,7 +130,7 @@ def profile_by_snap(
         else:
             manippars = manippars_binning
 
-        command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname=dens_centre+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
+        command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{manippars}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
