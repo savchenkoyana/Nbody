@@ -265,10 +265,14 @@ We use non-usual units in our experiments:
   - pc (length)
   - km/s (velocity)
   - $M\_{☉}$ (mass)
-- We use units with `G=1` to feed data into N-body codes such as Nbody0, Nbody1, Nbody2 and gyrFalcON:
+- We use units with `G=1` to feed data into N-body codes such as Nbody0 and Nbody1:
   - pc (lenght)
   - km/s (velocity)
   - $\\sim 232.5337 \\times M\_{☉}$ (mass)
+- We use these units for gyrFalcON:
+  - kpc (length)
+  - km/s (velocity)
+  - $M\_{☉}$ (mass)
     This is demonstrated in `sh_scripts/run_othermethods.sh`.
 - Nbody6++GPU-beijing uses different units:
   - N-body units are used for computations. The resulting `conf.3_*` (and, as a result, `out.nemo`) is stored in N-body units.
