@@ -55,15 +55,15 @@ def scale_snapshot(filename: Union[str, Path], outfile: Union[str, Path], scalin
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="This programs scales NEMO snapshot to astrophysical units."
+        description="This programs post-process NEMO snapshot to astrophysical units."
     )
     parser.add_argument(
         "--exp",
         type=str,
         required=True,
-        help="Two cases:\n"
-        "1 --- nbody6++gpu-beijing: Directory with experiment. It is assumed that there are `out.nemo` and `exp.out`."
-        "2 --- gyrfalcon: output file with `nemo` extension.",
+        help="Two cases: "
+        "1) nbody6++gpu-beijing: Directory with experiment. It is assumed that there are `out.nemo` and `exp.out`. "
+        "2) gyrfalcon: output file with `nemo` extension.",
     )
     parser.add_argument(
         "--version",
@@ -78,7 +78,7 @@ if __name__ == "__main__":
             "nbody6++gpu-beijing",
         ],
         default="nbody6++gpu-beijing",
-        help="Specify the version of the software",
+        help="Specify the version of the software. Default: nbody6++gpu-beijing.",
     )
     args = parser.parse_args()
     exp = Path(args.exp)

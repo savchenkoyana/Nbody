@@ -62,7 +62,7 @@ To reproduce the experiment, follow these steps:
   Then transform data into Nbody6pp-format:
 
   ```bash
-  runbody6 in=<OUTDIR>/IC_g1.nemo out=<OUTDIR>/outdir tcrit=0 nbody6=0 exe=nbody6pp
+  runbody6 in=<OUTDIR>/IC_g1.nemo outdir=<OUTDIR>/outdir tcrit=0 nbody6=0 exe=nbody6pp
   cp <OUTDIR>/outdir/dat.10 <OUTDIR>/
   ```
 

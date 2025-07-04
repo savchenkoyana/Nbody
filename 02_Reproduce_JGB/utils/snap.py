@@ -447,3 +447,25 @@ def parse_fort14(
     F_LAGR = (0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.625, 0.75, 0.9)
     data = np.loadtxt(fort14, usecols=range(1, 13))
     return F_LAGR, data
+
+
+def find_density_center(
+    positions: np.ndarray[float],
+    masses: np.ndarray[float],
+    k: int = 6,
+):
+    """Estimates density center by positions[N, 3] and masses[N,] using
+    Casertano-Hut algo (note that NEMO uses another one)."""
+    tree = cKDTree(positions)
+    dists, idxs = tree.query(
+        positions, k=k + 1
+    )  # distances to k+1 neighbours including self at zero
+    rk = dists[:, k]  # k-th neighbor distance (exclude self at index 0)
+
+    # compute rho by k nearest particles
+    neigh_idx = idxs[:, 1 : k + 1]
+    mass_k = masses[neigh_idx].sum(axis=1)
+    rho = mass_k / (4 / 3 * np.pi * rk**3)
+
+    i_max = np.nanargmax(rho)
+    return positions[i_max]
