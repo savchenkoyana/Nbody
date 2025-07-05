@@ -80,7 +80,7 @@ def mass_pdf(x, mu, scale, sigma) -> typing.Callable[float, float]:
 
 
 def compute_mean_mass(mu: float, scale: float, sigma: float) -> float:
-    """Compute E[x] of mass pdf depending on parameter values.
+    """Compute E[x] of lognormal distribution depending on parameter values.
 
     See
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.lognorm.html

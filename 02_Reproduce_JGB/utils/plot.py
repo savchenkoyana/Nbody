@@ -1,13 +1,16 @@
 """Utils used for plotting."""
 
+import os
 from functools import partial
 from pathlib import Path
 from typing import Callable
 from typing import Optional
 from typing import Union
 
+import agama
 import matplotlib.animation
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def create_label(mu: float, scale: float, sigma: float) -> str:
@@ -40,6 +43,47 @@ def show_with_timeout():
     plt.close()
 
 
+def plot_density(
+    dens: agama.Density,
+    save_path: Optional[Union[str, os.PathLike]] = None,
+):
+    r = np.logspace(-4, 1)
+    xyz = np.vstack((r, r * 0, r * 0)).T
+
+    plt.plot(r, dens(xyz), linestyle="dotted")
+
+    plt.xlabel("r, pc")
+    plt.ylabel(r"$\rho, M_\odot / pc^3$")
+    plt.xscale("log")
+    plt.yscale("log")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    show_with_timeout()
+
+
+def plot_density_diff(
+    orig_dens: agama.Density,
+    dens: agama.Density,
+    save_path: Optional[Union[str, os.PathLike]] = None,
+):
+    r = np.logspace(-4, 1)
+    xyz = np.vstack((r, r * 0, r * 0)).T
+
+    plt.plot(r, np.abs(dens(xyz) - orig_dens(xyz)) / orig_dens(xyz))
+
+    plt.xlabel("r, pc")
+    plt.ylabel(r"$\delta\rho / \rho, M_\odot / pc^3$")
+    plt.xscale("log")
+    plt.yscale("log")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    show_with_timeout()
+
+
 def update(
     i: int,
     data: list,
@@ -47,6 +91,7 @@ def update(
     xlim: tuple[float, float],
     ylim: tuple[float, float],
 ):
+    """Default function to update matplotlib animation."""
     (
         x,
         y,
