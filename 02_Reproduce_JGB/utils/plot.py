@@ -74,7 +74,7 @@ def plot_density_diff(
     plt.plot(r, np.abs(dens(xyz) - orig_dens(xyz)) / orig_dens(xyz))
 
     plt.xlabel("r, pc")
-    plt.ylabel(r"$\delta\rho / \rho, M_\odot / pc^3$")
+    plt.ylabel(r"$\delta\rho / \rho$")
     plt.xscale("log")
     plt.yscale("log")
 

@@ -100,7 +100,7 @@ The installation of Nbody6++GPU-beijing is a little bit tricky. The reason is th
   ```makefile
   HDF5_FLAGS = -D H5OUTPUT -I${MESASDK_ROOT}/include -L${MESASDK_ROOT}/lib -lhdf5_fortran -lhdf5  # instead of HDF5_FLAGS = -D H5OUTPUT
   ...
-  FFLAGS = -O3 -fPIC -mcmodel=large -fopenmp -I../include $(MPI_FLAGS) ${SIMD_FLAGS} $(GPU_FLAGS) ${OMP_FLAGS} ${HDF5_FLAGS}  # add ${HDF5_FLAGS} at the end
+  FFLAGS =  -I../extra_inc/nompi -O3 -fPIC -mcmodel=large -fopenmp -I../include ${SIMD_FLAGS} $(GPU_FLAGS) ${OMP_FLAGS} ${HDF5_FLAGS}  # add ${HDF5_FLAGS} at the end
   ```
 
 - And finally, run installation:

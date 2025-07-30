@@ -31,11 +31,17 @@ To reproduce the experiment, follow these steps:
 - Prepare binaries (only once):
 
   ```bash
-  ln -s ~/work/Nbody/Nbody6ppGPU/build/nbody6++.avx nbody6pp
-  ln -s ~/work/Nbody/Nbody6PPGPU-beijing/build/nbody6++.avx nbody6pp-beijing
+  ln -s /path/to/Nbody/Nbody6ppGPU/build/nbody6++.avx nbody6pp
+  ln -s /path/to/Nbody/Nbody6PPGPU-beijing/build/nbody6++.avx nbody6pp-beijing
   ```
 
   Note that the name of binaries may differ if you used other options to build them. We will use `nbody6pp-beijing` binary for evolution and `nbody6pp` binary simply to convert data to the right format.
+
+  If you want to set natal spins=0 for black holes, use https://github.com/savchenkoyana/Nbody6PPGPU-beijing/tree/feat/bh_only_cluster instead of Nbody6PPGPU-beijing and this executable:
+
+  ```bash
+  ln -s /path/to/Nbody/Nbody6PPGPU-beijing-yana/build/nbody6++.avx nbody6pp-beijing
+  ```
 
 - Create initial coordinates of cluster:
 
