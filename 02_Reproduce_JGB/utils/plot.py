@@ -13,29 +13,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def create_label(mu: float, scale: float, sigma: float) -> str:
-    """Creates label by log-normal model parameters."""
-    if (mu, scale) == (0, 1):
-        label = rf"$\sigma$ = {sigma}"
-    elif (mu, scale, sigma) == (10, 1.5, 0.954):
-        label = "M & A"
-    else:
-        label = f"{mu}_{scale}_{sigma}"
-
-    return label
-
-
-def create_file_label(filename: Union[str, Path]) -> str:
-    """Creates label by filename.
-
-    Filename should be like this: f'/path/to/dirname/snap_mu{mu}_s{scale}_sigma{sigma}_r{plummer_r}_N{N}_{postfix}/{name}.nemo'.
-    """
-    dirname = Path(filename).parts[-2]
-    postfix = "_".join(dirname.split("_")[6:])
-
-    return postfix
-
-
 def show_with_timeout():
     """Shows a plot and automatically closes it after 10 seconds."""
     plt.show(block=False)
@@ -82,6 +59,53 @@ def plot_density_diff(
         plt.savefig(Path(save_path))
 
     show_with_timeout()
+
+
+def plot_mass_pdf(
+    grid: np.ndarray[float],
+    masses: np.ndarray[float],
+    pdf: Callable[float, float],
+    save_path: Optional[Union[str, os.PathLike]] = None,
+):
+    """Plot mass PDF (both experimental and analytical)."""
+    plt.hist(masses, bins=grid, density=True)
+    plt.plot(grid, pdf(grid))
+    plt.xscale("log")
+    plt.xlabel(r"$M, M_\odot$")
+    plt.ylabel(r"$f(M)$")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    show_with_timeout()
+
+
+def plot_mass_cdf(
+    grid: np.ndarray[float],
+    masses: np.ndarray[float],
+    cdf: Callable[float, float],
+    save_path: Optional[Union[str, os.PathLike]] = None,
+):
+    """Plot mass CDF (both experimental and analytical)."""
+
+    def ecdf(masses, x):
+        sorted_masses = np.sort(masses)
+        n = masses.size
+        return np.searchsorted(sorted_masses, x, side="right") / n
+
+    plt.plot(grid, ecdf(masses, grid), linestyle="--")
+    plt.plot(grid, cdf(grid), linestyle="-.")
+    plt.xscale("log")
+    plt.xlabel(r"$M, M_\odot$")
+    plt.ylabel(r"$F(M)$")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    show_with_timeout()
+
+
+# For matplotlib animation
 
 
 def update(

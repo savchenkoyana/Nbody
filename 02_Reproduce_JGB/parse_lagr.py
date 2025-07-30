@@ -6,7 +6,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from utils.general import check_parameters
 from utils.general import create_argparse
-from utils.plot import create_label
+from utils.general import create_label
 from utils.snap import parse_fort14
 
 if __name__ == "__main__":

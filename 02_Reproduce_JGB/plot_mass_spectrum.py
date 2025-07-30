@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
+from utils.general import create_label
 from utils.general import mass_pdf
-from utils.plot import create_label
 from utils.snap import masses_in_lagrange_radius
 from utils.snap import parse_nemo
 

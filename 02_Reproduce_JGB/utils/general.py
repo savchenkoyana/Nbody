@@ -4,6 +4,7 @@ import argparse
 import math
 import sys
 import typing
+from pathlib import Path
 
 import agama
 import scipy
@@ -95,6 +96,29 @@ def compute_mean_mass(mu: float, scale: float, sigma: float) -> float:
     #     integral_, _ = scipy.integrate.quad(func=lambda x: x * pdf(x), a=mu, b=np.inf)
     #     mass_math_expectation = integral_ / norm_
     return scipy.stats.lognorm(loc=mu, scale=scale, s=sigma).mean()
+
+
+def create_label(mu: float, scale: float, sigma: float) -> str:
+    """Creates label by log-normal model parameters."""
+    if (mu, scale) == (0, 1):
+        label = rf"$\sigma$ = {sigma}"
+    elif (mu, scale, sigma) == (10, 1.5, 0.954):
+        label = "M & A"
+    else:
+        label = f"{mu}_{scale}_{sigma}"
+
+    return label
+
+
+def create_file_label(filename: typing.Union[str, Path]) -> str:
+    """Creates label by filename.
+
+    Filename should be like this: f'/path/to/dirname/snap_mu{mu}_s{scale}_sigma{sigma}_r{plummer_r}_N{N}_{postfix}/{name}.nemo'.
+    """
+    dirname = Path(filename).parts[-2]
+    postfix = "_".join(dirname.split("_")[6:])
+
+    return postfix
 
 
 def compute_gyrfalcon_parameters(
