@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
+from utils.general import create_label
 from utils.general import mass_pdf
-from utils.plot import create_label
 from utils.snap import masses_in_lagrange_radius
 from utils.snap import parse_nemo
 
@@ -27,12 +27,6 @@ if __name__ == "__main__":
         type=float,
         required=True,
         help="Which times to use. Example: '--times 0.0 0.5 1.0'",
-    )
-    parser.add_argument(
-        "--timeUnitMyr",
-        type=float,
-        default=0.97779,
-        help="Time unit in Myr. Default: 0.97779",
     )
     parser.add_argument(
         "--store-artifacts",
@@ -102,7 +96,7 @@ if __name__ == "__main__":
             bins[:-1],
             bins,
             weights=counts,
-            label=f"$t$={t * 1e-3 * args.timeUnitMyr:.2f}",
+            label=f"$t$={t * 1e-3:.2f} Gyr",
             histtype="step",
         )
 

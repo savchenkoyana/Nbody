@@ -7,7 +7,7 @@ echo "<TASK> should be:"
 echo "-1 --- to create IC;"
 echo "0 --- to run nbody0;"
 echo "1 --- to run runbody1;"
-echo "2 --- to run runbody2;"
+echo "2 --- to run gyrfalcon;"
 echo "Choose <ETA> carefully (default value is 0.02)"
 echo
 
@@ -42,12 +42,12 @@ EPS=0.01  # default
 
 NPART=$N+1
 DIR="snap_mu0.0_s1.0_sigma1.5_r10.0_N${N}"
-IC_G1="${DIR}/IC_g1.nemo"
 IC_PREPROCESSED_G1="${DIR}/IC_preprocessed_g1.nemo"
 
 if [[ $TASK -eq -1 ]]; then
   echo "Creating IC"
 
+  # pc, Msun, km/s
   python create_ic.py \
     --N $N \
     --mu 0 \
@@ -56,7 +56,9 @@ if [[ $TASK -eq -1 ]]; then
     --plummer-r 10 \
     --n-iterations 20
 
-  # This part is for Nbody0, Nbody1 and Nbody2 ONLY!
+  # Add point mass to snapshot
+  # This snapshot is for gyrfalcon
+  # Working units are: kpc, Msun, km/s (G=4.30091727067736e-06)
   python preprocess_snap.py \
     --nemo-file $DIR/IC.nemo \
     --r-shift 34 0 0 \
@@ -65,15 +67,12 @@ if [[ $TASK -eq -1 ]]; then
     --add-point-source \
     --source-mass 4.37e10
 
+  # Another version of snapshot for nbody0 and nbody1
+  # Working units are: pc, ~232 Msun, km/s (G=1.0)
   snapscale in=$DIR/IC_preprocessed.nemo \
     out=$IC_PREPROCESSED_G1 \
     mscale=4.300451321727918e-03 \
     rscale=1000
-
-  # This part is for Nbody4 and Nbody6
-  snapscale in=$DIR/IC.nemo \
-    out=$IC_G1 \
-    mscale=4.300451321727918e-03
 
 elif [[ $TASK -eq 0 ]]; then
   echo "Running nbody0"
@@ -90,11 +89,8 @@ elif [[ $TASK -eq 0 ]]; then
     eta=$ETA
 
   python postprocess_snap.py \
-    --snap-file $OUTFILE \
-    --remove-point-source \
-    --length 0.001 \
-    --mass 232.5337331 \
-    --velocity 1.0
+    --exp $OUTFILE \
+    --version nbody0
 
 elif [[ $TASK -eq 1 ]]; then
   echo "Running runbody1"
@@ -114,39 +110,41 @@ elif [[ $TASK -eq 1 ]]; then
     outdir=$OUTDIR
 
   python postprocess_snap.py \
-    --snap-file "${OUTDIR}/OUT3.snap" \
-    --remove-point-source \
-    --length 0.001 \
-    --mass 232.5337331 \
-    --velocity 1.0
+    --exp "${OUTDIR}/OUT3.snap" \
+    --version nbody1
 
 elif [[ $TASK -eq 2 ]]; then
-  echo "Running runbody2"
+  echo "Running gyrfalcon"
 
-  OUTDIR="${DIR}/runbody2_ETA${ETA}_ETAR${ETAR}_EPS${EPS}"
+  OUTFILE="${DIR}/out_gf.nemo"
 
-  # Nbody2
-  # TODO: increase NNBMAX, increase RS0, right now it's not correct at all
-  time nice -n 20 runbody2 \
-    in=$IC_PREPROCESSED_G1 \
-    tcrit=14000 \
-    deltat=100 \
-    nbody=$NPART \
-    eps=$EPS \
-    etai=$ETA \
-    etar=$ETAR \
-    KZ6=0 \
-    tcomp=4000 \
-    outdir=$OUTDIR
-
-  u3tos "${OUTDIR}/OUT3" \
-    "${OUTDIR}/OUT3.snap" \
-    mode=2
+  # Hardcoded, best parameters for N=5000 according to eugvas
+  # Feel free to modify
+  gyrfalcON $DIR/IC_preprocessed.nemo \
+    $OUTFILE \
+    logstep=3000 \
+    eps=0.0005848035476425733 \
+    kmax=15 \
+    tstop=14.0 \
+    step=0.001 \
+    Grav=4.30091727067736e-06 \
+    theta=0.1
 
   python postprocess_snap.py \
-    --snap-file "${OUTDIR}/OUT3.snap" \
-    --remove-point-source \
-    --length 0.001 \
-    --mass 232.5337331 \
-    --velocity 1.0
+    --exp $OUTFILE \
+    --version gyrfalcon
+
+  # For checking energy conservation by stat.py
+  # We use the same units with G=1 as with nbody0, nbody1
+  # They are convenient because pc / (km/s) ~ 1 Myr
+  # Note that we use original file (without postprocessing) with central BH
+  snapscale in=$OUTFILE \
+    out="${DIR}/out_gf_g1.nemo" \
+    rscale=1e3 \
+    mscale=0.004300451322346228
+
+  python stat.py \
+    --virial \
+    --nemo-files "${DIR}/out_gf_g1.nemo" \
+    --eps 0.0005848035476425733e3  # eps in pc
 fi

@@ -29,7 +29,7 @@ runbody2 nbody0.in nbody2.out \
   nbody=$N
 u3tos nbody2.out/OUT3 nbody2.out/OUT3.snap mode=2
 
-gyrfalcON nbody0.in gyrfalcon.out kmax=20 eps=$EPS tstop=10 step=0.01 theta=0.0001
+gyrfalcON nbody0.in gyrfalcon.out kmax=12 eps=$EPS tstop=10 step=0.01 theta=0.001
 
 runbody4 nbody0.in nbody4.out \
   tcrit=10 \

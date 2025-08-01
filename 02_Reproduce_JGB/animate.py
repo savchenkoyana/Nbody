@@ -47,14 +47,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--xlim",
         type=float,
-        default=40_000,
-        help="The limit on X axis: (-xlim, xlim). Default: 40_000",
+        default=40,
+        help="The limit on X axis: (-xlim, xlim). Default: 40",
     )
     parser.add_argument(
         "--ylim",
         type=float,
-        default=40_000,
-        help="The limit on Y axis: (-ylim, ylim). Default: 40_000",
+        default=40,
+        help="The limit on Y axis: (-ylim, ylim). Default: 40",
     )
     args = parser.parse_args()
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
         x = snap[1]
         y = snap[2]
-        label = f"Time={t}"
+        label = f"Time={t:.2f} Myr"
 
         data.append((x, y, label))
 
@@ -137,6 +137,8 @@ if __name__ == "__main__":
             label="Cluster center-of-mass",
         )
         ax.legend(title=label if label else None, loc=1)  # upper right location
+        ax.set_xlabel("x, pc")
+        ax.set_ylabel("y, pc")
 
     update_animation = partial(
         custom_update,

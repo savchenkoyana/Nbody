@@ -1,36 +1,16 @@
 """Utils used for plotting."""
 
+import os
 from functools import partial
 from pathlib import Path
 from typing import Callable
 from typing import Optional
 from typing import Union
 
+import agama
 import matplotlib.animation
 import matplotlib.pyplot as plt
-
-
-def create_label(mu: float, scale: float, sigma: float) -> str:
-    """Creates label by log-normal model parameters."""
-    if (mu, scale) == (0, 1):
-        label = rf"$\sigma$ = {sigma}"
-    elif (mu, scale, sigma) == (10, 1.5, 0.954):
-        label = "M & A"
-    else:
-        label = f"{mu}_{scale}_{sigma}"
-
-    return label
-
-
-def create_file_label(filename: Union[str, Path]) -> str:
-    """Creates label by filename.
-
-    Filename should be like this: f'/path/to/dirname/snap_mu{mu}_s{scale}_sigma{sigma}_r{plummer_r}_N{N}_{postfix}/{name}.nemo'.
-    """
-    dirname = Path(filename).parts[-2]
-    postfix = "_".join(dirname.split("_")[6:])
-
-    return postfix
+import numpy as np
 
 
 def show_with_timeout():
@@ -40,6 +20,94 @@ def show_with_timeout():
     plt.close()
 
 
+def plot_density(
+    dens: agama.Density,
+    save_path: Optional[Union[str, os.PathLike]] = None,
+):
+    r = np.logspace(-4, 1)
+    xyz = np.vstack((r, r * 0, r * 0)).T
+
+    plt.plot(r, dens(xyz), linestyle="dotted")
+
+    plt.xlabel("r, pc")
+    plt.ylabel(r"$\rho, M_\odot / pc^3$")
+    plt.xscale("log")
+    plt.yscale("log")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    show_with_timeout()
+
+
+def plot_density_diff(
+    orig_dens: agama.Density,
+    dens: agama.Density,
+    save_path: Optional[Union[str, os.PathLike]] = None,
+):
+    r = np.logspace(-4, 1)
+    xyz = np.vstack((r, r * 0, r * 0)).T
+
+    plt.plot(r, np.abs(dens(xyz) - orig_dens(xyz)) / orig_dens(xyz))
+
+    plt.xlabel("r, pc")
+    plt.ylabel(r"$\delta\rho / \rho$")
+    plt.xscale("log")
+    plt.yscale("log")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    show_with_timeout()
+
+
+def plot_mass_pdf(
+    grid: np.ndarray[float],
+    masses: np.ndarray[float],
+    pdf: Callable[float, float],
+    save_path: Optional[Union[str, os.PathLike]] = None,
+):
+    """Plot mass PDF (both experimental and analytical)."""
+    plt.hist(masses, bins=grid, density=True)
+    plt.plot(grid, pdf(grid))
+    plt.xscale("log")
+    plt.xlabel(r"$M, M_\odot$")
+    plt.ylabel(r"$f(M)$")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    show_with_timeout()
+
+
+def plot_mass_cdf(
+    grid: np.ndarray[float],
+    masses: np.ndarray[float],
+    cdf: Callable[float, float],
+    save_path: Optional[Union[str, os.PathLike]] = None,
+):
+    """Plot mass CDF (both experimental and analytical)."""
+
+    def ecdf(masses, x):
+        sorted_masses = np.sort(masses)
+        n = masses.size
+        return np.searchsorted(sorted_masses, x, side="right") / n
+
+    plt.plot(grid, ecdf(masses, grid), linestyle="--")
+    plt.plot(grid, cdf(grid), linestyle="-.")
+    plt.xscale("log")
+    plt.xlabel(r"$M, M_\odot$")
+    plt.ylabel(r"$F(M)$")
+
+    if isinstance(save_path, (str, Path)):
+        plt.savefig(Path(save_path))
+
+    show_with_timeout()
+
+
+# For matplotlib animation
+
+
 def update(
     i: int,
     data: list,
@@ -47,6 +115,7 @@ def update(
     xlim: tuple[float, float],
     ylim: tuple[float, float],
 ):
+    """Default function to update matplotlib animation."""
     (
         x,
         y,

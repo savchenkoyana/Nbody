@@ -4,6 +4,7 @@ snapshots."""
 import math
 import os
 import subprocess
+import warnings
 from pathlib import Path
 from typing import Annotated
 from typing import Literal
@@ -12,6 +13,14 @@ from typing import Union
 
 import numpy as np
 import unsio.input as uns_in
+
+# use TIMEFUZZ 1e-6 for snapshots with too frequent outputs (https://github.com/teuben/nemo/issues/162)
+_TIMEFUZZ = os.environ.get("TIMEFUZZ")
+if _TIMEFUZZ:
+    _TIMEFUZZ = float(_TIMEFUZZ)
+else:
+    warnings.warn("environment variable TIMEFUZZ is not set, using default value 1e-3")
+    _TIMEFUZZ = 1e-3
 
 _PROJ_VECTOR_TYPE = Union[
     tuple[float, float, float],
@@ -74,7 +83,7 @@ def parse_nemo(
     snapfile = filename.replace(".nemo", "") + f"{t}.txt"
 
     with RemoveFileOnEnterExit(snapfile, remove_artifacts):
-        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | s2a in=- out={snapfile}"
+        command = f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | s2a in=- out={snapfile}"
         subprocess.check_call(command, shell=True)
         return np.loadtxt(snapfile).T if transpose else np.loadtxt(snapfile)
 
@@ -84,6 +93,7 @@ def profile_by_snap(
     t: Union[float, str],
     projvector: Optional[_PROJ_VECTOR_TYPE] = None,
     remove_artifacts: bool = True,
+    dens_par: int = 500,
 ) -> np.ndarray:
     """Get a np.ndarray with density profile for a given snapshot and time.
 
@@ -110,10 +120,17 @@ def profile_by_snap(
 
     filename = str(filename)
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
+    manippars_binning = (
+        "100,0.05"  # minimum bodies in radial bin, minimum bin size in log(r)
+    )
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        manippars = "" if not projvector else ",".join([str(_) for _ in projvector])
-        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars=";{manippars}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
+        if projvector:
+            manippars = ",".join([str(_) for _ in projvector]) + "," + manippars_binning
+        else:
+            manippars = manippars_binning
+
+        command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{manippars}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
@@ -157,9 +174,9 @@ def lagrange_radius_by_snap(
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
         if dens_par:
-            command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
+            command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
         else:
-            command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="{fraction}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
+            command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname={manipname} manippars="{fraction}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
 
         print(command)
 
@@ -201,7 +218,7 @@ def center_of_snap(
     manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
 
     with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        command = f'snaptrim in={filename} out=- times={t} timefuzz=0.000001 | manipulate in=- out=. manipname={manipname} manippars="{dens_par}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
+        command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname={manipname} manippars="{dens_par}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
         print(command)
 
         subprocess.check_call(command, shell=True)
@@ -319,7 +336,7 @@ def get_virial(
     virfile = filename.replace(".nemo", "") + f"{t}_vir.txt"
 
     with RemoveFileOnEnterExit(virfile, remove_artifacts):
-        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | snapvratio - wmode=exact eps={eps} newton=t | tee {virfile}"
+        command = f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | snapvratio - wmode=exact eps={eps} newton=t | tee {virfile}"
         print(command)
         subprocess.check_call(command, shell=True)
 
@@ -350,7 +367,7 @@ def get_momentum(
     momentum_file = filename.replace(".nemo", "") + f"{t}_momentum.txt"
 
     with RemoveFileOnEnterExit(momentum_file, remove_artifacts):
-        command = f"snaptrim in={filename} out=- times={t} timefuzz=0.000001 | snapkinem - weight=m | tee {momentum_file}"
+        command = f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | snapkinem - weight=m | tee {momentum_file}"
         print(command)
         subprocess.check_call(command, shell=True)
 
@@ -412,7 +429,7 @@ def count_binaries(
 
 
 def parse_fort14(
-    fort14: Union[str, os.PathLike, Path]
+    fort14: Union[str, os.PathLike, Path],
 ) -> tuple[tuple, np.ndarray[np.float32]]:
     """Parse fort.14 file with Lagrange radius data from Nbody6.
     The data has the following structure: LAGR: TTOT, LOG10(RLAGR(K)),K=1,11
@@ -430,3 +447,25 @@ def parse_fort14(
     F_LAGR = (0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.625, 0.75, 0.9)
     data = np.loadtxt(fort14, usecols=range(1, 13))
     return F_LAGR, data
+
+
+def find_density_center(
+    positions: np.ndarray[float],
+    masses: np.ndarray[float],
+    k: int = 6,
+):
+    """Estimates density center by positions[N, 3] and masses[N,] using
+    Casertano-Hut algo (note that NEMO uses another one)."""
+    tree = cKDTree(positions)
+    dists, idxs = tree.query(
+        positions, k=k + 1
+    )  # distances to k+1 neighbours including self at zero
+    rk = dists[:, k]  # k-th neighbor distance (exclude self at index 0)
+
+    # compute rho by k nearest particles
+    neigh_idx = idxs[:, 1 : k + 1]
+    mass_k = masses[neigh_idx].sum(axis=1)
+    rho = mass_k / (4 / 3 * np.pi * rk**3)
+
+    i_max = np.nanargmax(rho)
+    return positions[i_max]

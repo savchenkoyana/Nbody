@@ -1,10 +1,10 @@
 repos:
 - repo: https://github.com/psf/black
-  rev: 23.3.0
+  rev: 25.1.0
   hooks:
     - id: black
 - repo: https://github.com/PyCQA/isort
-  rev: 5.12.0
+  rev: 6.0.1
   hooks:
     - id: isort
       args:
@@ -23,11 +23,11 @@ repos:
           "--in-place",
         ]
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.8.0
+  rev: v3.20.0
   hooks:
     - id: pyupgrade
 - repo: https://github.com/PyCQA/docformatter
-  rev: v1.7.3
+  rev: v1.7.7
   hooks:
     - id: docformatter
       additional_dependencies: [tomli]
@@ -38,7 +38,7 @@ repos:
           "pyproject.toml",
         ]
 - repo: https://github.com/executablebooks/mdformat
-  rev: 0.7.16
+  rev: 0.7.22
   hooks:
     - id: mdformat
       additional_dependencies:
@@ -49,7 +49,7 @@ repos:
   hooks:
     - id: shellcheck
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v5.0.0
   hooks:
     - id: check-yaml
     - id: check-toml

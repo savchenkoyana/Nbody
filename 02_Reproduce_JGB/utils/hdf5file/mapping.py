@@ -1,0 +1,118 @@
+"""Mapping for Nbody6++GPU HDF5 snapshot data."""
+
+_SCALAR_MAP = {
+    1: "TTOT",
+    2: "NPAIRS",
+    3: "RBAR",
+    4: "ZMBAR",
+    5: "N",
+    6: "TSTAR",
+    7: "RDENS1",
+    8: "RDENS2",
+    9: "RDENS3",
+    10: "TTOT_TCR0",
+    11: "TSCALE",
+    12: "VSTAR",
+    13: "RC",
+    14: "NC",
+    15: "VC",
+    16: "RHOM",
+    17: "CMAX",
+    18: "RSCALE",
+    19: "RSMIN",
+    20: "DMIN1",
+    21: "RG1",
+    22: "RG2",
+    23: "RG3",
+    24: "VG1",
+    25: "VG2",
+    26: "VG3",
+    27: "TIDAL1",
+    28: "TIDAL2",
+    29: "TIDAL3",
+    30: "TIDAL4",
+    31: "GMG",
+    32: "OMEGA",
+    33: "DISK",
+    34: "A_OORT",
+    35: "B_OORT",
+    36: "ZMET_HURLEY",
+    **{i + 37: f"ZPAR{i+1}" for i in range(20)},  # ZPARS1-20 begin at index 37
+    57: "ETAI",
+    58: "ETAR",
+    59: "ETAU",
+    60: "ECLOSE",
+    61: "DTMIN",
+    62: "RMIN",
+    63: "GMIN",
+    64: "GMAX",
+    65: "SMAX",
+    66: "NNBOPT",
+    67: "EPOCH0",
+    68: "N_SINGLE",
+    69: "N_BINARY",
+    70: "N_MERGER",
+}
+
+_SINGLE_PARTICLE_MAP = {
+    "001": "X1",
+    "002": "X2",
+    "003": "X3",
+    "004": "V1",
+    "005": "V2",
+    "006": "V3",
+    "023": "M",
+    "032": "Name",
+    "033": "Type",
+    "035": "ASPN",
+}
+
+_SINGLE_PARTICLE_HR_MAP = {
+    "026": "R*",
+    "027": "L*",
+    "028": "Teff*",
+    "029": "RC*",
+    "030": "MC*",
+    "031": "KW",
+}
+
+_BINARY_PARTICLE_MAP = {
+    "123": "Bin M1*",
+    "124": "Bin M2*",
+    "154": "Bin A[au]",
+    "155": "Bin ECC",
+    "156": "Bin P[d]",
+    "157": "Bin G",
+    "161": "Bin Name1",
+    "162": "Bin Name2",
+    "164": "ASPN1",
+    "165": "ASPN2",
+}
+
+_BINARY_PARTICLE_HR_MAP = {
+    "158": "Bin KW1",
+    "159": "Bin KW2",
+}
+
+_MERGER_PARTICLE_MAP = {
+    "207": "Mer M1",
+    "208": "Mer M2",
+    "209": "Mer M3",
+    "238": "Mer A0[au]",
+    "239": "Mer ECC0",
+    "240": "Mer P0[d]",
+    "241": "Mer A1[au]",
+    "242": "Mer ECC1",
+    "243": "Mer P1[d]",
+    "247": "Mer KWC",
+    "248": "Mer NAM1",
+    "249": "Mer NAM2",
+    "250": "Mer NAM3",
+    "251": "Mer NAMC",
+}
+
+_MERGER_PARTICLE_HR_MAP = {
+    "244": "Mer KW1",
+    "245": "Mer KW2",
+    "246": "Mer KW3",
+}

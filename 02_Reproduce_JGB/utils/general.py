@@ -4,12 +4,10 @@ import argparse
 import math
 import sys
 import typing
-from functools import partial
+from pathlib import Path
 
 import agama
-import numpy as np
 import scipy
-import scipy.integrate as integrate
 
 
 def set_units():
@@ -83,23 +81,44 @@ def mass_pdf(x, mu, scale, sigma) -> typing.Callable[float, float]:
 
 
 def compute_mean_mass(mu: float, scale: float, sigma: float) -> float:
-    """Compute E[x] of mass pdf analytically or numerically depending on
-    parameter values.
+    """Compute E[x] of lognormal distribution depending on parameter values.
 
     See
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.lognorm.html
     for parameters definition.
     """
-    if mu == 0 and scale == 1:  # Simple case of log-normal distribution with zero mean
-        # Calculate E[x] according to analytic formula (see https://en.wikipedia.org/wiki/Log-normal_distribution)
-        mass_math_expectation = np.exp(sigma**2 / 2)
-    else:  # compute numerically
-        pdf = partial(mass_pdf, mu=mu, sigma=sigma, scale=scale)
-        norm_, _ = integrate.quad(func=pdf, a=mu, b=np.inf)
-        integral_, _ = integrate.quad(func=lambda x: x * pdf(x), a=mu, b=np.inf)
-        mass_math_expectation = integral_ / norm_
+    # if mu == 0 and scale == 1:  # Simple case of log-normal distribution with zero mean
+    #     # Calculate E[x] according to analytic formula (see https://en.wikipedia.org/wiki/Log-normal_distribution)
+    #     mass_math_expectation = np.exp(sigma**2 / 2)
+    # else:  # compute numerically
+    #     pdf = partial(mass_pdf, mu=mu, sigma=sigma, scale=scale)
+    #     norm_, _ = scipy.integrate.quad(func=pdf, a=mu, b=np.inf)
+    #     integral_, _ = scipy.integrate.quad(func=lambda x: x * pdf(x), a=mu, b=np.inf)
+    #     mass_math_expectation = integral_ / norm_
+    return scipy.stats.lognorm(loc=mu, scale=scale, s=sigma).mean()
 
-    return mass_math_expectation
+
+def create_label(mu: float, scale: float, sigma: float) -> str:
+    """Creates label by log-normal model parameters."""
+    if (mu, scale) == (0, 1):
+        label = rf"$\sigma$ = {sigma}"
+    elif (mu, scale, sigma) == (10, 1.5, 0.954):
+        label = "M & A"
+    else:
+        label = f"{mu}_{scale}_{sigma}"
+
+    return label
+
+
+def create_file_label(filename: typing.Union[str, Path]) -> str:
+    """Creates label by filename.
+
+    Filename should be like this: f'/path/to/dirname/snap_mu{mu}_s{scale}_sigma{sigma}_r{plummer_r}_N{N}_{postfix}/{name}.nemo'.
+    """
+    dirname = Path(filename).parts[-2]
+    postfix = "_".join(dirname.split("_")[6:])
+
+    return postfix
 
 
 def compute_gyrfalcon_parameters(

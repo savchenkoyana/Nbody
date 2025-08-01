@@ -95,12 +95,8 @@ nice -n 20 nbody0 $ROOT_DIR/IC_preprocessed_g1.nemo \
 echo
 echo "Postprocess data:"
 python postprocess_snap.py \
-  --snap-file $ROOT_DIR/out_nbody.nemo \
-  --remove-point-source \
-  --source-mass 4.37e10 \
-  --length 0.001 \
-  --mass 232.5337331 \
-  --velocity 1.0
+  --exp $ROOT_DIR/out_nbody.nemo \
+  --version nbody0
 
 echo
 echo "Calculating timestamps..."
