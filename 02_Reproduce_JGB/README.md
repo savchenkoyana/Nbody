@@ -292,4 +292,4 @@ Here is a list of what we need to fully reproduce the article:
 - [x] Comparison with other methods
 - [x] Nbody6 (simple run)
 - [x] Enable gravitational waves and black hole coalescence
-- [ ] Set natal spins = 0 (random with `KZ(24)=2`)
+- [x] Set natal spins = 0 (random with `KZ(24)=2`)

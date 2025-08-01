@@ -14,7 +14,7 @@ Level='C' /
 
 &INSSE /
 
-&INBSE bhspinfl=0 /
+&INBSE bhspinfl=2,kicktype=1 /
 
 &INCOLL /
 
