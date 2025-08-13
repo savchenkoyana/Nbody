@@ -59,7 +59,11 @@ if __name__ == "__main__":
         # Plot mass distribution
         df_m = pd.read_csv(exp / "coll.13", sep=r"\s+", skiprows=[0, 1])
         print(df_m[["M(I1)[M*]", "M(I2)[M*]"]])
-        ax_m.scatter(df_m["M(I1)[M*]"], df_m["M(I2)[M*]"], marker=".", alpha=0.7)
+
+        m_low = np.minimum(df_m["M(I1)[M*]"], df_m["M(I2)[M*]"])
+        m_high = np.maximum(df_m["M(I1)[M*]"], df_m["M(I2)[M*]"])
+
+        ax_m.scatter(m_high, m_low, marker=".", alpha=0.7)
 
         ax_m.plot([0, 70], [0, 70], "--", alpha=0.7, label="q=1")
         ax_m.plot([0, 70], [0, 35], "--", alpha=0.7, label="q=1/2")
@@ -80,7 +84,7 @@ if __name__ == "__main__":
             # More massive particle absorbs another during collision
             m1, m2 = df_m_i["M(I1)[M*]"], df_m_i["M(I2)[M*]"]
             ind = df_m_i["NAME(I1)"] if m1 > m2 else df_m_i["NAME(I2)"]
-            q = m2 / m1 if m1 > m2 else m1 / m2
+            q = (m2 / m1) if m1 > m2 else (m1 / m2)
 
             def get_spin(snap, idx):
                 if idx in snap.Name:
