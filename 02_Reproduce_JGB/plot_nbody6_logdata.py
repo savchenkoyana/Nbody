@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from utils.nbody6_log import _ADJUST_DATA
 from utils.nbody6_log import _COLS
@@ -81,11 +82,13 @@ if __name__ == "__main__":
 
     # Plot and print selected data
     if values_adjust:
-        plot_adjust_data(df, values_adjust, logscale=args.logscale)
+        fix, ax = plot_adjust_data(df, values_adjust, logscale=args.logscale)
+        plt.show()
         print(df[values_adjust])
 
     if values_output:
-        plot_output_data(data, values_output, args.astro_units)
+        fix, ax = plot_output_data(data, values_output, args.astro_units)
+        plt.show()
         for value in values_output:
             print("=" * 15, value, "=" * 15)
             print(data[value][_COLS])

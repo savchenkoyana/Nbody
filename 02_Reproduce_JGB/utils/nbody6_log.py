@@ -1,8 +1,11 @@
 """Based on this jupyter-notebook: https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing/blob/stable/examples/01_Basics.ipynb"""
+
 import re
 from pathlib import Path
+from typing import Optional
 from typing import Union
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -85,9 +88,9 @@ def parse_output_data(logfile: str):
                     line = re.sub(r"\s+", " ", line).strip()
                     line = line.split(" ")
 
-                    (data[data_type]).loc[
-                        np.float64(line[0].replace("D", "E"))
-                    ] = np.float64(line[2:])
+                    (data[data_type]).loc[np.float64(line[0].replace("D", "E"))] = (
+                        np.float64(line[2:])
+                    )
                     break
 
     return data
@@ -125,14 +128,20 @@ def load_data(dirname: Union[str, Path]):
 # ——— Data plotting ———
 
 
-def plot_adjust_data(df: pd.DataFrame, plot_values: list, logscale: bool):
+def plot_adjust_data(
+    df: pd.DataFrame,
+    plot_values: list,
+    logscale: bool,
+    ax: Optional[matplotlib.axes._axes.Axes] = None,
+):
     """Plot data produced at 'adjust' stage.
 
     Y axis can be in default scale or logscale. Only N-body units are
     supported.
     """
-    fig = plt.figure(figsize=(9, 6))
-    ax = fig.gca()
+    if ax is None:
+        fig = plt.figure(figsize=(9, 6))
+        ax = fig.gca()
 
     df[plot_values].plot(ax=ax)
 
@@ -142,8 +151,7 @@ def plot_adjust_data(df: pd.DataFrame, plot_values: list, logscale: bool):
     ax.grid()
     if logscale:
         ax.set_yscale("log")
-    plt.show()
-    return fig, ax
+    return ax.figure, ax
 
 
 def plot_output_data(data: dict, plot_values: list, astro_units: bool):
@@ -192,5 +200,4 @@ def plot_output_data(data: dict, plot_values: list, astro_units: bool):
 
     fig.tight_layout()
     plt.legend()
-    plt.show()
     return fig, ax
