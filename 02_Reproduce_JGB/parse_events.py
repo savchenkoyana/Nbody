@@ -97,7 +97,15 @@ if __name__ == "__main__":
     plot_adjust_data(df_adjust, ["ECOLL", "EMDOT", "ECDOT"], logscale=False, ax=axes[2])
     plot_events_vline(ax=axes[2], events=events, event_times=event_times)
 
-    text = ", ".join(f"t={t:.2f} ({', '.join(events[t])})" for t in sorted(event_times))
-    plt.tight_layout(rect=[0, 0.05, 1, 1])  # leave 5% bottom margin
-    fig.text(0.5, 0.025, text, ha="center", fontsize=10)
+    if event_times:
+        text = (
+            "DE>1e-5, got "
+            + ", ".join(
+                f"{', '.join(events[t])} (t={t:.2f})" for t in sorted(event_times)
+            )
+            + " (from event.35)"
+        )
+        plt.tight_layout(rect=[0, 0.05, 1, 1])  # leave 5% bottom margin
+        fig.text(0.5, 0.025, text, ha="center", fontsize=10)
+
     plt.show()

@@ -29,6 +29,11 @@ _ADJUST_DATA = {
     "ECOLL",  # The difference of binding energy of inner binary at the end and begin of hierarchical systems (E(10))
     "EMDOT",  # Mechanical energy of mass loss due to stellar evolution (E(12))
     "ECDOT",  # Energy of velocity kick due to stellar evolution
+    "DTMIN",
+    "RMIN",
+    "ETAI",
+    "ETAR",
+    "ETAU",
 }
 
 _FULL_COLS = [
@@ -60,21 +65,67 @@ _COLS = [0.01, 0.1, 0.3, 0.5, 0.9, 1.0, "<RC"]
 def parse_adjust_data(logfile: str):
     """Parse lines produced at adjust stage."""
     df = None
+    df_ks_params = pd.DataFrame(columns=["DTMIN", "RMIN"])
+    df_eta_params = pd.DataFrame(columns=["ETAI", "ETAR", "ETAU"])
 
     with open(logfile) as nb_stdout:
-        for line in nb_stdout:
-            line = line.replace("*****", " nan")
-            if re.search("ADJUST:", line):
-                line = re.sub(r"\s+", " ", line).strip()
-                line = line.split(" ")
+        etai = None
+        etar = None
+        etau = None
 
-                if df is None:
-                    cols = [line[i] for i in range(3, len(line), 2)]
-                    df = pd.DataFrame(columns=cols)
+        read_eta = False
 
-                idx = np.float64(line[2])
-                df.loc[idx] = np.float64([line[i] for i in range(4, len(line), 2)])
-    return df
+        for i, line in enumerate(nb_stdout):
+            # the definitions of parameters are printed here in a str
+            if i < 50:
+                if line.strip().startswith("ETAI      ETAR"):
+                    read_eta = True
+                elif line.strip().startswith("DTMIN     RMIN      ETAU"):
+                    read_eta = True
+                elif read_eta and line.strip():
+                    floats = [float(x) for x in line.strip().split()]
+                    if len(floats) > 7:
+                        etai, etar = floats[0], floats[1]
+                    else:
+                        etau = floats[2]
+                    read_eta = False
+            else:
+                line = line.replace("*****", " nan")
+                if re.search("ADJUST:", line):
+                    line = re.sub(r"\s+", " ", line).strip()
+                    line = line.split(" ")
+
+                    if df is None:
+                        cols = [line[i] for i in range(3, len(line), 2)]
+                        df = pd.DataFrame(columns=cols)
+
+                    idx = np.float64(line[2])
+                    df.loc[idx] = np.float64([line[i] for i in range(4, len(line), 2)])
+
+                    # Fill with previously calculated parameters
+                    df_eta_params.loc[idx] = {"ETAI": etai, "ETAR": etar, "ETAU": etau}
+
+                elif re.search("RMIN = ", line):
+                    pattern = r"([A-Z]+)\s*=\s*([0-9Ee\+\-\.]+)"
+                    matches = re.findall(pattern, line)
+                    params = {key: float(value) for key, value in matches}
+
+                    # idx is the same as this is written after ADJUST
+                    df_ks_params.loc[idx] = {
+                        key: float(params[key]) for key in df_ks_params.columns
+                    }
+                elif re.search("ETAI = ", line):
+                    pattern = r"([A-Z]+)\s*=\s*([0-9Ee\+\-\.]+)"
+                    matches = re.findall(pattern, line)
+                    params = {key: float(value) for key, value in matches}
+
+                    # If present, overwrite
+                    df_eta_params.loc[idx] = {
+                        key: float(params[key]) for key in df_eta_params.columns
+                    }
+                    etai, etau, etar = params["ETAI"], params["ETAU"], params["ETAR"]
+
+    return pd.concat([df, df_ks_params, df_eta_params], axis=1)
 
 
 def parse_output_data(logfile: str):

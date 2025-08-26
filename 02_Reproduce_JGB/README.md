@@ -293,3 +293,17 @@ Here is a list of what we need to fully reproduce the article:
 - [x] Nbody6 (simple run)
 - [x] Enable gravitational waves and black hole coalescence
 - [x] Set natal spins = 0 (random with `KZ(24)=2`)
+
+# Debugging
+
+- Try using `parse_events.py` and QE=1.0 to gather more info about failed runs:
+
+  ```bash
+  python parse_events.py --exp /path/to/your/exp
+  ```
+
+- Try to grep "Warning" in output log:
+
+  ```bash
+  grep "Warning" /path/to/your/exp.out
+  ```
