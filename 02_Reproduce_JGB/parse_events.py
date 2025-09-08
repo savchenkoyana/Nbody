@@ -64,9 +64,8 @@ if __name__ == "__main__":
     df_adjust = parse_adjust_data(exp / "exp.out")
 
     # Get time [NB] of energy non-conservation
-    t_nb_large_de = df_adjust[np.abs(df_adjust["DE"]) > 1e-5].index.values.astype(
-        np.int32
-    )
+    df_adjust_large_de = df_adjust[np.abs(df_adjust["DE"]) > 1e-5]
+    t_nb_large_de = df_adjust_large_de.index.values.astype(np.int32)
 
     event_times = set(event_times)
     t_nb_large_de = set(t_nb_large_de)
@@ -81,6 +80,19 @@ if __name__ == "__main__":
     plt.plot(df_adjust["DE"])
     plot_events_vline(ax=ax_de, events=events, event_times=event_times)
 
+    if event_times:
+        text = (
+            "DE>1e-5, got "
+            + ", ".join(
+                f"{df_adjust_large_de.at[t, 'DE']:.1e} (t={t:.2f})"
+                for t in sorted(event_times)
+            )
+            + " (from event.35)"
+        )
+        plt.subplots_adjust(bottom=0.15)
+        fig_de.text(0.5, 0.05, text, ha="center", fontsize=10)
+
+    # plot other distributions
     fig, axes = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
 
     # plot EKIN, POT, ETIDE, ETOT
@@ -105,7 +117,7 @@ if __name__ == "__main__":
             )
             + " (from event.35)"
         )
-        plt.tight_layout(rect=[0, 0.05, 1, 1])  # leave 5% bottom margin
-        fig.text(0.5, 0.025, text, ha="center", fontsize=10)
+        plt.subplots_adjust(bottom=0.1)
+        fig.text(0.5, 0.02, text, ha="center", fontsize=10)
 
     plt.show()
