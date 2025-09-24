@@ -43,6 +43,8 @@ To reproduce the experiment, follow these steps:
   ln -s /path/to/Nbody/Nbody6PPGPU-beijing-yana/build/nbody6++.avx nbody6pp-beijing
   ```
 
+  Also note that you need to use `KZ(24)=3` option in your input files which is not introduced in the official version. Although there is `KZ(24)=2`, which means "start with black holes only, spin is random".
+
 - Create initial coordinates of cluster:
 
   ```bash
@@ -292,7 +294,7 @@ Here is a list of what we need to fully reproduce the article:
 - [x] Comparison with other methods
 - [x] Nbody6 (simple run)
 - [x] Enable gravitational waves and black hole coalescence
-- [x] Set natal spins = 0 (random with `KZ(24)=2`)
+- [x] Set natal spins = 0
 
 # Debugging
 

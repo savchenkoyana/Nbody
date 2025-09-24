@@ -75,6 +75,8 @@ def parse_adjust_data(logfile: str):
 
         read_eta = False
 
+        idx = None
+
         for i, line in enumerate(nb_stdout):
             # the definitions of parameters are printed here in a str
             if i < 50:

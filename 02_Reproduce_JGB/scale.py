@@ -14,28 +14,25 @@ from utils.snap import remove
 def get_scaling(filename, current_units):
     agama.setUnits(**current_units)
 
-    snap = agama.readSnapshot(filename)
-    xv, m = snap
+    xv, m = agama.readSnapshot(filename)
+    pos = xv[:, :3]
+    vel = xv[:, 3:]
     N = m.shape[0]
 
-    T = 0
-    W = 0
-    eps = 0  # can be changed if needed
+    # --- Kinetic energy
+    v2 = np.sum(vel**2, axis=1)
+    T = 0.5 * np.sum(m * v2)
 
-    for i in range(N):
-        v2 = np.sum(xv[i, 3:] ** 2)
-        T += 0.5 * m[i] * v2
+    # --- Potential energy using Agama multipole expansion
+    pot = agama.Potential(type="Multipole", particles=(xv, m), symmetry="spherical")
+    phi = pot.potential(pos)
+    W = 0.5 * np.sum(m * phi)
 
-        for j in range(N):
-            if i == j:
-                continue
-
-            dr = xv[i, :3] - xv[j, :3]
-            r2 = np.sum(dr**2 + eps**2)
-            W += -0.5 * agama.G * m[i] * m[j] / np.sqrt(r2)
-
+    # --- Total energy and virial ratio
     E = T + W
-    print(f"E = {E}, T / E = {T / E}, W / E = {W / E}")
+    Q = T / abs(W)
+
+    print(f"E = {E}, T = {T}, W = {W}, Q = {Q}")
 
     M = np.sum(m)
     R = -0.25 * agama.G * M**2 / E
@@ -43,11 +40,13 @@ def get_scaling(filename, current_units):
     mscale = 1 / M
     rscale = 1 / R
     vscale = np.sqrt(mscale / rscale / agama.G)
-    print(f"mscale={mscale}, rscale={rscale}, vscale={vscale}")
 
+    print(f"mscale={mscale}, rscale={rscale}, vscale={vscale}")
     print(
-        f"Rbar(pc)={R * 1e3 * current_units['length']}, Zmbar(Msun)={np.mean(m) * current_units['mass']}, Q={T / W}"
+        f"Rbar(pc)={R * 1e3 * current_units['length']}, "
+        f"Zmbar(Msun)={np.mean(m) * current_units['mass']}, Q={Q}"
     )
+
     scale = {
         "mscale": mscale,
         "rscale": rscale,
