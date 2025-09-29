@@ -149,6 +149,34 @@ def parse_output_data(logfile: str):
     return data
 
 
+def parse_step_data(logfile: str):
+    """Parse STEP I / STEP R lines from output stage."""
+    step_data = {"I": [], "R": []}
+
+    with open(logfile) as f:
+        for line in f:
+            stripped_line = line.strip()
+            if stripped_line.startswith("STEP I") or stripped_line.startswith("STEP R"):
+                parts = stripped_line.split()
+                step_type = parts[1]  # "I" or "R"
+                values = list(map(int, parts[2:]))  # rest are integers
+                step_data[step_type].append(values)
+
+    # Convert each to DataFrame with dynamic columns
+    dfs = {}
+    for key, rows in step_data.items():
+        if not rows:
+            continue
+        maxlen = max(len(r) for r in rows)
+        cols = [f"bin_{i}" for i in range(maxlen)]
+        df = pd.DataFrame(
+            [r + [np.nan] * (maxlen - len(r)) for r in rows], columns=cols
+        )
+        dfs[key] = df
+
+    return dfs
+
+
 def load_scaling(logfile: str):
     """Get scale coefficient from log file."""
     pat = re.compile(

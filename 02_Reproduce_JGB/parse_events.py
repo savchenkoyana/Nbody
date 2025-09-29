@@ -77,6 +77,7 @@ if __name__ == "__main__":
     ax_de.set_title(r"DE")
     ax_de.set_xlabel(r"Time t [nbody units]")
     ax_de.set_ylabel(r"DE [nbody units]")
+    ax_de.grid()
     plt.plot(df_adjust["DE"])
     plot_events_vline(ax=ax_de, events=events, event_times=event_times)
 
@@ -91,6 +92,28 @@ if __name__ == "__main__":
         )
         plt.subplots_adjust(bottom=0.15)
         fig_de.text(0.5, 0.05, text, ha="center", fontsize=10)
+
+    # plot DETOT
+    fig_detot = plt.figure(figsize=(9, 6))
+    ax_detot = fig_detot.gca()
+    ax_detot.set_title(r"DETOT")
+    ax_detot.set_xlabel(r"Time t [nbody units]")
+    ax_detot.set_ylabel(r"DETOT [nbody units]")
+    ax_detot.grid()
+    plt.plot(df_adjust["DETOT"])
+    plot_events_vline(ax=ax_detot, events=events, event_times=event_times)
+
+    if event_times:
+        text = (
+            "DE>1e-5, got "
+            + ", ".join(
+                f"{df_adjust_large_de.at[t, 'DE']:.1e} (t={t:.2f})"
+                for t in sorted(event_times)
+            )
+            + " (from event.35)"
+        )
+        plt.subplots_adjust(bottom=0.15)
+        fig_detot.text(0.5, 0.05, text, ha="center", fontsize=10)
 
     # plot other distributions
     fig, axes = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
