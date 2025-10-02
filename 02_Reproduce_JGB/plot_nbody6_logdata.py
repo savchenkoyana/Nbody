@@ -68,17 +68,18 @@ if __name__ == "__main__":
 
     df = parse_adjust_data(args.log_file)
     data = parse_output_data(args.log_file)
-    scalings = load_scaling(args.log_file)
-    print(
-        f"Scale coefficients: R*={scalings['R*']}[pc], V*={scalings['V*']}[km/s], T*={scalings['T*']}[Myr], M*={scalings['M*']}[Msun]"
-    )
 
     # save data
     df.to_csv(save_dir / "adjust_data.csv", index=False)
     for key in data:
         data[key].to_csv(save_dir / f"{key}.csv", index=False)
 
-    data = {**data, **scalings}
+    if args.astro_units:
+        scalings = load_scaling(args.log_file)
+        print(
+            f"Scale coefficients: R*={scalings['R*']}[pc], V*={scalings['V*']}[km/s], T*={scalings['T*']}[Myr], M*={scalings['M*']}[Msun]"
+        )
+        data = {**data, **scalings}
 
     # Plot and print selected data
     if values_adjust:

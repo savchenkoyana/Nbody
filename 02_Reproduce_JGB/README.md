@@ -131,11 +131,11 @@ To reproduce the experiment, follow these steps:
 
 # Simulation output
 
-In previous versions of direct N-body codes, the evolving algorithm produced many text outputs as well as simulation file `out.nemo`. Later Nbody6++GPU-beijing switched to hdf5 data format where everything is stored in a single file. A part of the next scripts uses nemo file and other part uses hdf5 file for historical reasons. But it is essential to build Nbody6++GPU-beijing with hdf5 support as there is no other easy way to get access to spin data other that use hdf5.
+In previous versions of direct N-body codes, the evolving algorithm produced many text outputs as well as particle data files `conf.3_*`. Later Nbody6++GPU-beijing switched to hdf5 data format where both particle and scalar data are stored in a single file. A part of the next scripts uses nemo file (particle data) and other part uses hdf5 file for historical reasons. But it is essential to build Nbody6++GPU-beijing with hdf5 support as there is no other way to get access to spin data other that use hdf5.
 
-There is a notebook [Hdf5Example.ipynb](Hdf5Example.ipynb) that illustrates how to work with hdf5 data created by simulation.
+There is a notebook [Hdf5Example.ipynb](Hdf5Example.ipynb) that illustrates how to work with hdf5 data created during simulation.
 
-> Note that Nbody6++GPU is written on Fortran so it uses Fortran-style (1-based) array indexing while we use C-style (0-based) array indexing.
+> Note that Nbody6++GPU is written in Fortran so it uses Fortran-style (1-based) array indexing while we use C-style (0-based) array indexing. This is essential to acess particle data.
 
 # Explore results
 
