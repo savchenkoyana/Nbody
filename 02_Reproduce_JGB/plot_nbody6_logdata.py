@@ -6,9 +6,7 @@ import pandas as pd
 from utils.nbody6_log import _ADJUST_DATA
 from utils.nbody6_log import _COLS
 from utils.nbody6_log import _OUTPUT_DATA
-from utils.nbody6_log import load_scaling
-from utils.nbody6_log import parse_adjust_data
-from utils.nbody6_log import parse_output_data
+from utils.nbody6_log import load_data
 from utils.nbody6_log import plot_adjust_data
 from utils.nbody6_log import plot_output_data
 
@@ -65,30 +63,31 @@ if __name__ == "__main__":
     if args.full_output:
         setup_pandas()
 
-    df = parse_adjust_data(args.log_file)
-    data = parse_output_data(args.log_file)
+    data = load_data(args.log_file)
+    adjust_data = data["adjust"]
+    output_data = data["output"]
 
     # save data
-    df.to_csv(save_dir / "adjust_data.csv", index=False)
-    for key in data:
-        data[key].to_csv(save_dir / f"{key}.csv", index=False)
+    adjust_data.to_csv(save_dir / "adjust_data.csv", index=False)
+    for key in output_data:
+        output_data[key].to_csv(save_dir / f"{key}.csv", index=False)
 
     if args.astro_units:
-        scalings = load_scaling(args.log_file)
+        scalings = data["scalings"]
         print(
             f"Scale coefficients: R*={scalings['R*']}[pc], V*={scalings['V*']}[km/s], T*={scalings['T*']}[Myr], M*={scalings['M*']}[Msun]"
         )
-        data = {**data, **scalings}
+        output_data = {**output_data, **scalings}
 
     # Plot and print selected data
     if values_adjust:
-        fix, ax = plot_adjust_data(df, values_adjust, logscale=args.logscale)
+        fix, ax = plot_adjust_data(adjust_data, values_adjust, logscale=args.logscale)
         plt.show()
-        print(df[values_adjust])
+        print(adjust_data[values_adjust])
 
     if values_output:
-        fix, ax = plot_output_data(data, values_output, args.astro_units)
+        fix, ax = plot_output_data(output_data, values_output, args.astro_units)
         plt.show()
         for value in values_output:
             print("=" * 15, value, "=" * 15)
-            print(data[value][_COLS])
+            print(output_data[value][_COLS])

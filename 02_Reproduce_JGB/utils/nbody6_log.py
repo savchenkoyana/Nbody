@@ -2,7 +2,10 @@
 
 import re
 from pathlib import Path
+from typing import Dict
+from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 import matplotlib
@@ -59,122 +62,266 @@ _FULL_COLS = [
 ]
 _COLS = [0.01, 0.1, 0.3, 0.5, 0.9, 1.0, "<RC"]
 
+# Precompile regexes used repeatedly
+_KEYVAL_RE = re.compile(r"([A-Z]+)\s*=\s*([0-9Ee\+\-\.]+)")
+_SCALING_RE = re.compile(
+    r"""PHYSICAL\ SCALING:      # literal header
+        \s*R\*\s*=\s*([0-9E+.\-]+)   # capture R*
+        \s*M\*\s*=\s*([0-9E+.\-]+)   # capture M*
+        \s*V\*\s*=\s*([0-9E+.\-]+)   # capture V*
+        \s*T\*\s*=\s*([0-9E+.\-]+)   # capture T*
+    """,
+    re.VERBOSE,
+)
+
+
+def _safe_float(token: str) -> float:
+    """Convert token to float safely, handling 'D' exponent and malformed
+    tokens."""
+    try:
+        return float(token)
+    except ValueError:
+        try:
+            return float(token.replace("D", "E"))
+        except Exception:
+            return np.nan
+
+
 # ——— Data loading ———
 
 
-def parse_adjust_data(logfile: str):
-    """Parse lines produced at adjust stage."""
-    df = None
-    df_ks_params = pd.DataFrame(columns=["DTMIN", "RMIN"])
-    df_eta_params = pd.DataFrame(columns=["ETAI", "ETAR", "ETAU"])
+def parse_log(
+    logfile: Union[str, Path],
+) -> Dict[str, Union[pd.DataFrame, Dict[str, pd.DataFrame], None]]:
+    """Parse an Nbody6++GPU log file in one pass.
 
-    with open(logfile) as nb_stdout:
-        etai = None
-        etar = None
-        etau = None
+    Returns dict with keys:
+      - "adjust": DataFrame (index=time)
+      - "output": dict mapping data_type -> DataFrame (columns=_FULL_COLS)
+      - "step": dict mapping 'I'/'R' -> DataFrame, or None if not present
+      - "scaling": dict with keys 'R*','M*','V*','T*' or None
+    """
+    logfile = Path(logfile)
+    with logfile.open("r") as fh:
+        lines = fh.readlines()
 
-        read_eta = False
+    # Obtain scaling first using the dedicated function (if you already have parse_scaling)
+    scaling = load_scaling(logfile)
 
-        idx = None
+    # Header scan for predeclared ETA values (unchanged)
+    pre_etai: Optional[float] = None
+    pre_etar: Optional[float] = None
+    pre_etau: Optional[float] = None
+    for i, raw in enumerate(lines[:50]):
+        s = raw.strip()
+        if s.startswith("ETAI") and "ETAR" in s:
+            for next_line in lines[i + 1 : i + 6]:
+                if not next_line.strip():
+                    continue
+                parts = next_line.split()
+                if len(parts) >= 1:
+                    pre_etai = _safe_float(parts[0])
+                if len(parts) >= 2:
+                    pre_etar = _safe_float(parts[1])
+                if len(parts) >= 3:
+                    pre_etau = _safe_float(parts[2])
+                break
+        elif s.startswith("DTMIN") and "RMIN" in s and "ETAU" in s:
+            for next_line in lines[i + 1 : i + 6]:
+                if not next_line.strip():
+                    continue
+                parts = next_line.split()
+                if len(parts) >= 3:
+                    pre_etai = _safe_float(parts[0])
+                    pre_etar = _safe_float(parts[1])
+                    pre_etau = _safe_float(parts[2])
+                break
 
-        for i, line in enumerate(nb_stdout):
-            # the definitions of parameters are printed here in a str
-            if i < 50:
-                if line.strip().startswith("ETAI      ETAR"):
-                    read_eta = True
-                elif line.strip().startswith("DTMIN     RMIN      ETAU"):
-                    read_eta = True
-                elif read_eta and line.strip():
-                    floats = [float(x) for x in line.strip().split()]
-                    if len(floats) > 7:
-                        etai, etar = floats[0], floats[1]
-                    else:
-                        etau = floats[2]
-                    read_eta = False
-            else:
-                line = line.replace("*****", " nan")
-                if re.search("ADJUST:", line):
-                    line = re.sub(r"\s+", " ", line).strip()
-                    line = line.split(" ")
+    # Collections while scanning file once
+    adjust_rows: List[Dict] = []
+    output_rows: Dict[str, List[Tuple[float, List[float]]]] = {
+        name: [] for name in _OUTPUT_DATA
+    }
+    step_lists: Dict[str, List[List[int]]] = {"I": [], "R": []}
+    ks_params: Dict[float, Dict[str, float]] = {}
+    eta_params: Dict[float, Dict[str, float]] = {}
 
-                    if df is None:
-                        cols = [line[i] for i in range(3, len(line), 2)]
-                        df = pd.DataFrame(columns=cols)
+    current_time_idx: Optional[float] = None
 
-                    idx = np.float64(line[2])
-                    df.loc[idx] = np.float64([line[i] for i in range(4, len(line), 2)])
-
-                    # Fill with previously calculated parameters
-                    df_eta_params.loc[idx] = {"ETAI": etai, "ETAR": etar, "ETAU": etau}
-
-                elif re.search("RMIN = ", line):
-                    pattern = r"([A-Z]+)\s*=\s*([0-9Ee\+\-\.]+)"
-                    matches = re.findall(pattern, line)
-                    params = {key: float(value) for key, value in matches}
-
-                    # idx is the same as this is written after ADJUST
-                    df_ks_params.loc[idx] = {
-                        key: float(params[key]) for key in df_ks_params.columns
-                    }
-                elif re.search("ETAI = ", line):
-                    pattern = r"([A-Z]+)\s*=\s*([0-9Ee\+\-\.]+)"
-                    matches = re.findall(pattern, line)
-                    params = {key: float(value) for key, value in matches}
-
-                    # If present, overwrite
-                    df_eta_params.loc[idx] = {
-                        key: float(params[key]) for key in df_eta_params.columns
-                    }
-                    etai, etau, etar = params["ETAI"], params["ETAU"], params["ETAR"]
-
-    return pd.concat([df, df_ks_params, df_eta_params], axis=1)
-
-
-def parse_output_data(logfile: str):
-    """Parse lines produced at output stage."""
-    data = {data_type: pd.DataFrame(columns=_FULL_COLS) for data_type in _OUTPUT_DATA}
-
-    with open(logfile) as nb_stdout:
-        for line in nb_stdout:
-            for data_type in _OUTPUT_DATA:
-                if re.search(data_type, line):
-                    line = re.sub(r"\s+", " ", line).strip()
-                    line = line.split(" ")
-
-                    (data[data_type]).loc[np.float64(line[0].replace("D", "E"))] = (
-                        np.float64(line[2:])
-                    )
-                    break
-
-    return data
-
-
-def parse_step_data(logfile: str):
-    """Parse STEP I / STEP R lines from output stage."""
-    step_data = {"I": [], "R": []}
-
-    with open(logfile) as f:
-        for line in f:
-            stripped_line = line.strip()
-            if stripped_line.startswith("STEP I") or stripped_line.startswith("STEP R"):
-                parts = stripped_line.split()
-                step_type = parts[1]  # "I" or "R"
-                values = list(map(int, parts[2:]))  # rest are integers
-                step_data[step_type].append(values)
-
-    # Convert each to DataFrame with dynamic columns
-    dfs = {}
-    for key, rows in step_data.items():
-        if not rows:
+    # iterate once
+    for raw in lines:
+        if not raw.strip():
             continue
-        maxlen = max(len(r) for r in rows)
-        cols = [f"bin_{i}" for i in range(maxlen)]
-        df = pd.DataFrame(
-            [r + [np.nan] * (maxlen - len(r)) for r in rows], columns=cols
-        )
-        dfs[key] = df
 
-    return dfs
+        line = raw.replace("*****", " nan")
+        stripped = line.strip()
+
+        # STEP lines
+        if stripped.startswith("STEP I") or stripped.startswith("STEP R"):
+            parts = stripped.split()
+            if len(parts) >= 2:
+                step_type = parts[1]
+                try:
+                    values = [int(x) for x in parts[2:]]
+                except ValueError:
+                    continue
+                if step_type in step_lists:
+                    step_lists[step_type].append(values)
+            continue
+
+        # ADJUST lines
+        if "ADJUST:" in line:
+            toks = re.sub(r"\s+", " ", line).strip().split(" ")
+            if len(toks) >= 3:
+                time_token = toks[2]
+                try:
+                    time_val = float(time_token)
+                except ValueError:
+                    try:
+                        time_val = float(time_token.replace("D", "E"))
+                    except Exception:
+                        continue
+                current_time_idx = time_val
+                cols = toks[3::2]
+                vals_toks = toks[4::2]
+                vals = [_safe_float(vt) for vt in vals_toks]
+                row: Dict = {"time": time_val}
+                for c, v in zip(cols, vals):
+                    row[c] = v
+
+                # fill predeclared ETA values if missing
+                if pre_etai is not None and "ETAI" not in row:
+                    row["ETAI"] = pre_etai
+                if pre_etar is not None and "ETAR" not in row:
+                    row["ETAR"] = pre_etar
+                if pre_etau is not None and "ETAU" not in row:
+                    row["ETAU"] = pre_etau
+
+                eta_params.setdefault(
+                    time_val,
+                    {
+                        "ETAI": pre_etai,
+                        "ETAR": pre_etar,
+                        "ETAU": pre_etau,
+                    },
+                )
+
+                adjust_rows.append(row)
+            continue
+
+        # RMIN / DTMIN lines
+        if "RMIN" in line and "=" in line:
+            matches = _KEYVAL_RE.findall(line)
+            if matches and current_time_idx is not None:
+                params = {k: float(v) for k, v in matches if k in ("DTMIN", "RMIN")}
+                if params:
+                    ks_params[current_time_idx] = params
+            continue
+
+        # Explicit ETAI = ... lines override
+        if "ETAI" in line and "=" in line:
+            matches = _KEYVAL_RE.findall(line)
+            if matches and current_time_idx is not None:
+                params = {
+                    k: float(v) for k, v in matches if k in ("ETAI", "ETAU", "ETAR")
+                }
+                prev = eta_params.get(current_time_idx, {})
+                prev.update(params)
+                eta_params[current_time_idx] = prev
+                if "ETAI" in params:
+                    pre_etai = params["ETAI"]
+                if "ETAU" in params:
+                    pre_etau = params["ETAU"]
+                if "ETAR" in params:
+                    pre_etar = params["ETAR"]
+            continue
+
+        # Output-type lines (RLAGR, AVMASS, ...)
+        for data_type in _OUTPUT_DATA:
+            if data_type in line:
+                toks = re.sub(r"\s+", " ", raw).strip().split(" ")
+                if len(toks) < 3:
+                    break
+                time_token = toks[0].replace("D", "E")
+                try:
+                    time_val = float(time_token)
+                except ValueError:
+                    break
+                val_tokens = toks[2:]
+                values = [_safe_float(vt) for vt in val_tokens]
+                output_rows[data_type].append((time_val, values))
+                break
+
+    # --- Build DataFrames (keep last ADJUST row when times duplicate) ---
+    # in case of terminated runs and concatenated logs
+    if adjust_rows:
+        df_adjust = pd.DataFrame(adjust_rows).set_index("time").sort_index()
+    else:
+        df_adjust = pd.DataFrame()
+
+    # create ks/eta dataframes from collected dicts (may be empty)
+    df_ks = (
+        pd.DataFrame.from_dict(ks_params, orient="index")
+        if ks_params
+        else pd.DataFrame(columns=["DTMIN", "RMIN"])
+    )
+    df_eta = (
+        pd.DataFrame.from_dict(eta_params, orient="index")
+        if eta_params
+        else pd.DataFrame(columns=["ETAI", "ETAR", "ETAU"])
+    )
+
+    # Deduplicate the ADJUST DataFrame by index, keeping the LAST occurrence
+    if not df_adjust.empty and not df_adjust.index.is_unique:
+        df_adjust = df_adjust.groupby(level=0).last()
+
+    # Now safe to concat
+    if not df_adjust.empty:
+        df_adjust = pd.concat([df_adjust, df_ks, df_eta], axis=1)
+    else:
+        df_adjust = (
+            pd.concat([df_ks, df_eta], axis=1)
+            if (not df_ks.empty or not df_eta.empty)
+            else pd.DataFrame()
+        )
+
+    output_result: Dict[str, pd.DataFrame] = {}
+    for data_type, rows in output_rows.items():
+        if not rows:
+            output_result[data_type] = pd.DataFrame(columns=_FULL_COLS)
+            continue
+        times, vals_list = zip(*rows)
+        df = pd.DataFrame(vals_list, index=pd.Index(times, name="time"))
+        expected_n = len(_FULL_COLS)
+        if df.shape[1] < expected_n:
+            for i in range(df.shape[1], expected_n):
+                df[i] = np.nan
+        elif df.shape[1] > expected_n:
+            df = df.iloc[:, :expected_n]
+        df.columns = _FULL_COLS
+        df.sort_index(inplace=True)
+        output_result[data_type] = df
+
+    # Build step dataframes only if there is STEP content
+    any_step_found = any(len(lst) > 0 for lst in step_lists.values())
+    if any_step_found:
+        step_dfs: Dict[str, pd.DataFrame] = {}
+        for key, rows in step_lists.items():
+            if not rows:
+                continue
+            maxlen = max(len(r) for r in rows)
+            cols = [f"bin_{i}" for i in range(maxlen)]
+            normalized = [r + [np.nan] * (maxlen - len(r)) for r in rows]
+            step_dfs[key] = pd.DataFrame(normalized, columns=cols)
+    else:
+        step_dfs = None  # explicitly indicate absence
+
+    return {
+        "adjust": df_adjust,
+        "output": output_result,
+        "step": step_dfs,
+        "scaling": scaling,
+    }
 
 
 def load_scaling(logfile: str):
@@ -198,12 +345,8 @@ def load_scaling(logfile: str):
                 return dict(zip(keys, vals))
 
 
-def load_data(dirname: Union[str, Path]):
-    # load output data
-    data = {name: pd.read_csv(Path(dirname) / f"{name}.csv") for name in _OUTPUT_DATA}
-    # load adjust data
-    df = pd.read_csv(Path(dirname) / "adjust_data.csv")
-    return data, df
+def load_data(logfile: Union[str, Path]):
+    return parse_log(logfile)
 
 
 # ——— Data plotting ———
