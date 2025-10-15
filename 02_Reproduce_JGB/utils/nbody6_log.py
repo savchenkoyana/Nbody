@@ -1,6 +1,7 @@
 """Based on this jupyter-notebook: https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing/blob/stable/examples/01_Basics.ipynb"""
 
 import re
+import warnings
 from pathlib import Path
 from typing import Dict
 from typing import List
@@ -176,30 +177,38 @@ def parse_log(
                 adjust_rows.append(row)
 
             # RMIN / DTMIN lines
-            ks_line = lines[i + 2]
-            matches = _KEYVAL_RE.findall(ks_line)
-            if matches:
-                params = {k: float(v) for k, v in matches if k in ("DTMIN", "RMIN")}
-                if params:
-                    ks_params[current_time_idx] = params
+            try:
+                ks_line = lines[i + 2]
+                matches = _KEYVAL_RE.findall(ks_line)
+                if matches:
+                    params = {k: float(v) for k, v in matches if k in ("DTMIN", "RMIN")}
+                    if params:
+                        ks_params[current_time_idx] = params
+            except:
+                warnings.warn("Log incomplete! Seems like simulation stopped abruptly")
+                break
 
             # Explicit ETAI = ... lines override
-            eta_line = lines[i + 5]
-            if "ETAI" in eta_line and "=" in eta_line:
-                matches = _KEYVAL_RE.findall(eta_line)
-                params = {
-                    k: float(v) for k, v in matches if k in ("ETAI", "ETAU", "ETAR")
-                }
-                pre_etai = params["ETAI"]
-                pre_etar = params["ETAR"]
-                pre_etau = params["ETAU"]
-            else:
-                params = {}
-                params["ETAI"] = pre_etai
-                params["ETAR"] = pre_etar
-                params["ETAU"] = pre_etau
+            try:
+                eta_line = lines[i + 5]
+                if "ETAI" in eta_line and "=" in eta_line:
+                    matches = _KEYVAL_RE.findall(eta_line)
+                    params = {
+                        k: float(v) for k, v in matches if k in ("ETAI", "ETAU", "ETAR")
+                    }
+                    pre_etai = params["ETAI"]
+                    pre_etar = params["ETAR"]
+                    pre_etau = params["ETAU"]
+                else:
+                    params = {}
+                    params["ETAI"] = pre_etai
+                    params["ETAR"] = pre_etar
+                    params["ETAU"] = pre_etau
 
-            eta_params[current_time_idx] = params
+                eta_params[current_time_idx] = params
+            except:
+                warnings.warn("Log incomplete! Seems like simulation stopped abruptly")
+                break
 
             continue
 
