@@ -105,39 +105,24 @@ def parse_log(
     with logfile.open("r") as fh:
         lines = fh.readlines()
 
-    # Obtain scaling first using the dedicated function (if you already have parse_scaling)
     scaling = load_scaling(logfile)
 
-    # Header scan for predeclared ETA values (unchanged)
     pre_etai: Optional[float] = None
     pre_etar: Optional[float] = None
     pre_etau: Optional[float] = None
+
     for i, raw in enumerate(lines[:50]):
         s = raw.strip()
         if s.startswith("ETAI") and "ETAR" in s:
-            for next_line in lines[i + 1 : i + 6]:
-                if not next_line.strip():
-                    continue
-                parts = next_line.split()
-                if len(parts) >= 1:
-                    pre_etai = _safe_float(parts[0])
-                if len(parts) >= 2:
-                    pre_etar = _safe_float(parts[1])
-                if len(parts) >= 3:
-                    pre_etau = _safe_float(parts[2])
-                break
+            next_line = lines[i + 2]
+            parts = next_line.split()
+            pre_etai = _safe_float(parts[0])
+            pre_etar = _safe_float(parts[1])
         elif s.startswith("DTMIN") and "RMIN" in s and "ETAU" in s:
-            for next_line in lines[i + 1 : i + 6]:
-                if not next_line.strip():
-                    continue
-                parts = next_line.split()
-                if len(parts) >= 3:
-                    pre_etai = _safe_float(parts[0])
-                    pre_etar = _safe_float(parts[1])
-                    pre_etau = _safe_float(parts[2])
-                break
+            next_line = lines[i + 2]
+            parts = next_line.split()
+            pre_etau = _safe_float(parts[2])
 
-    # Collections while scanning file once
     adjust_rows: List[Dict] = []
     output_rows: Dict[str, List[Tuple[float, List[float]]]] = {
         name: [] for name in _OUTPUT_DATA
@@ -149,7 +134,7 @@ def parse_log(
     current_time_idx: Optional[float] = None
 
     # iterate once
-    for raw in lines:
+    for i, raw in enumerate(lines):
         if not raw.strip():
             continue
 
@@ -188,52 +173,34 @@ def parse_log(
                 row: Dict = {"time": time_val}
                 for c, v in zip(cols, vals):
                     row[c] = v
-
-                # fill predeclared ETA values if missing
-                if pre_etai is not None and "ETAI" not in row:
-                    row["ETAI"] = pre_etai
-                if pre_etar is not None and "ETAR" not in row:
-                    row["ETAR"] = pre_etar
-                if pre_etau is not None and "ETAU" not in row:
-                    row["ETAU"] = pre_etau
-
-                eta_params.setdefault(
-                    time_val,
-                    {
-                        "ETAI": pre_etai,
-                        "ETAR": pre_etar,
-                        "ETAU": pre_etau,
-                    },
-                )
-
                 adjust_rows.append(row)
-            continue
 
-        # RMIN / DTMIN lines
-        if "RMIN" in line and "=" in line:
-            matches = _KEYVAL_RE.findall(line)
-            if matches and current_time_idx is not None:
+            # RMIN / DTMIN lines
+            ks_line = lines[i + 2]
+            matches = _KEYVAL_RE.findall(ks_line)
+            if matches:
                 params = {k: float(v) for k, v in matches if k in ("DTMIN", "RMIN")}
                 if params:
                     ks_params[current_time_idx] = params
-            continue
 
-        # Explicit ETAI = ... lines override
-        if "ETAI" in line and "=" in line:
-            matches = _KEYVAL_RE.findall(line)
-            if matches and current_time_idx is not None:
+            # Explicit ETAI = ... lines override
+            eta_line = lines[i + 5]
+            if "ETAI" in eta_line and "=" in eta_line:
+                matches = _KEYVAL_RE.findall(eta_line)
                 params = {
                     k: float(v) for k, v in matches if k in ("ETAI", "ETAU", "ETAR")
                 }
-                prev = eta_params.get(current_time_idx, {})
-                prev.update(params)
-                eta_params[current_time_idx] = prev
-                if "ETAI" in params:
-                    pre_etai = params["ETAI"]
-                if "ETAU" in params:
-                    pre_etau = params["ETAU"]
-                if "ETAR" in params:
-                    pre_etar = params["ETAR"]
+                pre_etai = params["ETAI"]
+                pre_etar = params["ETAR"]
+                pre_etau = params["ETAU"]
+            else:
+                params = {}
+                params["ETAI"] = pre_etai
+                params["ETAR"] = pre_etar
+                params["ETAU"] = pre_etau
+
+            eta_params[current_time_idx] = params
+
             continue
 
         # Output-type lines (RLAGR, AVMASS, ...)
@@ -259,21 +226,19 @@ def parse_log(
     else:
         df_adjust = pd.DataFrame()
 
-    # create ks/eta dataframes from collected dicts (may be empty)
-    df_ks = (
-        pd.DataFrame.from_dict(ks_params, orient="index")
-        if ks_params
-        else pd.DataFrame(columns=["DTMIN", "RMIN"])
-    )
-    df_eta = (
-        pd.DataFrame.from_dict(eta_params, orient="index")
-        if eta_params
-        else pd.DataFrame(columns=["ETAI", "ETAR", "ETAU"])
-    )
+    # create ks/eta dataframes from collected dicts
+    df_ks = pd.DataFrame.from_dict(ks_params, orient="index")
+    df_eta = pd.DataFrame.from_dict(eta_params, orient="index")
 
-    # Deduplicate the ADJUST DataFrame by index, keeping the LAST occurrence
-    if not df_adjust.empty and not df_adjust.index.is_unique:
-        df_adjust = df_adjust.groupby(level=0).last()
+    # Deduplicate the DataFrames by index, keeping the LAST occurrence
+    def deduplicate(df):
+        if not df.empty and not df.index.is_unique:
+            df = df.groupby(level=0).last()
+        return df
+
+    df_adjust = deduplicate(df_adjust)
+    df_ks = deduplicate(df_ks)
+    df_eta = deduplicate(df_eta)
 
     # Now safe to concat
     if not df_adjust.empty:

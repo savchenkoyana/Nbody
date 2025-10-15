@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
-from utils.nbody6_log import parse_adjust_data
+from utils.nbody6_log import load_data
 from utils.nbody6_log import plot_adjust_data
 
 _EVENT_TYPE = yaml.safe_load(open("utils/nbody6_events.yaml"))
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
                 print(f"\t Event {i} happened at T[NB]={event_time}")
 
-    df_adjust = parse_adjust_data(exp / "exp.out")
+    df_adjust = load_data(exp / "exp.out")["adjust"]
 
     # Get time [NB] of energy non-conservation
     df_adjust_large_de = df_adjust[np.abs(df_adjust["DE"]) > 1e-5]
