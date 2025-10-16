@@ -32,7 +32,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--values",
         type=str,
-        help=f"Comma-separated column values to plot. Choose one of {(*_OUTPUT_DATA, *_ADJUST_DATA)}",
+        help=f"Comma-separated column values to plot. Choose from {(*_OUTPUT_DATA, *_ADJUST_DATA)}",
     )
     parser.add_argument(
         "--logscale",
@@ -56,9 +56,9 @@ if __name__ == "__main__":
     values_adjust = list(values.intersection(_ADJUST_DATA))
     values_output = list(values.intersection(_OUTPUT_DATA))
 
-    unknow_values = values.difference(_ADJUST_DATA, _OUTPUT_DATA)
-    if unknow_values:
-        raise ValueError(f"Unknown columns {unknow_values}")
+    unknown_values = values.difference(_ADJUST_DATA, _OUTPUT_DATA)
+    if unknown_values:
+        raise ValueError(f"Unknown columns {unknown_values}")
 
     if args.full_output:
         setup_pandas()
