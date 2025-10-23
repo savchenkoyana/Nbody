@@ -296,7 +296,7 @@ Here is a list of what we need to fully reproduce the article:
 - [x] Enable gravitational waves and black hole coalescence
 - [x] Set natal spins = 0
 
-# Debugging
+# Hints
 
 - Try using `parse_events.py` and QE=1.0 to gather more info about failed runs:
 
@@ -308,4 +308,38 @@ Here is a list of what we need to fully reproduce the article:
 
   ```bash
   grep "Warning" /path/to/your/exp.out
+  ```
+
+# Debugging
+
+In case of errors:
+
+- Edit `build/Makefile` for Nbody6PPGPU-beijing. Change line:
+
+  ```bash
+  FFLAGS =  -I../extra_inc/nompi -O3 -fPIC -mcmodel=large -fopenmp -I../include ${SIMD_FLAGS} $(GPU_FLAGS) ${OMP_FLAGS}
+  ```
+
+  to
+
+  ```bash
+  FFLAGS =  -I../extra_inc/nompi -O3 -g -fPIC -mcmodel=large -fopenmp -I../include ${SIMD_FLAGS} $(GPU_FLAGS) ${OMP_FLAGS}
+  ```
+
+  And then (from the Nbody6PPGPU-beijing dir):
+
+  ```bash
+  make clean
+  make -j
+  ```
+
+- Run `gdb` (should be installed with MESA SDK):
+
+  ```bash
+  nice -n 20 gdb /path/to/nbody6pp-beijing  # (`nice -n 20` is optional)
+  (gdb) run < 1k.inp
+  (gdb) backtrace  # or `backtrace full`
+  (gdb) frame 0  # choose number from backtrace
+  (gdb) list
+  (gdb) print some_variable_name  # choose `some_variable_name`
   ```
