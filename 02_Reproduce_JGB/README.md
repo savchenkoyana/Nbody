@@ -314,19 +314,13 @@ Here is a list of what we need to fully reproduce the article:
 
 In case of errors:
 
-- Edit `build/Makefile` for Nbody6PPGPU-beijing. Change line:
+- Edit `build/Makefile` for Nbody6PPGPU-beijing. At line 30, which looks like this:
 
   ```bash
-  FFLAGS =  -I../extra_inc/nompi -O3 -fPIC -mcmodel=large -fopenmp -I../include ${SIMD_FLAGS} $(GPU_FLAGS) ${OMP_FLAGS}
+  FFLAGS =  -I../extra_inc/nompi -O3 -fPIC ...
   ```
 
-  to
-
-  ```bash
-  FFLAGS =  -I../extra_inc/nompi -O3 -g -fPIC -mcmodel=large -fopenmp -I../include ${SIMD_FLAGS} $(GPU_FLAGS) ${OMP_FLAGS}
-  ```
-
-  And then (from the Nbody6PPGPU-beijing dir):
+  Replace `-O3` with `-O3 -g` or even with `-O0 -g -fbacktrace -fcheck=all -fbounds-check`. And then (from the Nbody6PPGPU-beijing dir) compile:
 
   ```bash
   make clean
