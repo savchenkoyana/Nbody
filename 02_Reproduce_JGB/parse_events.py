@@ -39,8 +39,17 @@ if __name__ == "__main__":
     exp = Path(args.exp)
 
     df = pd.read_csv(exp / "event.35", sep=r"\s+", skiprows=[0], header=None)
-    df_col = pd.read_csv(exp / "event.35")
-    colnames = list(df_col.columns)[0].split()
+
+    # df_col = pd.read_csv(exp / "event.35")
+    # colnames = list(df_col.columns)[0].split()
+
+    colnames = (
+        "TIME[Myr] NDISS NTIDE NSYNC NCOLL NCOAL NDD NCIRC NROCHE "
+        + "NRO NCE NHYP NHYPC NKICK EBIN EMERGE ECOLL EMDOT ECDOT "
+        + "EKICK ESESC EBESC EMESC DEGRAV EBIND MMAX NMDOT NRG "
+        + "NHE NRS NNH NWD NSN NBH NBS ZMRG ZMHE ZMRS ZMNH ZMWD ZMSN ZMDOT NTYPE(1:16)"
+    ).split()
+
     colnames_last = colnames[-1]
     colnames = colnames[:-1] + [f"{colnames_last}_{i}" for i in range(16)]
     df.columns = colnames
