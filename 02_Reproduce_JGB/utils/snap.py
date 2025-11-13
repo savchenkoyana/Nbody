@@ -1,7 +1,6 @@
 """Scripts for snapshot transformations and other manipulations with
 snapshots."""
 
-import math
 import os
 import subprocess
 import warnings
@@ -55,8 +54,14 @@ class RemoveFileOnEnterExit:
             remove(self.file_path, f"Removed file: {self.file_path} on exit.")
 
 
+def build_snapfile(filename: Union[str, Path], suffix: str) -> str:
+    """Build snapshot-related filename based on original file and suffix."""
+    base = str(filename).replace(".nemo", "")
+    return f"{base}{suffix}"
+
+
 def parse_nemo(
-    filename: Union[str, os.PathLike, Path],
+    filename: Union[str, Path],
     t: Union[float, str],
     transpose: bool = True,
     remove_artifacts: bool = True,
@@ -65,7 +70,7 @@ def parse_nemo(
 
     Parameters
     ----------
-    filename : Union[str, os.PathLike, Path]
+    filename : Union[str, Path]
         the name of NEMO snapshot file
     t : Union[float, str]
         which time point in snapshot to use for profile calculations
@@ -79,17 +84,43 @@ def parse_nemo(
         Array with particles with shape [7, N] (if transposed) or [N, 7] (otherwise).
         7 coordinates are: mass, x, y, z, vx, vy, vz.
     """
-    filename = str(filename)
-    snapfile = filename.replace(".nemo", "") + f"{t}.txt"
+    snapfile = build_snapfile(filename, f"_{t}")
 
     with RemoveFileOnEnterExit(snapfile, remove_artifacts):
-        command = f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | s2a in=- out={snapfile}"
+        command = (
+            f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | "
+            f"s2a in=- out={snapfile}"
+        )
+        print(command)
         subprocess.check_call(command, shell=True)
         return np.loadtxt(snapfile).T if transpose else np.loadtxt(snapfile)
 
 
+def manipulate_snapshot(
+    filename: Union[str, Path],
+    t: Union[float, str],
+    manipname: str,
+    manippars: str,
+    manipfile: str,
+    remove_artifacts: bool = True,
+) -> np.ndarray:
+    """Helper for commands using 'manipulate' on NEMO snapshots."""
+    # in case of joined manipulators, all info is stored in the last file
+    last_mp = manipfile.split(";")[-1]
+
+    with RemoveFileOnEnterExit(last_mp, remove_artifacts):
+        command = (
+            f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | "
+            f'manipulate in=- out=. manipname={manipname} manippars="{manippars}" '
+            f'manipfile="{manipfile}" | tee {manipname}_log 2>&1'
+        )
+        print(command)
+        subprocess.check_call(command, shell=True)
+        return np.loadtxt(last_mp).T
+
+
 def profile_by_snap(
-    filename: Union[str, os.PathLike, Path],
+    filename: Union[str, Path],
     t: Union[float, str],
     projvector: Optional[_PROJ_VECTOR_TYPE] = None,
     remove_artifacts: bool = True,
@@ -99,7 +130,7 @@ def profile_by_snap(
 
     Parameters
     ----------
-    filename : Union[str, os.PathLike, Path]
+    filename : Union[str, Path]
         the name of NEMO snapshot file
     t : Union[float, str]
         which time point in snapshot to use for profile calculations
@@ -117,29 +148,30 @@ def profile_by_snap(
         raise RuntimeError(f"`projvector` should have len == 3, got {projvector}")
 
     manipname = "sphereprof" if not projvector else "projprof"
-
-    filename = str(filename)
-    manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
     manippars_binning = (
         "100,0.05"  # minimum bodies in radial bin, minimum bin size in log(r)
     )
+    if projvector:
+        manippars = ",".join([str(_) for _ in projvector]) + "," + manippars_binning
+    else:
+        manippars = manippars_binning
+    manippars = f"{dens_par},{manippars}"
+    manipfile = build_snapfile(filename, f"_{manipname}{t}")
 
-    with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        if projvector:
-            manippars = ",".join([str(_) for _ in projvector]) + "," + manippars_binning
-        else:
-            manippars = manippars_binning
+    result = manipulate_snapshot(
+        filename=filename,
+        t=t,
+        manipname=manipname,
+        manippars=manippars,
+        manipfile=manipfile,
+        remove_artifacts=remove_artifacts,
+    )
 
-        command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{manippars}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
-        print(command)
-
-        subprocess.check_call(command, shell=True)
-
-        return np.loadtxt(manipfile).T
+    return result
 
 
 def lagrange_radius_by_snap(
-    filename: Union[str, os.PathLike, Path],
+    filename: Union[str, Path],
     t: Union[float, str],
     fraction: float = 0.5,
     remove_artifacts: bool = True,
@@ -152,7 +184,7 @@ def lagrange_radius_by_snap(
 
     Parameters
     ----------
-    filename : Union[str, os.PathLike, Path]
+    filename : Union[str, Path]
         the name of NEMO snapshot file
     t : Union[float, str]
         which time point in snapshot to use for profile calculations
@@ -167,25 +199,30 @@ def lagrange_radius_by_snap(
     np.ndarray
         Array with two elements: time and lagrange radius.
     """
-    manipname = "lagrange"
+    if dens_par:
+        manipname = "dens_centre+lagrange"
+        manippars = f"{dens_par};{fraction}"
+        manipfile = build_snapfile(filename, f"_{manipname}{t}")
+        manipfile = f";{manipfile}"
+    else:
+        manipname = "lagrange"
+        manippars = str(fraction)
+        manipfile = build_snapfile(filename, f"_{manipname}{t}")
 
-    filename = str(filename)
-    manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
+    result = manipulate_snapshot(
+        filename=filename,
+        t=t,
+        manipname=manipname,
+        manippars=manippars,
+        manipfile=manipfile,
+        remove_artifacts=remove_artifacts,
+    )
 
-    with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        if dens_par:
-            command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname=dens_centre+{manipname} manippars="{dens_par};{fraction}" manipfile=";{manipfile}" | tee {manipname}_log 2>&1'
-        else:
-            command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname={manipname} manippars="{fraction}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
-
-        print(command)
-
-        subprocess.check_call(command, shell=True)
-        return np.loadtxt(manipfile).T
+    return result
 
 
 def center_of_snap(
-    filename: Union[str, os.PathLike, Path],
+    filename: Union[str, Path],
     t: Union[float, str],
     density_center: bool = False,
     remove_artifacts: bool = True,
@@ -195,7 +232,7 @@ def center_of_snap(
 
     Parameters
     ----------
-    filename : Union[str, os.PathLike, Path]
+    filename : Union[str, Path]
         the name of NEMO snapshot file
     t : Union[float, str]
         which time point in snapshot to use for profile calculations
@@ -210,23 +247,29 @@ def center_of_snap(
     np.ndarray
         Array with the following structure: t, x, y, z, vx, vy, vz.
     """
-    manipname = "dens_centre" if density_center else "centre_of_mass"
-    if not density_center:
-        dens_par = ""
+    if density_center:
+        manipname = "dens_centre"
+        manippars = str(dens_par)
+    else:
+        manipname = "centre_of_mass"
+        manippars = ""
 
-    filename = str(filename)
-    manipfile = filename.replace(".nemo", "") + f"_{manipname}{t}"
+    manipfile = build_snapfile(filename, f"_{manipname}{t}")
 
-    with RemoveFileOnEnterExit(manipfile, remove_artifacts):
-        command = f'snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | manipulate in=- out=. manipname={manipname} manippars="{dens_par}" manipfile="{manipfile}" | tee {manipname}_log 2>&1'
-        print(command)
+    result = manipulate_snapshot(
+        filename=filename,
+        t=t,
+        manipname=manipname,
+        manippars=manippars,
+        manipfile=manipfile,
+        remove_artifacts=remove_artifacts,
+    )
 
-        subprocess.check_call(command, shell=True)
-        return np.loadtxt(manipfile).T
+    return result
 
 
 def masses_in_lagrange_radius(
-    filename: Union[str, os.PathLike, Path],
+    filename: Union[str, Path],
     t: Union[float, str],
     remove_artifacts: bool = True,
     dens_par: int = 500,
@@ -235,7 +278,7 @@ def masses_in_lagrange_radius(
 
     Parameters
     ----------
-    filename : Union[str, os.PathLike, Path]
+    filename : Union[str, Path]
         the name of NEMO snapshot file
     t : Union[float, str]
         which time point in snapshot to use for profile calculations
@@ -307,146 +350,6 @@ def get_timestamps(
     # else filter
     indices = [_ * len(timestamps) // n_timestamps for _ in range(n_timestamps)]
     return np.array(timestamps)[indices]
-
-
-def get_virial(
-    filename: Union[str, Path],
-    eps: float,
-    t: Union[float, str],
-    remove_artifacts: bool = True,
-):
-    """Compute virial ratio and energy for simulation file.
-
-    Parameters
-    ----------
-    filename : Union[str, os.PathLike, Path]
-        the name of NEMO snapshot file
-    eps : float
-        gravitational softening (use the same as during the simulation)
-    t : Union[float, str]
-        which time point in snapshot to use for profile calculations
-    remove_artifacts :
-        Whether to remove artifacts after the function execution. Default: True.
-    Returns
-    -------
-    np.ndarray
-        Array with columns: time, 2T/W, T+W, T, W_acc, W_phi, W_exact, M
-    """
-    filename = str(filename)
-    virfile = filename.replace(".nemo", "") + f"{t}_vir.txt"
-
-    with RemoveFileOnEnterExit(virfile, remove_artifacts):
-        command = f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | snapvratio - wmode=exact eps={eps} newton=t | tee {virfile}"
-        print(command)
-        subprocess.check_call(command, shell=True)
-
-        return np.loadtxt(virfile).T
-
-
-def get_momentum(
-    filename: Union[str, Path],
-    t: Union[float, str],
-    remove_artifacts: bool = True,
-):
-    """Compute momentum and angular momentum for simulation file.
-
-    Parameters
-    ----------
-    filename : Union[str, os.PathLike, Path]
-        the name of NEMO snapshot file
-    t : Union[float, str]
-        which time point in snapshot to use for profile calculations
-    remove_artifacts :
-        Whether to remove artifacts after the function execution. Default: True.
-    Returns
-    -------
-    list
-        List with items: pos, x, y, z, vel, vx, vy, vz, l, lx, ly, lz
-    """
-    filename = str(filename)
-    momentum_file = filename.replace(".nemo", "") + f"{t}_momentum.txt"
-
-    with RemoveFileOnEnterExit(momentum_file, remove_artifacts):
-        command = f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | snapkinem - weight=m | tee {momentum_file}"
-        print(command)
-        subprocess.check_call(command, shell=True)
-
-        result = []
-
-        # parse file
-        with open(momentum_file) as f:
-            for line in f:
-                stripped = line.strip()
-                if (
-                    stripped.startswith("pos:")
-                    or stripped.startswith("vel:")
-                    or stripped.startswith("jvec:")
-                ):
-                    data = [float(x) for x in line.split()[1:]]
-                    result.extend(data)
-                else:
-                    continue
-        return result
-
-
-def count_binaries(
-    filename: Union[str, Path],
-    t: Union[float, str],
-    r_threshold: float,
-):
-    """Count the number of binaries in snapshot (G=1 is assumed).
-
-    Based on $NEMO/src/nbody/reduc/snapbinary.c
-    """
-    snap = parse_nemo(filename=filename, t=t)  # m, x, y, z, vx, vy, vz
-    N = snap.shape[1]
-
-    binary_counts = 0
-
-    for i in range(N):
-        jmin = None
-        epot_min = math.inf
-
-        for j in range(N):
-            if j == i:
-                continue
-
-            dr = np.linalg.norm(snap[1:4, i] - snap[1:4, j])
-            dv = np.linalg.norm(snap[4:7, i] - snap[4:7, j])
-            m = snap[0, i] + snap[0, j]
-            ekin = 0.5 * dv**2
-            epot = -m / dr
-
-            if ekin + epot < 0 and epot < epot_min and dr < r_threshold:
-                epot_min = epot
-                jmin = j
-
-        if jmin is not None and jmin > i:  # TODO: rewrite?
-            # print(i, jmin)
-            binary_counts += 1
-
-    return binary_counts
-
-
-def parse_fort14(
-    fort14: Union[str, os.PathLike, Path],
-) -> tuple[tuple, np.ndarray[np.float32]]:
-    """Parse fort.14 file with Lagrange radius data from Nbody6.
-    The data has the following structure: LAGR: TTOT, LOG10(RLAGR(K)),K=1,11
-
-    Parameters
-    ----------
-    fort14 : Union[str, os.PathLike, Path]
-        Nbody6 output file (fort.14)
-    Returns
-    -------
-    tuple
-        1st element: Lagrange mass fractions
-        2nd element: Simulation data
-    """
-    F_LAGR = (0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.625, 0.75, 0.9)
-    data = np.loadtxt(fort14, usecols=range(1, 13))
-    return F_LAGR, data
 
 
 def find_density_center(
