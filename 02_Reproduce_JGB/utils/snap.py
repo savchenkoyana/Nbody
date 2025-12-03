@@ -155,8 +155,15 @@ def profile_by_snap(
         manippars = ",".join([str(_) for _ in projvector]) + "," + manippars_binning
     else:
         manippars = manippars_binning
-    manippars = f"{dens_par},{manippars}"
+
     manipfile = build_snapfile(filename, f"_{manipname}{t}")
+
+    # modify if we need to compute density center first
+    if dens_par:
+        manipname = f"dens_centre+{manipname}"
+        manippars = f"{dens_par};{manippars}"
+        manipfile = build_snapfile(filename, f"_{manipname}{t}")
+        manipfile = f";{manipfile}"
 
     result = manipulate_snapshot(
         filename=filename,
