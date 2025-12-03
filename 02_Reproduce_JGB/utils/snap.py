@@ -273,8 +273,9 @@ def masses_in_lagrange_radius(
     t: Union[float, str],
     remove_artifacts: bool = True,
     dens_par: int = 500,
+    fraction: float = 0.5,
 ) -> tuple[np.ndarray[np.float32], float, np.ndarray[bool]]:
-    """Compute which masses of cluster reside inside the half-mass radius.
+    """Compute which masses of cluster reside inside the lagrange radius.
 
     Parameters
     ----------
@@ -286,6 +287,8 @@ def masses_in_lagrange_radius(
         Whether to remove artifacts after the function execution. Default: True.
     dens_par :
         Parameter for `dens_centre` (number of neighbours in SPH-like estimation). Default: 500.
+    fraction :
+        Fraction of mass used to compute the Lagrange radius. Default: 0.5
     Returns
     -------
     tuple[np.ndarray[np.float32], float, np.ndarray[bool]]
@@ -316,12 +319,13 @@ def masses_in_lagrange_radius(
         t,
         remove_artifacts=remove_artifacts,
         dens_par=dens_par,
+        fraction=fraction,
     )
 
     # create mask
     dist = np.linalg.norm(snap[1:4].T - center[1:4], axis=1)
     mask = dist < lagrange_r
-    print(f"Number of particles for half-mass radius {lagrange_r}: {mask.sum()}")
+    print(f"Number of particles for fraction={fraction} {lagrange_r}: {mask.sum()}")
 
     return masses, lagrange_r, mask
 

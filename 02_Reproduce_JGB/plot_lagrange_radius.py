@@ -34,6 +34,14 @@ if __name__ == "__main__":
         help="The number of timestamps to use for plot. Default: 100",
     )
     parser.add_argument(
+        "--fraction",
+        type=float,
+        default=0.5,
+        help="The fraction of mass used to compute the lagrange radius. Default: 0.5 (half-mass)"
+        "Recommended fractions: 0.01,0.03,0.1,0.3,0.5,0.7,0.9,0.97,0.99 "
+        "(see https://teuben.github.io/nemo/man_html/lagrange_radii.1.html)",
+    )
+    parser.add_argument(
         "--dens-parameter",
         type=int,
         default=500,
@@ -56,6 +64,10 @@ if __name__ == "__main__":
         raise RuntimeError("Got negative '--n-timestamps'")
     if args.dens_parameter < 0:
         raise RuntimeError("Got negative '--dens-parameter'")
+    if args.fraction < 0 or args.fraction > 1:
+        raise RuntimeError("Wrong value of '--fraction'")
+
+    mass_percent = int(args.fraction * 100)
 
     plot_label = args.plot_label.split()
     assert len(plot_label) == len(args.nemo_files)
@@ -68,20 +80,20 @@ if __name__ == "__main__":
     ax_rt.set_xlabel("$t$, Gyr")
     ax_rt.set_ylabel("Lagrange radius, $pc$")
     ax_rt.grid()
-    ax_rt.set_title("Lagrange radii for 50% of mass")
+    ax_rt.set_title(f"Lagrange radii for {mass_percent}% of mass")
 
     fig_nrt, ax_nrt = plt.subplots()  # N particles in Lagrange radius vs Time
     ax_nrt.set_xlabel("$t$, Gyr")
     ax_nrt.set_ylabel("$N(t) / N(t=0)$")
     ax_nrt.set_ylim([0, 1])
     ax_nrt.grid()
-    ax_nrt.set_title("Number of particles in Lagrange radius")
+    ax_nrt.set_title(f"Number of particles in Lagrange radius ({mass_percent}%)")
 
     fig_mrt, ax_mrt = plt.subplots()  # Mass in Lagrange radius vs Time
     ax_mrt.set_xlabel("$t$, Gyr")
     ax_mrt.set_ylabel(r"$M(t)$, $M_\odot$")
     ax_mrt.grid()
-    ax_mrt.set_title("Mean mass of particles in Lagrange radius")
+    ax_mrt.set_title(f"Mean mass of particles in Lagrange radius ({mass_percent}%)")
 
     for i, filename in enumerate(args.nemo_files):
         if not Path(filename).exists():
@@ -106,6 +118,7 @@ if __name__ == "__main__":
                     t=t,
                     remove_artifacts=not args.store_artifacts,
                     dens_par=args.dens_parameter,
+                    fraction=args.fraction,
                 )
             except RuntimeError:
                 if args.remove_outliers:
