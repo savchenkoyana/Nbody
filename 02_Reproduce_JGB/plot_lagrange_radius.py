@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
-from utils.general import create_label
 from utils.snap import get_timestamps
 from utils.snap import masses_in_lagrange_radius
 
@@ -21,6 +20,12 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="Nemo files used for lagrange radii computation",
+    )
+    parser.add_argument(
+        "--plot-label",
+        type=str,
+        required=True,
+        help="Label",
     )
     parser.add_argument(
         "--n-timestamps",
@@ -52,7 +57,8 @@ if __name__ == "__main__":
     if args.dens_parameter < 0:
         raise RuntimeError("Got negative '--dens-parameter'")
 
-    label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
+    plot_label = args.plot_label.split()
+    assert len(plot_label) == len(args.nemo_files)
 
     # assuming filenames are: /path/to/Nbody/02_Reproduce_JGB/<DIRNAME>/out.nemo
     # we will save data into /path/to/Nbody/02_Reproduce_JGB
@@ -113,23 +119,19 @@ if __name__ == "__main__":
             n_particles_lagrange = np.append(n_particles_lagrange, m_filtered.size)
             mean_mass_lagrange = np.append(mean_mass_lagrange, np.mean(m_filtered))
 
-        plot_label = (
-            filename if len(args.nemo_files) > 1 else None
-        )  # label as filename if there are many files
-        # plot_label = (
-        #     create_file_label(filename) if len(args.nemo_files) > 1 else None
-        # )  # label as filename if there are many files
-
         fmt = "."
-        ax_rt.plot(times, lagrange_radii, fmt, label=plot_label)
+        ax_rt.plot(times, lagrange_radii, fmt, label=rf"${plot_label[i]}$")
         ax_nrt.plot(
-            times, n_particles_lagrange / n_particles_lagrange[0], fmt, label=plot_label
+            times,
+            n_particles_lagrange / n_particles_lagrange[0],
+            fmt,
+            label=rf"${plot_label[i]}$",
         )
-        ax_mrt.plot(times, mean_mass_lagrange, fmt, label=plot_label)
+        ax_mrt.plot(times, mean_mass_lagrange, fmt, label=rf"${plot_label[i]}$")
 
-    ax_rt.legend(title=label)
-    ax_nrt.legend(title=label)
-    ax_mrt.legend(title=label)
+    ax_rt.legend()
+    ax_nrt.legend()
+    ax_mrt.legend()
 
     fig_rt.savefig(save_dir / "lagrange_radii.png")
     fig_nrt.savefig(save_dir / "N_lagrange_radii.png")
