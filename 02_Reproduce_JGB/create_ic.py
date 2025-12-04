@@ -6,7 +6,6 @@ from pathlib import Path
 import agama
 import scipy
 from utils.general import check_parameters
-from utils.general import compute_gyrfalcon_parameters
 from utils.general import compute_mean_mass
 from utils.general import create_argparse
 from utils.general import set_units
@@ -95,15 +94,3 @@ if __name__ == "__main__":
     agama.writeSnapshot(in_snap_file, snap, "nemo")
 
     print("*" * 10, "Generation finished!", "*" * 10)
-
-    eps, kmax, t_dyn = compute_gyrfalcon_parameters(
-        N=args.N,
-        r0=args.plummer_r,
-        phi0=scm.potential.potential(0, 0, 0),
-    )
-
-    print(f"Run this to start cluster evolution for 1 dynamical time:")
-    print(
-        f"\tgyrfalcON {in_snap_file} {out_snap_file} logstep=3000 "
-        f"eps={eps} kmax={kmax} tstop={t_dyn} step={t_dyn / 10} Grav={agama.G}"
-    )

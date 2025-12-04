@@ -40,7 +40,7 @@ if __name__ == "__main__":
         "--version",
         type=str,
         choices=["nbody6", "nbody6++gpu", "nbody6++gpu-beijing", "nbody4"],
-        default="nbody6",
+        default="nbody6++gpu-beijing",
         help="Specify the version of the software",
     )
 

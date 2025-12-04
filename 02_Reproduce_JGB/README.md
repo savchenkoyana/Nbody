@@ -43,6 +43,8 @@ To reproduce the experiment, follow these steps:
   ln -s /path/to/Nbody/Nbody6PPGPU-beijing-yana/build/nbody6++.avx nbody6pp-beijing
   ```
 
+  Also note that you need to use `KZ(24)=3` option in your input files which is not introduced in the official version. Although there is `KZ(24)=2`, which means "start with black holes only, spin is random".
+
 - Create initial coordinates of cluster:
 
   ```bash
@@ -129,11 +131,11 @@ To reproduce the experiment, follow these steps:
 
 # Simulation output
 
-In previous versions of direct N-body codes, the evolving algorithm produced many text outputs as well as simulation file `out.nemo`. Later Nbody6++GPU-beijing switched to hdf5 data format where everything is stored in a single file. A part of the next scripts uses nemo file and other part uses hdf5 file for historical reasons. But it is essential to build Nbody6++GPU-beijing with hdf5 support as there is no other easy way to get access to spin data other that use hdf5.
+In previous versions of direct N-body codes, the evolving algorithm produced many text outputs as well as particle data files `conf.3_*`. Later Nbody6++GPU-beijing switched to hdf5 data format where both particle and scalar data are stored in a single file. A part of the next scripts uses nemo file (particle data) and other part uses hdf5 file for historical reasons. But it is essential to build Nbody6++GPU-beijing with hdf5 support as there is no other way to get access to spin data other that use hdf5.
 
-There is a notebook [Hdf5Example.ipynb](Hdf5Example.ipynb) that illustrates how to work with hdf5 data created by simulation.
+There is a notebook [Hdf5Example.ipynb](Hdf5Example.ipynb) that illustrates how to work with hdf5 data created during simulation.
 
-> Note that Nbody6++GPU is written on Fortran so it uses Fortran-style (1-based) array indexing while we use C-style (0-based) array indexing.
+> Note that Nbody6++GPU is written in Fortran so it uses Fortran-style (1-based) array indexing while we use C-style (0-based) array indexing. This is essential to acess particle data.
 
 # Explore results
 
@@ -292,4 +294,46 @@ Here is a list of what we need to fully reproduce the article:
 - [x] Comparison with other methods
 - [x] Nbody6 (simple run)
 - [x] Enable gravitational waves and black hole coalescence
-- [x] Set natal spins = 0 (random with `KZ(24)=2`)
+- [x] Set natal spins = 0
+
+# Hints
+
+- Try using `parse_events.py` and QE=1.0 to gather more info about failed runs:
+
+  ```bash
+  python parse_events.py --exp /path/to/your/exp
+  ```
+
+- Try to grep "Warning" in output log:
+
+  ```bash
+  grep "Warning" /path/to/your/exp.out
+  ```
+
+# Debugging
+
+In case of errors:
+
+- Edit `build/Makefile` for Nbody6PPGPU-beijing. At line 30, which looks like this:
+
+  ```bash
+  FFLAGS =  -I../extra_inc/nompi -O3 -fPIC ...
+  ```
+
+  Replace `-O3` with `-O3 -g` or even with `-O0 -g -fbacktrace -fcheck=all -fbounds-check`. And then (from the Nbody6PPGPU-beijing dir) compile:
+
+  ```bash
+  make clean
+  make -j
+  ```
+
+- Run `gdb` (should be installed with MESA SDK):
+
+  ```bash
+  nice -n 20 gdb /path/to/nbody6pp-beijing  # (`nice -n 20` is optional)
+  (gdb) run < 1k.inp
+  (gdb) backtrace  # or `backtrace full`
+  (gdb) frame 0  # choose number from backtrace
+  (gdb) list
+  (gdb) print some_variable_name  # choose `some_variable_name`
+  ```

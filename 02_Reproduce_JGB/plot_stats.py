@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
-from utils.general import create_label
 from utils.snap import get_timestamps
 from utils.snap import parse_nemo
 
@@ -22,6 +21,12 @@ if __name__ == "__main__":
         help="Nemo files used for lagrange radii computation",
     )
     parser.add_argument(
+        "--plot-label",
+        type=str,
+        required=True,
+        help="Label",
+    )
+    parser.add_argument(
         "--n-timestamps",
         type=int,
         default=100,
@@ -33,7 +38,8 @@ if __name__ == "__main__":
     if args.n_timestamps <= 0:
         raise RuntimeError("Got negative '--n-timestamps'")
 
-    label = create_label(mu=args.mu, scale=args.scale, sigma=args.sigma)
+    plot_label = args.plot_label.split()
+    assert len(plot_label) == len(args.nemo_files)
 
     # assuming filenames are: /path/to/Nbody/02_Reproduce_JGB/<DIRNAME>/out.nemo
     # we will save data into /path/to/Nbody/02_Reproduce_JGB
@@ -76,17 +82,14 @@ if __name__ == "__main__":
             n_particles = np.append(n_particles, masses.size)
             mean_mass = np.append(mean_mass, np.mean(masses))
 
-        plot_label = filename
-        # plot_label = (
-        #     create_file_label(filename) if len(args.nemo_files) > 1 else None
-        # )  # label as filename if there are many files
-
         fmt = "."
-        ax_nt.plot(times, n_particles / n_particles[0], fmt, label=plot_label)
-        ax_mt.plot(times, mean_mass, fmt, label=plot_label)
+        ax_nt.plot(
+            times, n_particles / n_particles[0], fmt, label=rf"${plot_label[i]}$"
+        )
+        ax_mt.plot(times, mean_mass, fmt, label=rf"${plot_label[i]}$")
 
-    ax_nt.legend(title=label)
-    ax_mt.legend(title=label)
+    ax_nt.legend()
+    ax_mt.legend()
 
     fig_nt.savefig(save_dir / "N_cluster.png")
     fig_mt.savefig(save_dir / "M_cluster.png")

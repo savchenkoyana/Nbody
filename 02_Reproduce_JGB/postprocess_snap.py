@@ -9,6 +9,7 @@ from typing import Union
 
 import agama
 import numpy as np
+from tqdm import tqdm
 from utils.nbody6_log import load_scaling
 from utils.snap import parse_nemo
 from utils.snap import remove
@@ -43,7 +44,7 @@ def scale_snapshot(filename: Union[str, Path], outfile: Union[str, Path], scalin
     remove(outfile)
 
     with agama.NemoFile(outfile, "w") as out:
-        for i, snap in enumerate(agama.NemoFile(filename)):
+        for snap in tqdm(agama.NemoFile(filename)):
             new_snap = snap
             new_snap["Time"] = new_snap["Time"] * scalings["T*"]
             new_snap["Mass"] = new_snap["Mass"] * scalings["M*"]
