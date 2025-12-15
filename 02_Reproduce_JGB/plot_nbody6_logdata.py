@@ -73,7 +73,7 @@ if __name__ == "__main__":
         output_data[key].to_csv(save_dir / f"{key}.csv", index=False)
 
     if args.astro_units:
-        scalings = data["scalings"]
+        scalings = data["scaling"]
         print(
             f"Scale coefficients: R*={scalings['R*']}[pc], V*={scalings['V*']}[km/s], T*={scalings['T*']}[Myr], M*={scalings['M*']}[Msun]"
         )

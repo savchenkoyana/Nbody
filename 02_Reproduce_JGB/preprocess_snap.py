@@ -1,4 +1,7 @@
-"""Preprocess snapshot: change units (pc -> kpc) and shift snapshot data, optional: add point source of field."""
+"""
+Preprocess snapshot: change units (pc -> kpc) and shift snapshot data, optional: add point source of field.
+This script should be used with GyrfalcON, Nbody0, Nbody1 and Nbody2.
+"""
 
 import argparse
 from pathlib import Path

@@ -1,4 +1,5 @@
 import argparse
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -35,6 +36,11 @@ if __name__ == "__main__":
         required=True,
         help="Path to directory with event.35 file",
     )
+    parser.add_argument(
+        "--plot",
+        action="store_true",
+        help="Whether to plot DE, DETOT and events-connected images.",
+    )
     args = parser.parse_args()
     exp = Path(args.exp)
 
@@ -69,6 +75,9 @@ if __name__ == "__main__":
                 events.setdefault(event_time, []).append(column)
 
                 print(f"\t Event {i} happened at T[NB]={event_time}")
+
+    if not args.plot:
+        sys.exit()
 
     df_adjust = load_data(exp / "exp.out")["adjust"]
 

@@ -38,6 +38,10 @@ _ADJUST_DATA = {
     "ETAI",
     "ETAR",
     "ETAU",
+    "N",
+    "Reg.",
+    "Irr.",
+    "KS",
 }
 
 _FULL_COLS = [
@@ -130,6 +134,7 @@ def parse_log(
     }
     step_lists: Dict[str, List[List[int]]] = {"I": [], "R": []}
     ks_params: Dict[float, Dict[str, float]] = {}
+    profile_params: Dict[float, Dict[str, float]] = {}
     eta_params: Dict[float, Dict[str, float]] = {}
 
     current_time_idx: Optional[float] = None
@@ -176,14 +181,26 @@ def parse_log(
                     row[c] = v
                 adjust_rows.append(row)
 
-            # RMIN / DTMIN lines
             try:
+                # RMIN / DTMIN lines
                 ks_line = lines[i + 2]
                 matches = _KEYVAL_RE.findall(ks_line)
                 if matches:
                     params = {k: float(v) for k, v in matches if k in ("DTMIN", "RMIN")}
                     if params:
                         ks_params[current_time_idx] = params
+
+                # profile lines
+                profile_header = lines[i + 3].strip().split()
+                profile_vals = lines[i + 4].strip().split()
+
+                if "rank" in profile_header:
+                    params = {
+                        k: _safe_float(v)
+                        for k, v in zip(profile_header, profile_vals)
+                        if k in ("N", "Reg.", "Irr.", "KS")
+                    }
+                    profile_params[current_time_idx] = params
             except:
                 warnings.warn("Log incomplete! Seems like simulation stopped abruptly")
                 break
@@ -235,8 +252,9 @@ def parse_log(
     else:
         df_adjust = pd.DataFrame()
 
-    # create ks/eta dataframes from collected dicts
+    # create ks/profile/eta dataframes from collected dicts
     df_ks = pd.DataFrame.from_dict(ks_params, orient="index")
+    df_profile = pd.DataFrame.from_dict(profile_params, orient="index")
     df_eta = pd.DataFrame.from_dict(eta_params, orient="index")
 
     # Deduplicate the DataFrames by index, keeping the LAST occurrence
@@ -247,17 +265,11 @@ def parse_log(
 
     df_adjust = deduplicate(df_adjust)
     df_ks = deduplicate(df_ks)
+    df_profile = deduplicate(df_profile)
     df_eta = deduplicate(df_eta)
 
     # Now safe to concat
-    if not df_adjust.empty:
-        df_adjust = pd.concat([df_adjust, df_ks, df_eta], axis=1)
-    else:
-        df_adjust = (
-            pd.concat([df_ks, df_eta], axis=1)
-            if (not df_ks.empty or not df_eta.empty)
-            else pd.DataFrame()
-        )
+    df_adjust = pd.concat([df_adjust, df_profile, df_ks, df_eta], axis=1)
 
     output_result: Dict[str, pd.DataFrame] = {}
     for data_type, rows in output_rows.items():
@@ -321,6 +333,51 @@ def load_scaling(logfile: str):
 
 def load_data(logfile: Union[str, Path]):
     return parse_log(logfile)
+
+
+def parse_binaries(
+    logfile: Union[str, Path], scaled: bool = False
+) -> Dict[tuple, list[tuple]]:
+    scaling = load_scaling(logfile)
+
+    ksreg_pattern = re.compile(
+        r"^\s*(NEW KSREG|END KSREG)\s+TIME\[NB\]\s+([\d\.E\+\-]+)"
+    )
+    particles_pattern = re.compile(r"NM1,2,S=\s+(\d+)\s+(\d+)")
+
+    bindata = {}
+
+    logfile = Path(logfile)
+
+    with logfile.open("r") as f:
+        for line in f:
+            ksreg_match = ksreg_pattern.search(line)
+            if not ksreg_match:
+                continue
+
+            ksreg_type = ksreg_match.group(1)  # "NEW KSREG" or "END KSREG"
+            time_value = float(ksreg_match.group(2))
+            if scaled:
+                time_value *= scaling["T*"]
+
+            # Extract the ids of particles
+            particles_match = particles_pattern.search(line)
+            if particles_match:
+                nm1 = int(particles_match.group(1))
+                nm2 = int(particles_match.group(2))
+                key = (nm1, nm2)
+
+                if ksreg_type == "NEW KSREG":
+                    if key not in bindata:
+                        bindata[key] = []
+
+                    bindata[key].append((time_value, 0))
+
+                elif ksreg_type == "END KSREG":
+                    t_start, _ = bindata[key][-1]  # extract start time first
+                    bindata[key][-1] = (t_start, time_value)
+
+    return bindata
 
 
 # ——— Data plotting ———
