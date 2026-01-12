@@ -65,6 +65,7 @@ def parse_nemo(
     t: Union[float, str],
     transpose: bool = True,
     remove_artifacts: bool = True,
+    nearest: bool = True,
 ) -> np.ndarray:
     """Get a np.ndarray with particles for a given NEMO snapshot and time.
 
@@ -78,6 +79,8 @@ def parse_nemo(
         Whether to return transposed result. Default: True.
     remove_artifacts :
         Whether to remove artifacts after the function execution. Default: True.
+    nearest :
+        Whether to take the nearest t value. Default: True.
     Returns
     -------
     np.ndarray
@@ -85,10 +88,11 @@ def parse_nemo(
         7 coordinates are: mass, x, y, z, vx, vy, vz.
     """
     snapfile = build_snapfile(filename, f"_{t}")
+    timefuzz = "nearest" if nearest else _TIMEFUZZ
 
     with RemoveFileOnEnterExit(snapfile, remove_artifacts):
         command = (
-            f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | "
+            f"snaptrim in={filename} out=- times={t} timefuzz={timefuzz} | "
             f"s2a in=- out={snapfile}"
         )
         print(command)
@@ -103,14 +107,16 @@ def manipulate_snapshot(
     manippars: str,
     manipfile: str,
     remove_artifacts: bool = True,
+    nearest: bool = True,
 ) -> np.ndarray:
     """Helper for commands using 'manipulate' on NEMO snapshots."""
     # in case of joined manipulators, all info is stored in the last file
     last_mp = manipfile.split(";")[-1]
+    timefuzz = "nearest" if nearest else _TIMEFUZZ
 
     with RemoveFileOnEnterExit(last_mp, remove_artifacts):
         command = (
-            f"snaptrim in={filename} out=- times={t} timefuzz={_TIMEFUZZ} | "
+            f"snaptrim in={filename} out=- times={t} timefuzz={timefuzz} | "
             f'manipulate in=- out=. manipname={manipname} manippars="{manippars}" '
             f'manipfile="{manipfile}" | tee {manipname}_log 2>&1'
         )
@@ -338,7 +344,10 @@ def masses_in_lagrange_radius(
 
 
 def generate_timestamps(filename: Union[str, Path]):
-    """This generator yields timestamps for a given file."""
+    """This generator yields timestamps for a given file.
+
+    Could be very slow!
+    """
     fp_uns = uns_in.CUNS_IN(str(filename), float32=True)
 
     while fp_uns.nextFrame("mxv"):
@@ -348,12 +357,16 @@ def generate_timestamps(filename: Union[str, Path]):
 def get_timestamps(
     filename: Union[str, Path],
     n_timestamps: int = 100,
+    default: bool = False,
 ) -> np.ndarray:
     """Return timestamps for a given file."""
     if not n_timestamps > 0:
         raise RuntimeError(f"n_timestamps should be positive, got {n_timestamps}")
 
-    timestamps = [_ for _ in generate_timestamps(filename)]
+    if default:
+        timestamps = np.arange(0, 14_000, 14_000 / n_timestamps)
+    else:
+        timestamps = [_ for _ in generate_timestamps(filename)]
 
     if len(timestamps) < n_timestamps:
         return timestamps

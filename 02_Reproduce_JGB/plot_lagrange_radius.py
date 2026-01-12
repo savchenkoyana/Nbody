@@ -34,6 +34,11 @@ if __name__ == "__main__":
         help="The number of timestamps to use for plot. Default: 100",
     )
     parser.add_argument(
+        "--default-timestamps",
+        action="store_true",
+        help="Whether to use default timestamps to plot, this is the fastest way",
+    )
+    parser.add_argument(
         "--fraction",
         type=float,
         default=0.5,
@@ -107,6 +112,7 @@ if __name__ == "__main__":
         times_list = get_timestamps(
             filename=filename,
             n_timestamps=args.n_timestamps,
+            default=args.default_timestamps,
         )
         print("times list", times_list)
 

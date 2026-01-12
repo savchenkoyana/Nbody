@@ -32,6 +32,11 @@ if __name__ == "__main__":
         default=100,
         help="The number of timestamps to use for plot. Default: 100",
     )
+    parser.add_argument(
+        "--default-timestamps",
+        action="store_true",
+        help="Whether to use default timestamps to plot, this is the fastest way",
+    )
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
@@ -69,6 +74,7 @@ if __name__ == "__main__":
         times_list = get_timestamps(
             filename=filename,
             n_timestamps=args.n_timestamps,
+            default=args.default_timestamps,
         )
 
         for t in times_list:
