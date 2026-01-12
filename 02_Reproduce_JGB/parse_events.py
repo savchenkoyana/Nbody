@@ -64,6 +64,10 @@ if __name__ == "__main__":
     event_times = []
     events = {}
 
+    log_data = load_data(exp / "exp.out")
+    scalings = log_data["scaling"]
+    t_scale = scalings["T*"]
+
     # print events
     for column in event_types:
         event_counter = df[column].unique()
@@ -74,12 +78,14 @@ if __name__ == "__main__":
                 event_times.append(event_time)
                 events.setdefault(event_time, []).append(column)
 
-                print(f"\t Event {i} happened at T[NB]={event_time}")
+                print(
+                    f"\t Event {i} happened at T[NB]={event_time} ({event_time * t_scale:.2f} Myr)"
+                )
 
     if not args.plot:
         sys.exit()
 
-    df_adjust = load_data(exp / "exp.out")["adjust"]
+    df_adjust = log_data["adjust"]
 
     # Get time [NB] of energy non-conservation
     df_adjust_large_de = df_adjust[np.abs(df_adjust["DE"]) > 1e-5]
