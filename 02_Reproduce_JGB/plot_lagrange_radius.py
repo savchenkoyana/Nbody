@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
+from utils.plot import prepare_env_plots
 from utils.snap import get_timestamps
 from utils.snap import masses_in_lagrange_radius
 
@@ -81,6 +82,8 @@ if __name__ == "__main__":
     # we will save data into /path/to/Nbody/02_Reproduce_JGB
     save_dir = Path(args.nemo_files[0]).parents[1]
 
+    ext = prepare_env_plots(args.texsystem)
+
     fig_rt, ax_rt = plt.subplots()  # Lagrange radius vs Time
     ax_rt.set_xlabel("$t$, Gyr")
     ax_rt.set_ylabel("Lagrange radius, $pc$")
@@ -152,8 +155,8 @@ if __name__ == "__main__":
     ax_nrt.legend()
     ax_mrt.legend()
 
-    fig_rt.savefig(save_dir / "lagrange_radii.png")
-    fig_nrt.savefig(save_dir / "N_lagrange_radii.png")
-    fig_mrt.savefig(save_dir / "M_lagrange_radii.png")
+    fig_rt.savefig(save_dir / f"lagrange_radii.{ext}")
+    fig_nrt.savefig(save_dir / f"N_lagrange_radii.{ext}")
+    fig_mrt.savefig(save_dir / f"M_lagrange_radii.{ext}")
 
     plt.show()

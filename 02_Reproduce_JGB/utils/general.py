@@ -55,6 +55,14 @@ def create_argparse(description="") -> argparse.ArgumentParser:
         default=10,
         help="Plummer sphere radius (in pc). Default: 10",
     )
+    parser.add_argument(
+        "-t",
+        "--texsystem",
+        type=str,
+        choices=["pdflatex", "xelatex"],
+        required=False,
+        help="texsystem for plots rendering (not included for pdf generation)",
+    )
     return parser
 
 

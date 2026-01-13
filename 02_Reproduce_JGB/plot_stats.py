@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
+from utils.plot import prepare_env_plots
 from utils.snap import get_timestamps
 from utils.snap import parse_nemo
 
@@ -49,6 +50,8 @@ if __name__ == "__main__":
     # assuming filenames are: /path/to/Nbody/02_Reproduce_JGB/<DIRNAME>/out.nemo
     # we will save data into /path/to/Nbody/02_Reproduce_JGB
     save_dir = Path(args.nemo_files[0]).parents[1]
+
+    ext = prepare_env_plots(args.texsystem)
 
     fig_nt, ax_nt = plt.subplots()  # N particles vs Time
     ax_nt.set_xlabel("$t$, Gyr")
@@ -97,7 +100,7 @@ if __name__ == "__main__":
     ax_nt.legend()
     ax_mt.legend()
 
-    fig_nt.savefig(save_dir / "N_cluster.png")
-    fig_mt.savefig(save_dir / "M_cluster.png")
+    fig_nt.savefig(save_dir / f"N_cluster.{ext}")
+    fig_mt.savefig(save_dir / f"M_cluster.{ext}")
 
     plt.show()

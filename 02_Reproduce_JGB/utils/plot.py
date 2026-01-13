@@ -11,6 +11,31 @@ import agama
 import matplotlib.animation
 import matplotlib.pyplot as plt
 import numpy as np
+import scienceplots  # noqa: F401
+
+
+def prepare_env_plots(texsystem: Optional[str] = None) -> str:
+    """Prepare environment for plots.
+
+    Return plots extenstion.
+    """
+    if texsystem is None:
+        plt.style.use(["science", "no-latex", "grid"])
+        return "pdf"
+
+    plt.style.use(["science", "grid"])
+    matplotlib.use("pgf")
+    matplotlib.rcParams["pgf.rcfonts"] = False
+    plt.rcParams.update(
+        {
+            "pgf.texsystem": texsystem,
+            "pgf.preamble": r"\usepackage{lmodern}",
+            "text.usetex": True,
+            "font.family": "serif",
+            "font.size": 10,
+        }
+    )
+    return "pgf"
 
 
 def show_with_timeout():
