@@ -32,7 +32,7 @@ def prepare_env_plots(texsystem: Optional[str] = None) -> str:
             "pgf.preamble": r"\usepackage{lmodern}",
             "text.usetex": True,
             "font.family": "serif",
-            "font.size": 10,
+            "font.size": 8,
         }
     )
     return "pgf"

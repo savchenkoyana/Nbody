@@ -338,7 +338,7 @@ def masses_in_lagrange_radius(
     # create mask
     dist = np.linalg.norm(snap[1:4].T - center[1:4], axis=1)
     mask = dist < lagrange_r
-    print(f"Number of particles for fraction={fraction} {lagrange_r}: {mask.sum()}")
+    print(f"Number of particles for fraction={fraction}: {mask.sum()}")
 
     return masses, lagrange_r, mask
 

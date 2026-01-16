@@ -1,4 +1,5 @@
 astroquery
+colorama
 ipympl
 matplotlib
 mgefit>=6.0.3
