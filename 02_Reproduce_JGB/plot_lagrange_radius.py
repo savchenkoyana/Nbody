@@ -86,22 +86,22 @@ if __name__ == "__main__":
 
     fig_rt, ax_rt = plt.subplots()  # Lagrange radius vs Time
     ax_rt.set_xlabel("$t$, Gyr")
-    ax_rt.set_ylabel("Lagrange radius, $pc$")
+    ax_rt.set_ylabel(f"Lagrange radius {mass_percent}%, $pc$")
     ax_rt.grid()
-    ax_rt.set_title(f"Lagrange radii for {mass_percent}% of mass")
+    # ax_rt.set_title(f"Lagrange radii for {mass_percent}% of mass")
 
     fig_nrt, ax_nrt = plt.subplots()  # N particles in Lagrange radius vs Time
     ax_nrt.set_xlabel("$t$, Gyr")
     ax_nrt.set_ylabel("$N(t) / N(t=0)$")
     ax_nrt.set_ylim([0, 1])
     ax_nrt.grid()
-    ax_nrt.set_title(f"Number of particles in Lagrange radius ({mass_percent}%)")
+    # ax_nrt.set_title(f"Number of particles in Lagrange radius ({mass_percent}%)")
 
     fig_mrt, ax_mrt = plt.subplots()  # Mass in Lagrange radius vs Time
     ax_mrt.set_xlabel("$t$, Gyr")
     ax_mrt.set_ylabel(r"$M(t)$, $M_\odot$")
     ax_mrt.grid()
-    ax_mrt.set_title(f"Mean mass of particles in Lagrange radius ({mass_percent}%)")
+    # ax_mrt.set_title(f"Mean mass of particles in Lagrange radius ({mass_percent}%)")
 
     for i, filename in enumerate(args.nemo_files):
         if not Path(filename).exists():
@@ -130,9 +130,18 @@ if __name__ == "__main__":
                     fraction=args.fraction,
                 )
             except RuntimeError:
-                if args.remove_outliers:
-                    continue
-                raise
+                try:
+                    masses, lagrange_r, mask = masses_in_lagrange_radius(
+                        filename=filename,
+                        t=t,
+                        remove_artifacts=not args.store_artifacts,
+                        dens_par=0,
+                        fraction=args.fraction,
+                    )
+                except:
+                    if args.remove_outliers:
+                        continue
+                    raise
 
             m_filtered = masses[mask]
 
@@ -151,9 +160,12 @@ if __name__ == "__main__":
         )
         ax_mrt.plot(times, mean_mass_lagrange, fmt, label=rf"${plot_label[i]}$")
 
-    ax_rt.legend()
-    ax_nrt.legend()
-    ax_mrt.legend()
+    ymin, ymax = ax_rt.get_ylim()
+    ax_rt.set_ylim(ymin, 1.25 * ymax)
+
+    ax_rt.legend(loc="best", framealpha=0.7, facecolor="white", edgecolor="none")
+    ax_nrt.legend(loc="best", framealpha=0.7, facecolor="white", edgecolor="none")
+    ax_mrt.legend(loc="best", framealpha=0.7, facecolor="white", edgecolor="none")
 
     fig_rt.savefig(save_dir / f"lagrange_radii.{ext}")
     fig_nrt.savefig(save_dir / f"N_lagrange_radii.{ext}")

@@ -19,3 +19,4 @@ if __name__ == "__main__":
     print(f"max(DE) = {np.max(np.abs(df_adjust['DE']))}")
     print(f"max(DETOT) = {np.max(np.abs(df_adjust['DETOT']))}")
     print(f"DETOT = {df_adjust['DETOT'].iloc[-1]}")
+    print(f"max(T[Myr]) = {np.max(df_adjust['T[Myr]'])}")
