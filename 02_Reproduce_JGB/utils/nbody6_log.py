@@ -14,7 +14,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-_OUTPUT_DATA = {"RLAGR", "AVMASS", "NPARTC", "SIGR2", "SIGT2", "VROT"}
+_OUTPUT_DATA = {
+    "RLAGR",
+    "AVMASS",
+    "NPARTC",
+    "SIGR2",
+    "SIGT2",
+    "VROT",
+}
+
+_HDF5_OUTPUT_DATA = {
+    "N_STAR",
+    "N_BINARY",
+    "N_MERGER",
+}
 
 _ADJUST_DATA = {
     "T[Myr]",
@@ -136,6 +149,7 @@ def parse_log(
     ks_params: Dict[float, Dict[str, float]] = {}
     profile_params: Dict[float, Dict[str, float]] = {}
     eta_params: Dict[float, Dict[str, float]] = {}
+    hdf5_params: Dict[float, Dict[str, float]] = {}
 
     current_time_idx: Optional[float] = None
 
@@ -245,6 +259,32 @@ def parse_log(
                 output_rows[data_type].append((time_val, values))
                 break
 
+        try:  # if hdf5 is present
+            pattern = (
+                r"TTOT\s+([0-9.eE+-]+)\s+"
+                r"N_STAR\s+(\d+)\s+"
+                r"N_BINARY\s+(\d+)\s+"
+                r"N_MERGER\s+(\d+)\s+"
+                r"Output reduced 0/1=\s+(\d+)"
+            )
+
+            match = re.search(pattern, raw)
+
+            if match:
+                ttot = float(match.group(1))
+                n_star = int(match.group(2))
+                n_binary = int(match.group(3))
+                n_merger = int(match.group(4))
+
+                # print(ttot, n_star, n_binary, n_merger, reduced)
+                hdf5_params[ttot] = {
+                    "N_STAR": n_star,
+                    "N_BINARY": n_binary,
+                    "N_MERGER": n_merger,
+                }
+        except:
+            pass
+
     # --- Build DataFrames (keep last ADJUST row when times duplicate) ---
     # in case of terminated runs and concatenated logs
     if adjust_rows:
@@ -256,6 +296,7 @@ def parse_log(
     df_ks = pd.DataFrame.from_dict(ks_params, orient="index")
     df_profile = pd.DataFrame.from_dict(profile_params, orient="index")
     df_eta = pd.DataFrame.from_dict(eta_params, orient="index")
+    df_hdf5 = pd.DataFrame.from_dict(hdf5_params, orient="index")
 
     # Deduplicate the DataFrames by index, keeping the LAST occurrence
     def deduplicate(df):
@@ -267,6 +308,7 @@ def parse_log(
     df_ks = deduplicate(df_ks)
     df_profile = deduplicate(df_profile)
     df_eta = deduplicate(df_eta)
+    df_hdf5 = deduplicate(df_hdf5)
 
     # Now safe to concat
     df_adjust = pd.concat([df_adjust, df_profile, df_ks, df_eta], axis=1)
@@ -305,6 +347,7 @@ def parse_log(
     return {
         "adjust": df_adjust,
         "output": output_result,
+        "hdf5_output": df_hdf5,
         "step": step_dfs,
         "scaling": scaling,
     }
@@ -333,51 +376,6 @@ def load_scaling(logfile: str):
 
 def load_data(logfile: Union[str, Path]):
     return parse_log(logfile)
-
-
-def parse_binaries(
-    logfile: Union[str, Path], scaled: bool = False
-) -> Dict[tuple, list[tuple]]:
-    scaling = load_scaling(logfile)
-
-    ksreg_pattern = re.compile(
-        r"^\s*(NEW KSREG|END KSREG)\s+TIME\[NB\]\s+([\d\.E\+\-]+)"
-    )
-    particles_pattern = re.compile(r"NM1,2,S=\s+(\d+)\s+(\d+)")
-
-    bindata = {}
-
-    logfile = Path(logfile)
-
-    with logfile.open("r") as f:
-        for line in f:
-            ksreg_match = ksreg_pattern.search(line)
-            if not ksreg_match:
-                continue
-
-            ksreg_type = ksreg_match.group(1)  # "NEW KSREG" or "END KSREG"
-            time_value = float(ksreg_match.group(2))
-            if scaled:
-                time_value *= scaling["T*"]
-
-            # Extract the ids of particles
-            particles_match = particles_pattern.search(line)
-            if particles_match:
-                nm1 = int(particles_match.group(1))
-                nm2 = int(particles_match.group(2))
-                key = (nm1, nm2)
-
-                if ksreg_type == "NEW KSREG":
-                    if key not in bindata:
-                        bindata[key] = []
-
-                    bindata[key].append((time_value, 0))
-
-                elif ksreg_type == "END KSREG":
-                    t_start, _ = bindata[key][-1]  # extract start time first
-                    bindata[key][-1] = (t_start, time_value)
-
-    return bindata
 
 
 # ——— Data plotting ———
@@ -456,3 +454,22 @@ def plot_output_data(data: dict, plot_values: list, astro_units: bool):
     fig.tight_layout()
     plt.legend()
     return fig, ax
+
+
+def plot_hdf5_output_data(
+    df: pd.DataFrame,
+    plot_values: list,
+    ax: Optional[matplotlib.axes._axes.Axes] = None,
+):
+    """Plot data produced at 'hdf5 output' stage."""
+    if ax is None:
+        fig = plt.figure(figsize=(9, 6))
+        ax = fig.gca()
+
+    df[plot_values].plot(ax=ax)
+
+    ax.set_title(r"N particles")
+    ax.set_xlabel(r"Time t [nbody units]")
+    ax.set_ylabel(r"N particles")
+    ax.grid()
+    return ax.figure, ax

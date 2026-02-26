@@ -65,8 +65,12 @@ if __name__ == "__main__":
     events = {}
 
     log_data = load_data(exp / "exp.out")
-    scalings = log_data["scaling"]
-    t_scale = scalings["T*"]
+
+    try:
+        scalings = log_data["scaling"]
+        t_scale = scalings["T*"]
+    except:
+        t_scale = None  # in case of resumed simulations
 
     # print events
     for column in event_types:
@@ -78,9 +82,12 @@ if __name__ == "__main__":
                 event_times.append(event_time)
                 events.setdefault(event_time, []).append(column)
 
-                print(
-                    f"\t Event {i} happened at T[NB]={event_time} ({event_time * t_scale:.2f} Myr)"
-                )
+                if t_scale:
+                    print(
+                        f"\t Event {i} happened at T[NB]={event_time} ({event_time * t_scale:.2f} Myr)"
+                    )
+                else:
+                    print(f"\t Event {i} happened at T[NB]={event_time}")
 
     if not args.plot:
         sys.exit()
