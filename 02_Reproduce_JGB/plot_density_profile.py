@@ -9,6 +9,7 @@ from utils.general import check_parameters
 from utils.general import compute_mean_mass
 from utils.general import create_argparse
 from utils.general import set_units
+from utils.plot import prepare_env_plots
 from utils.snap import get_timestamps
 from utils.snap import profile_by_snap
 
@@ -66,6 +67,8 @@ if __name__ == "__main__":
     if not filename.exists():
         raise RuntimeError(f"filename {filename} does not exist")
     save_dir = filename.absolute().parent
+
+    env = prepare_env_plots(args.texsystem)
 
     # Compute total mass for the distribution by multiplying the number of samples by E[x] of distribution
     mass_math_expectation = compute_mean_mass(
@@ -132,5 +135,5 @@ if __name__ == "__main__":
     else:
         plt.title("Spherical density of the cluster")
 
-    plt.savefig(save_dir / "density_profile.png")
+    plt.savefig(save_dir / f"density_profile.{ext}")
     plt.show()

@@ -76,14 +76,6 @@ python plot_lagrange_radius.py \
 
 > Use `plot_lagrange_radius.py`, `plot_mass_spectrum.py` and `plot_density_profile.py` with post-processed data (without central BH).
 
-Plot energy, virial ratio, angular momentum as a function of time:
-
-```bash
-python stat.py --nemo-files <DIRNAME>/<OUT_NAME>.nemo --eps <eps> --virial --momentum --binaries
-```
-
-> Use the same `<eps>` as during the simulation. Use snapshot where central mass is not removed. Make sure that G=1 for your snapshot and also `<eps>` has the right units (see example for gyrfalcon in `run_othermethods.sh`)
-
 # Tips
 
 1. To resume gyrFalcON simulation, run:

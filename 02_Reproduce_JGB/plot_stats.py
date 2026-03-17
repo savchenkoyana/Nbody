@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from utils.general import check_parameters
 from utils.general import create_argparse
+from utils.plot import prepare_env_plots
 from utils.snap import get_timestamps
 from utils.snap import parse_nemo
 
@@ -32,6 +33,11 @@ if __name__ == "__main__":
         default=100,
         help="The number of timestamps to use for plot. Default: 100",
     )
+    parser.add_argument(
+        "--default-timestamps",
+        action="store_true",
+        help="Whether to use default timestamps to plot, this is the fastest way",
+    )
     args = parser.parse_args()
 
     check_parameters(args)  # sanity checks
@@ -45,18 +51,20 @@ if __name__ == "__main__":
     # we will save data into /path/to/Nbody/02_Reproduce_JGB
     save_dir = Path(args.nemo_files[0]).parents[1]
 
+    ext = prepare_env_plots(args.texsystem)
+
     fig_nt, ax_nt = plt.subplots()  # N particles vs Time
     ax_nt.set_xlabel("$t$, Gyr")
     ax_nt.set_ylabel("$N(t) / N(t=0)$")
-    ax_nt.set_ylim([0, 1])
+    ax_nt.set_ylim([0, 1.0])
     ax_nt.grid()
-    ax_nt.set_title("Number of particles in cluster")
+    # ax_nt.set_title("Number of particles in cluster")
 
     fig_mt, ax_mt = plt.subplots()  # Mass vs Time
     ax_mt.set_xlabel("$t$, Gyr")
     ax_mt.set_ylabel(r"$M(t)$, $M_\odot$")
     ax_mt.grid()
-    ax_mt.set_title("Mean mass of particles in cluster")
+    # ax_mt.set_title("Mean mass of particles in cluster")
 
     for i, filename in enumerate(args.nemo_files):
         if not Path(filename).exists():
@@ -69,6 +77,7 @@ if __name__ == "__main__":
         times_list = get_timestamps(
             filename=filename,
             n_timestamps=args.n_timestamps,
+            default=args.default_timestamps,
         )
 
         for t in times_list:
@@ -88,10 +97,13 @@ if __name__ == "__main__":
         )
         ax_mt.plot(times, mean_mass, fmt, label=rf"${plot_label[i]}$")
 
-    ax_nt.legend()
-    ax_mt.legend()
+    ymin, ymax = ax_nt.get_ylim()
+    ax_nt.set_ylim(ymin, 1.1 * ymax)
 
-    fig_nt.savefig(save_dir / "N_cluster.png")
-    fig_mt.savefig(save_dir / "M_cluster.png")
+    ax_nt.legend(loc="best", framealpha=0.7, facecolor="white", edgecolor="none")
+    ax_mt.legend(loc="best", framealpha=0.7, facecolor="white", edgecolor="none")
+
+    fig_nt.savefig(save_dir / f"N_cluster.{ext}")
+    fig_mt.savefig(save_dir / f"M_cluster.{ext}")
 
     plt.show()

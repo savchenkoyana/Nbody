@@ -32,7 +32,7 @@ Don't skip any steps if they are not marked as optional!
 
 [MESA SDK](http://user.astro.wisc.edu/~townsend/static.php?ref=mesasdk) helps to deal with incompatibilities and bugs in compilers and libraries.
 
-- Check that all pre-requisites are installed
+- **Check that all pre-requisites are installed**
 
 - Download latest `tar.gz` archive for Linux into `~/`
 
@@ -90,9 +90,9 @@ The installation of Nbody6++GPU-beijing is a little bit tricky. The reason is th
 - First configure Makefile without hdf5:
 
   ```bash
-  git clone git@github.com:nbody6ppgpu/Nbody6PPGPU-beijing
+  git clone https://github.com/nbody6ppgpu/Nbody6PPGPU-beijing.git
   cd Nbody6PPGPU-beijing
-  ./configure --enable-mcmodel=large --with-par=b1m --disable-gpu --disable-mpi  # configuration to quick-start on your computer
+  ./configure --with-par=b64k --disable-gpu --disable-mpi --with-lmax=600
   ```
 
 - Edit `build/Makefile` (lines 25-30):
@@ -100,8 +100,10 @@ The installation of Nbody6++GPU-beijing is a little bit tricky. The reason is th
   ```makefile
   HDF5_FLAGS = -D H5OUTPUT -I${MESASDK_ROOT}/include -L${MESASDK_ROOT}/lib -lhdf5_fortran -lhdf5  # instead of HDF5_FLAGS = -D H5OUTPUT
   ...
-  FFLAGS =  -I../extra_inc/nompi -O3 -fPIC -mcmodel=large -fopenmp -I../include ${SIMD_FLAGS} $(GPU_FLAGS) ${OMP_FLAGS} ${HDF5_FLAGS}  # add ${HDF5_FLAGS} at the end
+  FFLAGS = <some_text> ${HDF5_FLAGS}  # add ${HDF5_FLAGS} at the end
   ```
+
+  You can also substitute `-03` with `-03 -g` for better work with gdb.
 
 - And finally, run installation:
 
@@ -136,7 +138,7 @@ The resulting binary can be found here: `Nbody6PPGPU-beijing/build/nbody6++.*`
 git clone https://github.com/nbodyx/Nbody6ppGPU.git
 cd Nbody6ppGPU
 export FCFLAGS='-fallow-argument-mismatch'
-./configure --enable-mcmodel=large --with-par=b1m --disable-gpu --enable-tools  # there is also `--enable-tt`, not tested by me yet
+./configure --enable-mcmodel=large --with-par=b1m --disable-gpu --disable-mpi --enable-tools  # there is also `--enable-tt`, not tested by me yet
 make clean
 make -j
 cd ../  # back to repository root
@@ -146,10 +148,10 @@ The resulting binary can be found here: `Nbody6ppGPU/build/nbody6++.*`
 
 ## Create Conda environment for Agama
 
-I used conda environment with Python 3.9:
+I used conda environment with Python 3.11:
 
 ```bash
-conda create -n agama python=3.9
+conda create -n agama python=3.11
 ```
 
 Install all required packages into the environment:
@@ -158,7 +160,6 @@ Install all required packages into the environment:
 conda activate agama
 pip install -r requirements.txt
 pre-commit install  # optional, only if you want to commit to repository
-python -m pip install --only-binary galpy galpy  # tool for galactic dynamics, see https://docs.galpy.org/
 python -m pip install --no-binary=h5py h5py  # tool for parsing simulation data with python, see https://docs.h5py.org/en/stable/quick.html
 ```
 
@@ -167,7 +168,7 @@ To install Agama, follow these steps (with activated `agama` environment!):
 ```bash
 git clone https://github.com/GalacticDynamics-Oxford/Agama.git
 cd Agama
-pip install .
+pip install . --config-settings --build-option=--yes --no-build-isolation
 cd ../  # back to repository root
 ```
 

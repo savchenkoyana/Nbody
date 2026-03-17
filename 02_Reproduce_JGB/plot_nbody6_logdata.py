@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from utils.nbody6_log import _ADJUST_DATA
 from utils.nbody6_log import _COLS
+from utils.nbody6_log import _HDF5_OUTPUT_DATA
 from utils.nbody6_log import _OUTPUT_DATA
 from utils.nbody6_log import load_data
 from utils.nbody6_log import plot_adjust_data
+from utils.nbody6_log import plot_hdf5_output_data
 from utils.nbody6_log import plot_output_data
 
 
@@ -55,8 +57,9 @@ if __name__ == "__main__":
     values = {x for x in args.values.split(",")}
     values_adjust = list(values.intersection(_ADJUST_DATA))
     values_output = list(values.intersection(_OUTPUT_DATA))
+    values_hdf5_output = list(values.intersection(_HDF5_OUTPUT_DATA))
 
-    unknown_values = values.difference(_ADJUST_DATA, _OUTPUT_DATA)
+    unknown_values = values.difference(_ADJUST_DATA, _OUTPUT_DATA, _HDF5_OUTPUT_DATA)
     if unknown_values:
         raise ValueError(f"Unknown columns {unknown_values}")
 
@@ -66,6 +69,7 @@ if __name__ == "__main__":
     data = load_data(args.log_file)
     adjust_data = data["adjust"]
     output_data = data["output"]
+    hdf5_data = data["hdf5_output"]
 
     # save data
     adjust_data.to_csv(save_dir / "adjust_data.csv", index=False)
@@ -73,7 +77,7 @@ if __name__ == "__main__":
         output_data[key].to_csv(save_dir / f"{key}.csv", index=False)
 
     if args.astro_units:
-        scalings = data["scalings"]
+        scalings = data["scaling"]
         print(
             f"Scale coefficients: R*={scalings['R*']}[pc], V*={scalings['V*']}[km/s], T*={scalings['T*']}[Myr], M*={scalings['M*']}[Msun]"
         )
@@ -91,3 +95,10 @@ if __name__ == "__main__":
         for value in values_output:
             print("=" * 15, value, "=" * 15)
             print(output_data[value][_COLS])
+
+    if values_hdf5_output and not hdf5_data.empty:
+        fix, ax = plot_hdf5_output_data(hdf5_data, values_hdf5_output)
+        plt.show()
+        for value in values_hdf5_output:
+            print("=" * 15, value, "=" * 15)
+            print(hdf5_data[value])

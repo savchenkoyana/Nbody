@@ -1,4 +1,5 @@
 import argparse
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -35,6 +36,11 @@ if __name__ == "__main__":
         required=True,
         help="Path to directory with event.35 file",
     )
+    parser.add_argument(
+        "--plot",
+        action="store_true",
+        help="Whether to plot DE, DETOT and events-connected images.",
+    )
     args = parser.parse_args()
     exp = Path(args.exp)
 
@@ -58,6 +64,14 @@ if __name__ == "__main__":
     event_times = []
     events = {}
 
+    log_data = load_data(exp / "exp.out")
+
+    try:
+        scalings = log_data["scaling"]
+        t_scale = scalings["T*"]
+    except:
+        t_scale = None  # in case of resumed simulations
+
     # print events
     for column in event_types:
         event_counter = df[column].unique()
@@ -68,9 +82,17 @@ if __name__ == "__main__":
                 event_times.append(event_time)
                 events.setdefault(event_time, []).append(column)
 
-                print(f"\t Event {i} happened at T[NB]={event_time}")
+                if t_scale:
+                    print(
+                        f"\t Event {i} happened at T[NB]={event_time} ({event_time * t_scale:.2f} Myr)"
+                    )
+                else:
+                    print(f"\t Event {i} happened at T[NB]={event_time}")
 
-    df_adjust = load_data(exp / "exp.out")["adjust"]
+    if not args.plot:
+        sys.exit()
+
+    df_adjust = log_data["adjust"]
 
     # Get time [NB] of energy non-conservation
     df_adjust_large_de = df_adjust[np.abs(df_adjust["DE"]) > 1e-5]

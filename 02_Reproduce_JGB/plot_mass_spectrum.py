@@ -8,6 +8,7 @@ from utils.general import check_parameters
 from utils.general import create_argparse
 from utils.general import create_label
 from utils.general import mass_pdf
+from utils.plot import prepare_env_plots
 from utils.snap import masses_in_lagrange_radius
 from utils.snap import parse_nemo
 
@@ -62,6 +63,8 @@ if __name__ == "__main__":
         raise RuntimeError(f"filename {filename} does not exist")
     save_dir = filename.absolute().parent
 
+    ext = prepare_env_plots(args.texsystem)
+
     # Plot original spectrum
     m = np.logspace(-2, 2)
     plt.plot(
@@ -104,5 +107,5 @@ if __name__ == "__main__":
     plt.xlabel(r"$M, M_\odot$")
     plt.legend(title=label)
     plt.title("Mass distribution in cluster")
-    plt.savefig(save_dir / "mass_spectrum.png")
+    plt.savefig(save_dir / f"mass_spectrum.{ext}")
     plt.show()
